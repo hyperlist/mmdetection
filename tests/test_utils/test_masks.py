@@ -323,14 +323,14 @@ def test_bitmap_mask_to_tensor():
     # empty bitmap masks to tensor
     raw_masks = dummy_raw_bitmap_masks((0, 28, 28))
     bitmap_masks = BitmapMasks(raw_masks, 28, 28)
-    tensor_masks = bitmap_masks.to_tensor(dtype=torch.uint8, device='cpu')
+    tensor_masks = bitmap_masks.to_tensor(dtype=paddle.uint8, device='cpu')
     assert isinstance(tensor_masks, torch.Tensor)
     assert tensor_masks.shape == (0, 28, 28)
 
     # bitmap masks contain 3 instances to tensor
     raw_masks = dummy_raw_bitmap_masks((3, 28, 28))
     bitmap_masks = BitmapMasks(raw_masks, 28, 28)
-    tensor_masks = bitmap_masks.to_tensor(dtype=torch.uint8, device='cpu')
+    tensor_masks = bitmap_masks.to_tensor(dtype=paddle.uint8, device='cpu')
     assert isinstance(tensor_masks, torch.Tensor)
     assert tensor_masks.shape == (3, 28, 28)
     assert (tensor_masks.numpy() == raw_masks).all()
@@ -655,14 +655,14 @@ def test_polygon_to_tensor():
     # empty polygon masks to tensor
     raw_masks = dummy_raw_polygon_masks((0, 28, 28))
     polygon_masks = PolygonMasks(raw_masks, 28, 28)
-    tensor_masks = polygon_masks.to_tensor(dtype=torch.uint8, device='cpu')
+    tensor_masks = polygon_masks.to_tensor(dtype=paddle.uint8, device='cpu')
     assert isinstance(tensor_masks, torch.Tensor)
     assert tensor_masks.shape == (0, 28, 28)
 
     # polygon masks contain 3 instances to tensor
     raw_masks = dummy_raw_polygon_masks((3, 28, 28))
     polygon_masks = PolygonMasks(raw_masks, 28, 28)
-    tensor_masks = polygon_masks.to_tensor(dtype=torch.uint8, device='cpu')
+    tensor_masks = polygon_masks.to_tensor(dtype=paddle.uint8, device='cpu')
     assert isinstance(tensor_masks, torch.Tensor)
     assert tensor_masks.shape == (3, 28, 28)
     assert (tensor_masks.numpy() == polygon_masks.to_ndarray()).all()

@@ -67,14 +67,14 @@ def test_yolact_head_loss():
         max_masks_to_train=100,
         loss_mask_weight=6.125)
     feat = [
-        torch.rand(1, 256, feat_size, feat_size)
+        paddle.rand(1, 256, feat_size, feat_size)
         for feat_size in [69, 35, 18, 9, 5]
     ]
     cls_score, bbox_pred, coeff_pred = bbox_head.forward(feat)
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
-    gt_masks = [torch.empty((0, 550, 550))]
+    gt_masks = [paddle.empty((0, 550, 550))]
     gt_bboxes_ignore = None
     empty_gt_losses, sampling_results = bbox_head.loss(
         cls_score,
@@ -112,7 +112,7 @@ def test_yolact_head_loss():
         torch.Tensor([[23.6667, 23.8757, 238.6326, 151.8874]]),
     ]
     gt_labels = [torch.LongTensor([2])]
-    gt_masks = [(torch.rand((1, 550, 550)) > 0.5).float()]
+    gt_masks = [(paddle.rand((1, 550, 550)) > 0.5).float()]
 
     one_gt_losses, sampling_results = bbox_head.loss(
         cls_score,

@@ -89,7 +89,7 @@ def roi2bbox(rois):
         list[torch.Tensor]: Converted boxes of corresponding rois.
     """
     bbox_list = []
-    img_ids = torch.unique(rois[:, 0].cpu(), sorted=True)
+    img_ids = paddle.unique(rois[:, 0].cpu(), sorted=True)
     for img_id in img_ids:
         inds = (rois[:, 0] == img_id.item())
         bbox = rois[inds, 1:]
@@ -138,14 +138,14 @@ def distance2bbox(points, distance, max_shape=None):
     x2 = points[..., 0] + distance[..., 2]
     y2 = points[..., 1] + distance[..., 3]
 
-    bboxes = torch.stack([x1, y1, x2, y2], -1)
+    bboxes = paddle.stack([x1, y1, x2, y2], -1)
 
     if max_shape is not None:
         # clip bboxes with dynamic `min` and `max` for onnx
         if torch.onnx.is_in_onnx_export():
             from mmdet.core.export import dynamic_clip_for_onnx
             x1, y1, x2, y2 = dynamic_clip_for_onnx(x1, y1, x2, y2, max_shape)
-            bboxes = torch.stack([x1, y1, x2, y2], dim=-1)
+            bboxes = paddle.stack([x1, y1, x2, y2], dim=-1)
             return bboxes
         if not isinstance(max_shape, torch.Tensor):
             max_shape = x1.new_tensor(max_shape)
@@ -157,8 +157,8 @@ def distance2bbox(points, distance, max_shape=None):
         min_xy = x1.new_tensor(0)
         max_xy = paddle.concat([max_shape, max_shape],
                            dim=-1).flip(-1).unsqueeze(-2)
-        bboxes = torch.where(bboxes < min_xy, min_xy, bboxes)
-        bboxes = torch.where(bboxes > max_xy, max_xy, bboxes)
+        bboxes = paddle.where(bboxes < min_xy, min_xy, bboxes)
+        bboxes = paddle.where(bboxes > max_xy, max_xy, bboxes)
 
     return bboxes
 
@@ -184,7 +184,7 @@ def bbox2distance(points, bbox, max_dis=None, eps=0.1):
         top = top.clamp(min=0, max=max_dis - eps)
         right = right.clamp(min=0, max=max_dis - eps)
         bottom = bottom.clamp(min=0, max=max_dis - eps)
-    return torch.stack([left, top, right, bottom], -1)
+    return paddle.stack([left, top, right, bottom], -1)
 
 
 def bbox_rescale(bboxes, scale_factor=1.0):
@@ -213,9 +213,9 @@ def bbox_rescale(bboxes, scale_factor=1.0):
     y1 = cy - 0.5 * h
     y2 = cy + 0.5 * h
     if bboxes.size(1) == 5:
-        rescaled_bboxes = torch.stack([inds_, x1, y1, x2, y2], dim=-1)
+        rescaled_bboxes = paddle.stack([inds_, x1, y1, x2, y2], dim=-1)
     else:
-        rescaled_bboxes = torch.stack([x1, y1, x2, y2], dim=-1)
+        rescaled_bboxes = paddle.stack([x1, y1, x2, y2], dim=-1)
     return rescaled_bboxes
 
 

@@ -40,7 +40,7 @@ class FeatureAdaption(BaseModule):
                          type='Normal', name='conv_adaption', std=0.01))):
         super(FeatureAdaption, self).__init__(init_cfg)
         offset_channels = kernel_size * kernel_size * 2
-        self.conv_offset = nn.Conv2d(
+        self.conv_offset = nn.Conv2D(
             2, deform_groups * offset_channels, 1, bias=False)
         self.conv_adaption = DeformConv2d(
             in_channels,
@@ -208,8 +208,8 @@ class GuidedAnchorHead(AnchorHead):
 
     def _init_layers(self):
         self.relu = nn.ReLU(inplace=True)
-        self.conv_loc = nn.Conv2d(self.in_channels, 1, 1)
-        self.conv_shape = nn.Conv2d(self.in_channels, self.num_anchors * 2, 1)
+        self.conv_loc = nn.Conv2D(self.in_channels, 1, 1)
+        self.conv_shape = nn.Conv2D(self.in_channels, self.num_anchors * 2, 1)
         self.feature_adaption = FeatureAdaption(
             self.in_channels,
             self.feat_channels,
@@ -282,7 +282,7 @@ class GuidedAnchorHead(AnchorHead):
                 # inside_flag for a position is true if any anchor in this
                 # position is true
                 inside_flags = (
-                    torch.stack(inside_flags_list, 0).sum(dim=0) > 0)
+                    paddle.stack(inside_flags_list, 0).sum(dim=0) > 0)
                 multi_level_flags.append(inside_flags)
             inside_flag_list.append(multi_level_flags)
         return approxs_list, inside_flag_list
@@ -406,21 +406,21 @@ class GuidedAnchorHead(AnchorHead):
         all_ignore_map = []
         for lvl_id in range(num_lvls):
             h, w = featmap_sizes[lvl_id]
-            loc_targets = torch.zeros(
+            loc_targets = paddle.zeros(
                 img_per_gpu,
                 1,
                 h,
                 w,
                 device=gt_bboxes_list[0].device,
                 dtype=torch.float32)
-            loc_weights = torch.full_like(loc_targets, -1)
-            ignore_map = torch.zeros_like(loc_targets)
+            loc_weights = paddle.full_like(loc_targets, -1)
+            ignore_map = paddle.zeros_like(loc_targets)
             all_loc_targets.append(loc_targets)
             all_loc_weights.append(loc_weights)
             all_ignore_map.append(ignore_map)
         for img_id in range(img_per_gpu):
             gt_bboxes = gt_bboxes_list[img_id]
-            scale = torch.sqrt((gt_bboxes[:, 2] - gt_bboxes[:, 0]) *
+            scale = paddle.sqrt((gt_bboxes[:, 2] - gt_bboxes[:, 0]) *
                                (gt_bboxes[:, 3] - gt_bboxes[:, 1]))
             min_anchor_size = scale.new_full(
                 (1, ), float(anchor_scale * anchor_strides[0]))
@@ -517,9 +517,9 @@ class GuidedAnchorHead(AnchorHead):
         sampling_result = self.ga_sampler.sample(assign_result, squares,
                                                  gt_bboxes)
 
-        bbox_anchors = torch.zeros_like(squares)
-        bbox_gts = torch.zeros_like(squares)
-        bbox_weights = torch.zeros_like(squares)
+        bbox_anchors = paddle.zeros_like(squares)
+        bbox_gts = paddle.zeros_like(squares)
+        bbox_weights = paddle.zeros_like(squares)
 
         pos_inds = sampling_result.pos_inds
         neg_inds = sampling_result.neg_inds

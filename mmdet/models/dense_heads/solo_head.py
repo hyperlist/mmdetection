@@ -124,9 +124,9 @@ class SOLOHead(BaseMaskHead):
         self.conv_mask_list = nn.LayerList()
         for num_grid in self.num_grids:
             self.conv_mask_list.append(
-                nn.Conv2d(self.feat_channels, num_grid**2, 1))
+                nn.Conv2D(self.feat_channels, num_grid**2, 1))
 
-        self.conv_cls = nn.Conv2d(
+        self.conv_cls = nn.Conv2D(
             self.feat_channels, self.cls_out_channels, 3, padding=1)
 
     def resize_feats(self, feats):
@@ -316,7 +316,7 @@ class SOLOHead(BaseMaskHead):
                   is positive, has shape (num_grid **2).
         """
         device = gt_labels.device
-        gt_areas = torch.sqrt((gt_bboxes[:, 2] - gt_bboxes[:, 0]) *
+        gt_areas = paddle.sqrt((gt_bboxes[:, 2] - gt_bboxes[:, 0]) *
                               (gt_bboxes[:, 3] - gt_bboxes[:, 1]))
 
         mlvl_pos_mask_targets = []
@@ -326,16 +326,16 @@ class SOLOHead(BaseMaskHead):
                 in zip(self.scale_ranges, self.strides,
                        featmap_sizes, self.num_grids):
 
-            mask_target = torch.zeros(
+            mask_target = paddle.zeros(
                 [num_grid**2, featmap_size[0], featmap_size[1]],
-                dtype=torch.uint8,
+                dtype=paddle.uint8,
                 device=device)
             # FG cat_id: [0, num_classes -1], BG cat_id: num_classes
-            labels = torch.zeros([num_grid, num_grid],
+            labels = paddle.zeros([num_grid, num_grid],
                                  dtype=torch.int64,
                                  device=device) + self.num_classes
-            pos_mask = torch.zeros([num_grid**2],
-                                   dtype=torch.bool,
+            pos_mask = paddle.zeros([num_grid**2],
+                                   dtype=paddle.bool,
                                    device=device)
 
             gt_inds = ((gt_areas >= lower_bound) &
@@ -403,7 +403,7 @@ class SOLOHead(BaseMaskHead):
                 # Follow the original implementation, F.interpolate is
                 # different from cv2 and opencv
                 gt_mask = mmcv.imrescale(gt_mask, scale=1. / output_stride)
-                gt_mask = torch.from_numpy(gt_mask).to(device=device)
+                gt_mask = paddle.to_tensor(gt_mask).to(device=device)
 
                 for i in range(top, down + 1):
                     for j in range(left, right + 1):
@@ -638,10 +638,10 @@ class DecoupledSOLOHead(SOLOHead):
         self.conv_mask_list_y = nn.LayerList()
         for num_grid in self.num_grids:
             self.conv_mask_list_x.append(
-                nn.Conv2d(self.feat_channels, num_grid, 3, padding=1))
+                nn.Conv2D(self.feat_channels, num_grid, 3, padding=1))
             self.conv_mask_list_y.append(
-                nn.Conv2d(self.feat_channels, num_grid, 3, padding=1))
-        self.conv_cls = nn.Conv2d(
+                nn.Conv2D(self.feat_channels, num_grid, 3, padding=1))
+        self.conv_cls = nn.Conv2D(
             self.feat_channels, self.cls_out_channels, 3, padding=1)
 
     def forward(self, feats):
@@ -1114,10 +1114,10 @@ class DecoupledSOLOLightHead(DecoupledSOLOHead):
         self.conv_mask_list_y = nn.LayerList()
         for num_grid in self.num_grids:
             self.conv_mask_list_x.append(
-                nn.Conv2d(self.feat_channels, num_grid, 3, padding=1))
+                nn.Conv2D(self.feat_channels, num_grid, 3, padding=1))
             self.conv_mask_list_y.append(
-                nn.Conv2d(self.feat_channels, num_grid, 3, padding=1))
-        self.conv_cls = nn.Conv2d(
+                nn.Conv2D(self.feat_channels, num_grid, 3, padding=1))
+        self.conv_cls = nn.Conv2D(
             self.feat_channels, self.cls_out_channels, 3, padding=1)
 
     def forward(self, feats):

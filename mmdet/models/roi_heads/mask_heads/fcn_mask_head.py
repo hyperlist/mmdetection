@@ -120,7 +120,7 @@ class FCNMaskHead(BaseModule):
             elif isinstance(m, CARAFEPack):
                 m.init_weights()
             else:
-                nn.init.kaiming_normal_(
+                nn.initializer.KaimingNormal(
                     m.weight, mode='fan_out', nonlinearity='relu')
                 nn.init.constant_(m.bias, 0)
 
@@ -154,13 +154,13 @@ class FCNMaskHead(BaseModule):
             >>> # Create example instance of FCN Mask Head.
             >>> # There are lots of variations depending on the configuration
             >>> self = FCNMaskHead(num_classes=C, num_convs=1)
-            >>> inputs = torch.rand(N, self.in_channels, H, W)
+            >>> inputs = paddle.rand(N, self.in_channels, H, W)
             >>> mask_pred = self.forward(inputs)
             >>> sf = self.scale_factor
             >>> labels = torch.randint(0, C, size=(N,))
             >>> # With the default properties the mask targets should indicate
             >>> # a (potentially soft) single-class label
-            >>> mask_targets = torch.rand(N, H * sf, W * sf)
+            >>> mask_targets = paddle.rand(N, H * sf, W * sf)
             >>> loss = self.loss(mask_pred, mask_targets, labels)
             >>> print('loss = {!r}'.format(loss))
         """
@@ -170,7 +170,7 @@ class FCNMaskHead(BaseModule):
         else:
             if self.class_agnostic:
                 loss_mask = self.loss_mask(mask_pred, mask_targets,
-                                           torch.zeros_like(labels))
+                                           paddle.zeros_like(labels))
             else:
                 loss_mask = self.loss_mask(mask_pred, mask_targets, labels)
         loss['loss_mask'] = loss_mask
@@ -208,7 +208,7 @@ class FCNMaskHead(BaseModule):
             >>> C, H, W = 11, 32, 32
             >>> # Create example instance of FCN Mask Head.
             >>> self = FCNMaskHead(num_classes=C, num_convs=0)
-            >>> inputs = torch.rand(N, self.in_channels, H, W)
+            >>> inputs = paddle.rand(N, self.in_channels, H, W)
             >>> mask_pred = self.forward(inputs)
             >>> # Each input is associated with some bounding box
             >>> det_bboxes = torch.Tensor([[1, 1, 42, 42 ]] * N)
@@ -276,15 +276,15 @@ class FCNMaskHead(BaseModule):
                         GPU_MEM_LIMIT))
             assert (num_chunks <=
                     N), 'Default GPU_MEM_LIMIT is too small; try increasing it'
-        chunks = torch.chunk(torch.arange(N, device=device), num_chunks)
+        chunks = torch.chunk(paddle.arange(N, device=device), num_chunks)
 
         threshold = rcnn_test_cfg.mask_thr_binary
-        im_mask = torch.zeros(
+        im_mask = paddle.zeros(
             N,
             img_h,
             img_w,
             device=device,
-            dtype=torch.bool if threshold >= 0 else torch.uint8)
+            dtype=paddle.bool if threshold >= 0 else paddle.uint8)
 
         if not self.class_agnostic:
             mask_pred = mask_pred[range(N), labels][:, None]
@@ -298,10 +298,10 @@ class FCNMaskHead(BaseModule):
                 skip_empty=device.type == 'cpu')
 
             if threshold >= 0:
-                masks_chunk = (masks_chunk >= threshold).to(dtype=torch.bool)
+                masks_chunk = (masks_chunk >= threshold).to(dtype=paddle.bool)
             else:
                 # for visualization and debugging
-                masks_chunk = (masks_chunk * 255).to(dtype=torch.uint8)
+                masks_chunk = (masks_chunk * 255).to(dtype=paddle.uint8)
 
             im_mask[(inds, ) + spatial_inds] = masks_chunk
 
@@ -331,7 +331,7 @@ class FCNMaskHead(BaseModule):
         img_h, img_w = ori_shape[:2]
         threshold = rcnn_test_cfg.mask_thr_binary
         if not self.class_agnostic:
-            box_inds = torch.arange(mask_pred.shape[0])
+            box_inds = paddle.arange(mask_pred.shape[0])
             mask_pred = mask_pred[box_inds, labels][:, None]
         masks, _ = _do_paste_mask(
             mask_pred, bboxes, img_h, img_w, skip_empty=False)
@@ -385,23 +385,23 @@ def _do_paste_mask(masks, boxes, img_h, img_w, skip_empty=True):
 
     N = masks.shape[0]
 
-    img_y = torch.arange(y0_int, y1_int, device=device).to(torch.float32) + 0.5
-    img_x = torch.arange(x0_int, x1_int, device=device).to(torch.float32) + 0.5
+    img_y = paddle.arange(y0_int, y1_int, device=device).to(torch.float32) + 0.5
+    img_x = paddle.arange(x0_int, x1_int, device=device).to(torch.float32) + 0.5
     img_y = (img_y - y0) / (y1 - y0) * 2 - 1
     img_x = (img_x - x0) / (x1 - x0) * 2 - 1
     # img_x, img_y have shapes (N, w), (N, h)
     # IsInf op is not supported with ONNX<=1.7.0
     if not torch.onnx.is_in_onnx_export():
         if torch.isinf(img_x).any():
-            inds = torch.where(torch.isinf(img_x))
+            inds = paddle.where(torch.isinf(img_x))
             img_x[inds] = 0
         if torch.isinf(img_y).any():
-            inds = torch.where(torch.isinf(img_y))
+            inds = paddle.where(torch.isinf(img_y))
             img_y[inds] = 0
 
     gx = img_x[:, None, :].expand(N, img_y.size(1), img_x.size(1))
     gy = img_y[:, :, None].expand(N, img_y.size(1), img_x.size(1))
-    grid = torch.stack([gx, gy], dim=3)
+    grid = paddle.stack([gx, gy], dim=3)
 
     img_masks = F.grid_sample(
         masks.to(dtype=torch.float32), grid, align_corners=False)

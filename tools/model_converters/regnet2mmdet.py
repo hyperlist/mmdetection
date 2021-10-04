@@ -55,7 +55,7 @@ def convert_reslayer(model_key, model_weight, state_dict, converted_names):
 def convert(src, dst):
     """Convert keys in pycls pretrained RegNet models to mmdet style."""
     # load caffe model
-    regnet_model = torch.load(src)
+    regnet_model = paddle.load(src)
     blobs = regnet_model['model_state']
     # convert to pytorch style
     state_dict = OrderedDict()
@@ -75,7 +75,7 @@ def convert(src, dst):
     # save checkpoint
     checkpoint = dict()
     checkpoint['state_dict'] = state_dict
-    torch.save(checkpoint, dst)
+    paddle.save(checkpoint, dst)
 
 
 def main():

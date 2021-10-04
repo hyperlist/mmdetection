@@ -76,7 +76,7 @@ def test_max_iou_assigner_with_empty_gt():
         [5, 5, 15, 15],
         [32, 32, 38, 42],
     ])
-    gt_bboxes = torch.empty(0, 4)
+    gt_bboxes = paddle.empty(0, 4)
     assign_result = self.assign(bboxes, gt_bboxes)
 
     expected_gt_inds = torch.LongTensor([0, 0, 0, 0])
@@ -89,7 +89,7 @@ def test_max_iou_assigner_with_empty_boxes():
         pos_iou_thr=0.5,
         neg_iou_thr=0.5,
     )
-    bboxes = torch.empty((0, 4))
+    bboxes = paddle.empty((0, 4))
     gt_bboxes = torch.FloatTensor([
         [0, 0, 10, 9],
         [0, 10, 10, 19],
@@ -115,7 +115,7 @@ def test_max_iou_assigner_with_empty_boxes_and_ignore():
         neg_iou_thr=0.5,
         ignore_iof_thr=0.5,
     )
-    bboxes = torch.empty((0, 4))
+    bboxes = paddle.empty((0, 4))
     gt_bboxes = torch.FloatTensor([
         [0, 0, 10, 9],
         [0, 10, 10, 19],
@@ -147,8 +147,8 @@ def test_max_iou_assigner_with_empty_boxes_and_gt():
         pos_iou_thr=0.5,
         neg_iou_thr=0.5,
     )
-    bboxes = torch.empty((0, 4))
-    gt_bboxes = torch.empty((0, 4))
+    bboxes = paddle.empty((0, 4))
+    gt_bboxes = paddle.empty((0, 4))
     assign_result = self.assign(bboxes, gt_bboxes)
     assert len(assign_result.gt_inds) == 0
 
@@ -249,7 +249,7 @@ def test_approx_iou_assigner_with_empty_boxes():
         pos_iou_thr=0.5,
         neg_iou_thr=0.5,
     )
-    bboxes = torch.empty((0, 4))
+    bboxes = paddle.empty((0, 4))
     gt_bboxes = torch.FloatTensor([
         [0, 0, 10, 9],
         [0, 10, 10, 19],
@@ -268,8 +268,8 @@ def test_approx_iou_assigner_with_empty_boxes_and_gt():
         pos_iou_thr=0.5,
         neg_iou_thr=0.5,
     )
-    bboxes = torch.empty((0, 4))
-    gt_bboxes = torch.empty((0, 4))
+    bboxes = paddle.empty((0, 4))
+    gt_bboxes = paddle.empty((0, 4))
     approxs_per_octave = 1
     approxs = bboxes
     squares = bboxes
@@ -352,7 +352,7 @@ def test_center_region_assigner_with_empty_bboxes():
         pos_scale=0.5,
         neg_scale=1,
     )
-    bboxes = torch.empty((0, 4)).float()
+    bboxes = paddle.empty((0, 4)).float()
     gt_bboxes = torch.FloatTensor([
         [0, 0, 10, 10],  # match bboxes[0]
         [10, 10, 20, 20],  # match bboxes[1]
@@ -372,8 +372,8 @@ def test_center_region_assigner_with_empty_gts():
         [0, 0, 10, 10],
         [10, 10, 20, 20],
     ])
-    gt_bboxes = torch.empty((0, 4)).float()
-    gt_labels = torch.empty((0, )).long()
+    gt_bboxes = paddle.empty((0, 4)).float()
+    gt_labels = paddle.empty((0, )).long()
     assign_result = self.assign(bboxes, gt_bboxes, gt_labels=gt_labels)
     assert len(assign_result.gt_inds) == 2
     expected_gt_inds = torch.LongTensor([0, 0])
@@ -385,10 +385,10 @@ def test_hungarian_match_assigner():
     assert self.iou_cost.iou_mode == 'giou'
 
     # test no gt bboxes
-    bbox_pred = torch.rand((10, 4))
-    cls_pred = torch.rand((10, 81))
-    gt_bboxes = torch.empty((0, 4)).float()
-    gt_labels = torch.empty((0, )).long()
+    bbox_pred = paddle.rand((10, 4))
+    cls_pred = paddle.rand((10, 81))
+    gt_bboxes = paddle.empty((0, 4)).float()
+    gt_labels = paddle.empty((0, )).long()
     img_meta = dict(img_shape=(10, 8, 3))
     assign_result = self.assign(bbox_pred, cls_pred, gt_bboxes, gt_labels,
                                 img_meta)
@@ -469,7 +469,7 @@ def test_uniform_assigner_with_empty_gt():
         [5, 5, 15, 15],
         [32, 32, 38, 42],
     ])
-    gt_bboxes = torch.empty(0, 4)
+    gt_bboxes = paddle.empty(0, 4)
     assign_result = self.assign(pred_bbox, anchor, gt_bboxes)
 
     expected_gt_inds = torch.LongTensor([0, 0, 0, 0])
@@ -479,8 +479,8 @@ def test_uniform_assigner_with_empty_gt():
 def test_uniform_assigner_with_empty_boxes():
     """Test corner case where a network might predict no boxes."""
     self = UniformAssigner(0.15, 0.7, 1)
-    pred_bbox = torch.empty((0, 4))
-    anchor = torch.empty((0, 4))
+    pred_bbox = paddle.empty((0, 4))
+    anchor = paddle.empty((0, 4))
     gt_bboxes = torch.FloatTensor([
         [0, 0, 10, 9],
         [0, 10, 10, 19],

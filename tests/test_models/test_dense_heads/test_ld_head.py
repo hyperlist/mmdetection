@@ -56,7 +56,7 @@ def test_ld_head_loss():
             strides=[8, 16, 32, 64, 128]))
 
     feat = [
-        torch.rand(1, 1, s // feat_size, s // feat_size)
+        paddle.rand(1, 1, s // feat_size, s // feat_size)
         for feat_size in [4, 8, 16, 32, 64]
     ]
     cls_scores, bbox_preds = self.forward(feat)
@@ -64,7 +64,7 @@ def test_ld_head_loss():
 
     # Test that empty ground truth encourages the network to predict
     # background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
     gt_bboxes_ignore = None
 

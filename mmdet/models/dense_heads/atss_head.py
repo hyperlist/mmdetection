@@ -81,14 +81,14 @@ class ATSSHead(AnchorHead):
                     padding=1,
                     conv_cfg=self.conv_cfg,
                     norm_cfg=self.norm_cfg))
-        self.atss_cls = nn.Conv2d(
+        self.atss_cls = nn.Conv2D(
             self.feat_channels,
             self.num_anchors * self.cls_out_channels,
             3,
             padding=1)
-        self.atss_reg = nn.Conv2d(
+        self.atss_reg = nn.Conv2D(
             self.feat_channels, self.num_anchors * 4, 3, padding=1)
-        self.atss_centerness = nn.Conv2d(
+        self.atss_centerness = nn.Conv2D(
             self.feat_channels, self.num_anchors * 1, 3, padding=1)
         self.scales = nn.LayerList(
             [Scale(1.0) for _ in self.anchor_generator.strides])
@@ -267,7 +267,7 @@ class ATSSHead(AnchorHead):
          bbox_weights_list, num_total_pos, num_total_neg) = cls_reg_targets
 
         num_total_samples = reduce_mean(
-            torch.tensor(num_total_pos, dtype=torch.float,
+            paddle.to_tensor(num_total_pos, dtype=torch.float,
                          device=device)).item()
         num_total_samples = max(num_total_samples, 1.0)
 
@@ -301,9 +301,9 @@ class ATSSHead(AnchorHead):
         r_ = gts[:, 2] - anchors_cx
         b_ = gts[:, 3] - anchors_cy
 
-        left_right = torch.stack([l_, r_], dim=1)
-        top_bottom = torch.stack([t_, b_], dim=1)
-        centerness = torch.sqrt(
+        left_right = paddle.stack([l_, r_], dim=1)
+        top_bottom = paddle.stack([t_, b_], dim=1)
+        centerness = paddle.sqrt(
             (left_right.min(dim=-1)[0] / left_right.max(dim=-1)[0]) *
             (top_bottom.min(dim=-1)[0] / top_bottom.max(dim=-1)[0]))
         assert not torch.isnan(centerness).any()
@@ -413,8 +413,8 @@ class ATSSHead(AnchorHead):
         device = cls_scores[0].device
         batch_size = cls_scores[0].shape[0]
         # convert to tensor to keep tracing
-        nms_pre_tensor = torch.tensor(
-            cfg.get('nms_pre', -1), device=device, dtype=torch.long)
+        nms_pre_tensor = paddle.to_tensor(
+            cfg.get('nms_pre', -1), device=device, dtype=paddle.long)
         mlvl_bboxes = []
         mlvl_scores = []
         mlvl_centerness = []
@@ -435,13 +435,13 @@ class ATSSHead(AnchorHead):
                 from torch import _shape_as_tensor
                 # keep shape as tensor and get k
                 num_anchor = _shape_as_tensor(scores)[-2].to(device)
-                nms_pre = torch.where(nms_pre_tensor < num_anchor,
+                nms_pre = paddle.where(nms_pre_tensor < num_anchor,
                                       nms_pre_tensor, num_anchor)
 
                 max_scores, _ = (scores * centerness[..., None]).max(-1)
                 _, topk_inds = max_scores.topk(nms_pre)
                 anchors = anchors[topk_inds, :]
-                batch_inds = torch.arange(batch_size).view(
+                batch_inds = paddle.arange(batch_size).view(
                     -1, 1).expand_as(topk_inds).long()
                 bbox_pred = bbox_pred[batch_inds, topk_inds, :]
                 scores = scores[batch_inds, topk_inds, :]
@@ -470,7 +470,7 @@ class ATSSHead(AnchorHead):
                 batch_mlvl_centerness.unsqueeze(2).expand_as(batch_mlvl_scores)
             ).max(-1)
             _, topk_inds = batch_mlvl_scores.topk(deploy_nms_pre)
-            batch_inds = torch.arange(batch_size).view(-1,
+            batch_inds = paddle.arange(batch_size).view(-1,
                                                        1).expand_as(topk_inds)
             batch_mlvl_scores = batch_mlvl_scores[batch_inds, topk_inds, :]
             batch_mlvl_bboxes = batch_mlvl_bboxes[batch_inds, topk_inds, :]
@@ -631,11 +631,11 @@ class ATSSHead(AnchorHead):
                                               gt_bboxes)
 
         num_valid_anchors = anchors.shape[0]
-        bbox_targets = torch.zeros_like(anchors)
-        bbox_weights = torch.zeros_like(anchors)
+        bbox_targets = paddle.zeros_like(anchors)
+        bbox_weights = paddle.zeros_like(anchors)
         labels = anchors.new_full((num_valid_anchors, ),
                                   self.num_classes,
-                                  dtype=torch.long)
+                                  dtype=paddle.long)
         label_weights = anchors.new_zeros(num_valid_anchors, dtype=torch.float)
 
         pos_inds = sampling_result.pos_inds

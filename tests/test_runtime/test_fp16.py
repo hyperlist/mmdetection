@@ -61,7 +61,7 @@ def test_auto_fp16():
                 return x
 
         model = ExampleObject()
-        input_x = torch.ones(1, dtype=torch.float32)
+        input_x = paddle.ones(1, dtype=torch.float32)
         model(input_x)
 
     # apply to all input args
@@ -72,8 +72,8 @@ def test_auto_fp16():
             return x, y
 
     model = ExampleModule()
-    input_x = torch.ones(1, dtype=torch.float32)
-    input_y = torch.ones(1, dtype=torch.float32)
+    input_x = paddle.ones(1, dtype=torch.float32)
+    input_y = paddle.ones(1, dtype=torch.float32)
     output_x, output_y = model(input_x, input_y)
     assert output_x.dtype == torch.float32
     assert output_y.dtype == torch.float32
@@ -97,8 +97,8 @@ def test_auto_fp16():
             return x, y
 
     model = ExampleModule()
-    input_x = torch.ones(1, dtype=torch.float32)
-    input_y = torch.ones(1, dtype=torch.float32)
+    input_x = paddle.ones(1, dtype=torch.float32)
+    input_y = paddle.ones(1, dtype=torch.float32)
     output_x, output_y = model(input_x, input_y)
     assert output_x.dtype == torch.float32
     assert output_y.dtype == torch.float32
@@ -122,9 +122,9 @@ def test_auto_fp16():
             return x, y, z
 
     model = ExampleModule()
-    input_x = torch.ones(1, dtype=torch.float32)
-    input_y = torch.ones(1, dtype=torch.float32)
-    input_z = torch.ones(1, dtype=torch.float32)
+    input_x = paddle.ones(1, dtype=torch.float32)
+    input_y = paddle.ones(1, dtype=torch.float32)
+    input_z = paddle.ones(1, dtype=torch.float32)
     output_x, output_y, output_z = model(input_x, y=input_y, z=input_z)
     assert output_x.dtype == torch.float32
     assert output_y.dtype == torch.float32
@@ -152,9 +152,9 @@ def test_auto_fp16():
             return x, y, z
 
     model = ExampleModule()
-    input_x = torch.ones(1, dtype=torch.half)
-    input_y = torch.ones(1, dtype=torch.float32)
-    input_z = torch.ones(1, dtype=torch.float32)
+    input_x = paddle.ones(1, dtype=torch.half)
+    input_y = paddle.ones(1, dtype=torch.float32)
+    input_z = paddle.ones(1, dtype=torch.float32)
     output_x, output_y, output_z = model(input_x, y=input_y, z=input_z)
     assert output_x.dtype == torch.half
     assert output_y.dtype == torch.float32
@@ -187,7 +187,7 @@ def test_force_fp32():
                 return x
 
         model = ExampleObject()
-        input_x = torch.ones(1, dtype=torch.float32)
+        input_x = paddle.ones(1, dtype=torch.float32)
         model(input_x)
 
     # apply to all input args
@@ -198,8 +198,8 @@ def test_force_fp32():
             return x, y
 
     model = ExampleModule()
-    input_x = torch.ones(1, dtype=torch.half)
-    input_y = torch.ones(1, dtype=torch.half)
+    input_x = paddle.ones(1, dtype=torch.half)
+    input_y = paddle.ones(1, dtype=torch.half)
     output_x, output_y = model(input_x, input_y)
     assert output_x.dtype == torch.half
     assert output_y.dtype == torch.half
@@ -223,8 +223,8 @@ def test_force_fp32():
             return x, y
 
     model = ExampleModule()
-    input_x = torch.ones(1, dtype=torch.half)
-    input_y = torch.ones(1, dtype=torch.half)
+    input_x = paddle.ones(1, dtype=torch.half)
+    input_y = paddle.ones(1, dtype=torch.half)
     output_x, output_y = model(input_x, input_y)
     assert output_x.dtype == torch.half
     assert output_y.dtype == torch.half
@@ -248,9 +248,9 @@ def test_force_fp32():
             return x, y, z
 
     model = ExampleModule()
-    input_x = torch.ones(1, dtype=torch.half)
-    input_y = torch.ones(1, dtype=torch.half)
-    input_z = torch.ones(1, dtype=torch.half)
+    input_x = paddle.ones(1, dtype=torch.half)
+    input_y = paddle.ones(1, dtype=torch.half)
+    input_z = paddle.ones(1, dtype=torch.half)
     output_x, output_y, output_z = model(input_x, y=input_y, z=input_z)
     assert output_x.dtype == torch.half
     assert output_y.dtype == torch.half
@@ -278,9 +278,9 @@ def test_force_fp32():
             return x, y, z
 
     model = ExampleModule()
-    input_x = torch.ones(1, dtype=torch.float32)
-    input_y = torch.ones(1, dtype=torch.half)
-    input_z = torch.ones(1, dtype=torch.half)
+    input_x = paddle.ones(1, dtype=torch.float32)
+    input_y = paddle.ones(1, dtype=torch.half)
+    input_z = paddle.ones(1, dtype=torch.half)
     output_x, output_y, output_z = model(input_x, y=input_y, z=input_z)
     assert output_x.dtype == torch.float32
     assert output_y.dtype == torch.half

@@ -905,7 +905,7 @@ Models training with MMDetection 1.x are not fully compatible with 2.0, please r
 - Fix mAP evaluation when there are no ignored boxes. (#2116)
 - Fix the empty RoI input for Deformable RoI Pooling. (#2099)
 - Fix the dataset settings for multiple workflows. (#2103)
-- Fix the warning related to `torch.uint8` in PyTorch 1.4. (#2105)
+- Fix the warning related to `paddle.uint8` in PyTorch 1.4. (#2105)
 - Fix the inference demo on devices other than gpu:0. (#2098)
 - Fix Dockerfile. (#2097)
 - Fix the bug that `pad_val` is unused in Pad transform. (#2093)

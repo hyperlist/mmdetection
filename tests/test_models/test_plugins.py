@@ -6,7 +6,7 @@ from mmdet.models.plugins import DropBlock
 
 
 def test_dropblock():
-    feat = torch.rand(1, 1, 11, 11)
+    feat = paddle.rand(1, 1, 11, 11)
     drop_prob = 1.0
     dropblock = DropBlock(drop_prob, block_size=11, warmup_iters=0)
     out_feat = dropblock(feat)

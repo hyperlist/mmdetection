@@ -43,10 +43,10 @@ class UniformAssigner(BaseAssigner):
         # 1. assign -1 by default
         assigned_gt_inds = bbox_pred.new_full((num_bboxes, ),
                                               0,
-                                              dtype=torch.long)
+                                              dtype=paddle.long)
         assigned_labels = bbox_pred.new_full((num_bboxes, ),
                                              -1,
-                                             dtype=torch.long)
+                                             dtype=paddle.long)
         if num_gts == 0 or num_bboxes == 0:
             # No ground truth or boxes, return empty assignment
             if num_gts == 0:
@@ -55,7 +55,7 @@ class UniformAssigner(BaseAssigner):
             assign_result = AssignResult(
                 num_gts, assigned_gt_inds, None, labels=assigned_labels)
             assign_result.set_extra_property(
-                'pos_idx', bbox_pred.new_empty(0, dtype=torch.bool))
+                'pos_idx', bbox_pred.new_empty(0, dtype=paddle.bool))
             assign_result.set_extra_property('pos_predicted_boxes',
                                              bbox_pred.new_empty((0, 4)))
             assign_result.set_extra_property('target_boxes',
@@ -102,7 +102,7 @@ class UniformAssigner(BaseAssigner):
 
         # 4. Compute the ignore indexes of positive sample use anchors
         # and predict boxes
-        pos_gt_index = torch.arange(
+        pos_gt_index = paddle.arange(
             0, C1.size(1),
             device=bbox_pred.device).repeat(self.match_times * 2)
         pos_ious = anchor_overlaps[indexes, pos_gt_index]

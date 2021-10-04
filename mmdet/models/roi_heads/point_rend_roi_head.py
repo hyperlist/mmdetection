@@ -180,7 +180,7 @@ class PointRendRoIHead(StandardRoIHead):
             _bboxes = [det_bboxes[i][:, :4] for i in range(len(det_bboxes))]
             if rescale:
                 scale_factors = [
-                    torch.from_numpy(scale_factor).to(det_bboxes[0].device)
+                    paddle.to_tensor(scale_factor).to(det_bboxes[0].device)
                     for scale_factor in scale_factors
                 ]
                 _bboxes = [
@@ -329,9 +329,9 @@ class PointRendRoIHead(StandardRoIHead):
             if is_trt_backend:
                 mask_shape = refined_mask_pred.shape
                 point_shape = point_indices.shape
-                inds_dim0 = torch.arange(point_shape[0]).reshape(
+                inds_dim0 = paddle.arange(point_shape[0]).reshape(
                     point_shape[0], 1, 1).expand_as(point_indices)
-                inds_dim1 = torch.arange(point_shape[1]).reshape(
+                inds_dim1 = paddle.arange(point_shape[1]).reshape(
                     1, point_shape[1], 1).expand_as(point_indices)
                 inds_1d = inds_dim0.reshape(
                     -1) * mask_shape[1] * mask_shape[2] + inds_dim1.reshape(
@@ -370,7 +370,7 @@ class PointRendRoIHead(StandardRoIHead):
         # if det_bboxes is rescaled to the original image size, we need to
         # rescale it back to the testing scale to obtain RoIs.
         det_bboxes = det_bboxes[..., :4]
-        batch_index = torch.arange(
+        batch_index = paddle.arange(
             det_bboxes.size(0), device=det_bboxes.device).float().view(
                 -1, 1, 1).expand(det_bboxes.size(0), det_bboxes.size(1), 1)
         mask_rois = paddle.concat([batch_index, det_bboxes], dim=-1)

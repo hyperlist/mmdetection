@@ -8,7 +8,7 @@ import paddle
 def moco_convert(src, dst):
     """Convert keys in pycls pretrained moco models to mmdet style."""
     # load caffe model
-    moco_model = torch.load(src)
+    moco_model = paddle.load(src)
     blobs = moco_model['state_dict']
     # convert to pytorch style
     state_dict = OrderedDict()
@@ -22,7 +22,7 @@ def moco_convert(src, dst):
     # save checkpoint
     checkpoint = dict()
     checkpoint['state_dict'] = state_dict
-    torch.save(checkpoint, dst)
+    paddle.save(checkpoint, dst)
 
 
 def main():

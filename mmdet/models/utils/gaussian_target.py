@@ -18,9 +18,9 @@ def gaussian2D(radius, sigma=1, dtype=torch.float32, device='cpu'):
         h (Tensor): Gaussian kernel with a
             ``(2 * radius + 1) * (2 * radius + 1)`` shape.
     """
-    x = torch.arange(
+    x = paddle.arange(
         -radius, radius + 1, dtype=dtype, device=device).view(1, -1)
-    y = torch.arange(
+    y = paddle.arange(
         -radius, radius + 1, dtype=dtype, device=device).view(-1, 1)
 
     h = (-(x * x + y * y) / (2 * sigma * sigma)).exp()

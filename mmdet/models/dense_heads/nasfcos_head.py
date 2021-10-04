@@ -72,9 +72,9 @@ class NASFCOSHead(FCOSHead):
             self.cls_convs.append(copy.deepcopy(module))
             self.reg_convs.append(copy.deepcopy(module))
 
-        self.conv_cls = nn.Conv2d(
+        self.conv_cls = nn.Conv2D(
             self.feat_channels, self.cls_out_channels, 3, padding=1)
-        self.conv_reg = nn.Conv2d(self.feat_channels, 4, 3, padding=1)
-        self.conv_centerness = nn.Conv2d(self.feat_channels, 1, 3, padding=1)
+        self.conv_reg = nn.Conv2D(self.feat_channels, 4, 3, padding=1)
+        self.conv_centerness = nn.Conv2D(self.feat_channels, 1, 3, padding=1)
 
         self.scales = nn.LayerList([Scale(1.0) for _ in self.strides])

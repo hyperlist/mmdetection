@@ -78,7 +78,7 @@ class BBoxTestMixin:
         if rois.shape[0] == 0:
             batch_size = len(proposals)
             det_bbox = rois.new_zeros(0, 5)
-            det_label = rois.new_zeros((0, ), dtype=torch.long)
+            det_label = rois.new_zeros((0, ), dtype=paddle.long)
             if rcnn_test_cfg is None:
                 det_bbox = det_bbox[:, :4]
                 det_label = rois.new_zeros(
@@ -116,7 +116,7 @@ class BBoxTestMixin:
             if rois[i].shape[0] == 0:
                 # There is no proposal in the single image
                 det_bbox = rois[i].new_zeros(0, 5)
-                det_label = rois[i].new_zeros((0, ), dtype=torch.long)
+                det_label = rois[i].new_zeros((0, ), dtype=paddle.long)
                 if rcnn_test_cfg is None:
                     det_bbox = det_bbox[:, :4]
                     det_label = rois[i].new_zeros(
@@ -166,7 +166,7 @@ class BBoxTestMixin:
         if merged_bboxes.shape[0] == 0:
             # There is no proposal in the single image
             det_bboxes = merged_bboxes.new_zeros(0, 5)
-            det_labels = merged_bboxes.new_zeros((0, ), dtype=torch.long)
+            det_labels = merged_bboxes.new_zeros((0, ), dtype=paddle.long)
         else:
             det_bboxes, det_labels = multiclass_nms(merged_bboxes,
                                                     merged_scores,
@@ -249,7 +249,7 @@ class MaskTestMixin:
             # rescale it back to the testing scale to obtain RoIs.
             if rescale:
                 scale_factors = [
-                    torch.from_numpy(scale_factor).to(det_bboxes[0].device)
+                    paddle.to_tensor(scale_factor).to(det_bboxes[0].device)
                     for scale_factor in scale_factors
                 ]
             _bboxes = [

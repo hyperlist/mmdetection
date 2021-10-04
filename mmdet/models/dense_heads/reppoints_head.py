@@ -82,7 +82,7 @@ class RepPointsHead(AnchorFreeHead):
         dcn_base_x = np.tile(dcn_base, self.dcn_kernel)
         dcn_base_offset = np.stack([dcn_base_y, dcn_base_x], axis=1).reshape(
             (-1))
-        self.dcn_base_offset = torch.tensor(dcn_base_offset).view(1, -1, 1, 1)
+        self.dcn_base_offset = paddle.to_tensor(dcn_base_offset).view(1, -1, 1, 1)
 
         super().__init__(
             num_classes,
@@ -110,8 +110,8 @@ class RepPointsHead(AnchorFreeHead):
             self.sampler = build_sampler(sampler_cfg, context=self)
         self.transform_method = transform_method
         if self.transform_method == 'moment':
-            self.moment_transfer = nn.Parameter(
-                data=torch.zeros(2), requires_grad=True)
+            self.moment_transfer = paddle.create_parameter(
+                data=paddle.zeros(2), requires_grad=True)
             self.moment_mul = moment_mul
 
         self.use_sigmoid_cls = loss_cls.get('use_sigmoid', False)
@@ -152,18 +152,18 @@ class RepPointsHead(AnchorFreeHead):
                                                self.point_feat_channels,
                                                self.dcn_kernel, 1,
                                                self.dcn_pad)
-        self.reppoints_cls_out = nn.Conv2d(self.point_feat_channels,
+        self.reppoints_cls_out = nn.Conv2D(self.point_feat_channels,
                                            self.cls_out_channels, 1, 1, 0)
-        self.reppoints_pts_init_conv = nn.Conv2d(self.feat_channels,
+        self.reppoints_pts_init_conv = nn.Conv2D(self.feat_channels,
                                                  self.point_feat_channels, 3,
                                                  1, 1)
-        self.reppoints_pts_init_out = nn.Conv2d(self.point_feat_channels,
+        self.reppoints_pts_init_out = nn.Conv2D(self.point_feat_channels,
                                                 pts_out_dim, 1, 1, 0)
         self.reppoints_pts_refine_conv = DeformConv2d(self.feat_channels,
                                                       self.point_feat_channels,
                                                       self.dcn_kernel, 1,
                                                       self.dcn_pad)
-        self.reppoints_pts_refine_out = nn.Conv2d(self.point_feat_channels,
+        self.reppoints_pts_refine_out = nn.Conv2D(self.point_feat_channels,
                                                   pts_out_dim, 1, 1, 0)
 
     def points2bbox(self, pts, y_first=True):
@@ -244,7 +244,7 @@ class RepPointsHead(AnchorFreeHead):
         grid_y = grid_top + grid_height * intervel
         grid_y = grid_y.unsqueeze(2).repeat(1, 1, self.dcn_kernel, 1, 1)
         grid_y = grid_y.view(b, -1, h, w)
-        grid_yx = torch.stack([grid_y, grid_x], dim=2)
+        grid_yx = paddle.stack([grid_y, grid_x], dim=2)
         grid_yx = grid_yx.view(b, -1, h, w)
         regressed_bbox = paddle.concat([
             grid_left, grid_top, grid_left + grid_width, grid_top + grid_height
@@ -355,11 +355,11 @@ class RepPointsHead(AnchorFreeHead):
                     -1, 2 * self.num_points)
                 y_pts_shift = yx_pts_shift[..., 0::2]
                 x_pts_shift = yx_pts_shift[..., 1::2]
-                xy_pts_shift = torch.stack([x_pts_shift, y_pts_shift], -1)
+                xy_pts_shift = paddle.stack([x_pts_shift, y_pts_shift], -1)
                 xy_pts_shift = xy_pts_shift.view(*yx_pts_shift.shape[:-1], -1)
                 pts = xy_pts_shift * self.point_strides[i_lvl] + pts_center
                 pts_lvl.append(pts)
-            pts_lvl = torch.stack(pts_lvl, 0)
+            pts_lvl = paddle.stack(pts_lvl, 0)
             pts_list.append(pts_lvl)
         return pts_list
 
@@ -390,11 +390,11 @@ class RepPointsHead(AnchorFreeHead):
 
         num_valid_proposals = proposals.shape[0]
         bbox_gt = proposals.new_zeros([num_valid_proposals, 4])
-        pos_proposals = torch.zeros_like(proposals)
+        pos_proposals = paddle.zeros_like(proposals)
         proposals_weights = proposals.new_zeros([num_valid_proposals, 4])
         labels = proposals.new_full((num_valid_proposals, ),
                                     self.num_classes,
-                                    dtype=torch.long)
+                                    dtype=paddle.long)
         label_weights = proposals.new_zeros(
             num_valid_proposals, dtype=torch.float)
 
@@ -728,7 +728,7 @@ class RepPointsHead(AnchorFreeHead):
             y1 = bboxes[:, 1].clamp(min=0, max=img_shape[0])
             x2 = bboxes[:, 2].clamp(min=0, max=img_shape[1])
             y2 = bboxes[:, 3].clamp(min=0, max=img_shape[0])
-            bboxes = torch.stack([x1, y1, x2, y2], dim=-1)
+            bboxes = paddle.stack([x1, y1, x2, y2], dim=-1)
             mlvl_bboxes.append(bboxes)
             mlvl_scores.append(scores)
         mlvl_bboxes = paddle.concat(mlvl_bboxes)

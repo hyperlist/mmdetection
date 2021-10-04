@@ -143,7 +143,7 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
                 conv_cfg=self.conv_cfg,
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg)
-            conv_pred = nn.Conv2d(self.out_channels[i],
+            conv_pred = nn.Conv2D(self.out_channels[i],
                                   self.num_anchors * self.num_attrib, 1)
 
             self.convs_bridge.append(conv_bridge)
@@ -151,7 +151,7 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
 
     def init_weights(self):
         for m in self.modules():
-            if isinstance(m, nn.Conv2d):
+            if isinstance(m, nn.Conv2D):
                 normal_init(m, mean=0, std=0.01)
             if is_norm(m):
                 constant_init(m, 1)
@@ -246,7 +246,7 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
                                                 flatten_strides.unsqueeze(-1))
 
         if with_nms and (flatten_objectness.size(0) == 0):
-            return torch.zeros((0, 5)), torch.zeros((0, ))
+            return paddle.zeros((0, 5)), paddle.zeros((0, ))
 
         if rescale:
             flatten_bboxes /= flatten_bboxes.new_tensor(
@@ -433,7 +433,7 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
         anchor_strides = []
         for i in range(len(anchors)):
             anchor_strides.append(
-                torch.tensor(self.featmap_strides[i],
+                paddle.to_tensor(self.featmap_strides[i],
                              device=gt_bboxes.device).repeat(len(anchors[i])))
         concat_anchors = paddle.concat(anchors)
         concat_responsible_flags = paddle.concat(responsible_flags)
@@ -466,7 +466,7 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
             sampling_result.pos_assigned_gt_inds]
 
         neg_map = concat_anchors.new_zeros(
-            concat_anchors.size(0), dtype=torch.uint8)
+            concat_anchors.size(0), dtype=paddle.uint8)
         neg_map[sampling_result.neg_inds] = 1
 
         return target_map, neg_map
@@ -506,8 +506,8 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
         multi_lvl_anchors = self.anchor_generator.grid_anchors(
             featmap_sizes, device)
         # convert to tensor to keep tracing
-        nms_pre_tensor = torch.tensor(
-            cfg.get('nms_pre', -1), device=device, dtype=torch.long)
+        nms_pre_tensor = paddle.to_tensor(
+            cfg.get('nms_pre', -1), device=device, dtype=paddle.long)
 
         multi_lvl_bboxes = []
         multi_lvl_cls_scores = []
@@ -542,7 +542,7 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
             nms_pre = get_k_for_topk(nms_pre_tensor, bbox_pred.shape[1])
             if nms_pre > 0:
                 _, topk_inds = conf_pred.topk(nms_pre)
-                batch_inds = torch.arange(batch_size).view(
+                batch_inds = paddle.arange(batch_size).view(
                     -1, 1).expand_as(topk_inds).long()
                 # Avoid onnx2tensorrt issue in https://github.com/NVIDIA/TensorRT/issues/1134 # noqa: E501
                 transformed_inds = (

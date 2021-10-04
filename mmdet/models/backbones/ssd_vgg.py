@@ -32,7 +32,7 @@ class SSDVGG(VGG, BaseModule):
     Example:
         >>> self = SSDVGG(input_size=300, depth=11)
         >>> self.eval()
-        >>> inputs = torch.rand(1, 3, 300, 300)
+        >>> inputs = paddle.rand(1, 3, 300, 300)
         >>> level_outputs = self.forward(inputs)
         >>> for level_out in level_outputs:
         ...     print(tuple(level_out.shape))
@@ -69,11 +69,11 @@ class SSDVGG(VGG, BaseModule):
             nn.MaxPool2D(kernel_size=3, stride=1, padding=1))
         self.features.add_sublayer(
             str(len(self.features)),
-            nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6))
+            nn.Conv2D(512, 1024, kernel_size=3, padding=6, dilation=6))
         self.features.add_sublayer(
             str(len(self.features)), nn.ReLU(inplace=True))
         self.features.add_sublayer(
-            str(len(self.features)), nn.Conv2d(1024, 1024, kernel_size=1))
+            str(len(self.features)), nn.Conv2D(1024, 1024, kernel_size=1))
         self.features.add_sublayer(
             str(len(self.features)), nn.ReLU(inplace=True))
         self.out_feature_indices = out_feature_indices

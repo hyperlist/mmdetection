@@ -100,7 +100,7 @@ def bboxes2tblr(priors, gts, normalizer=4.0, normalize_by_wh=True):
 
     # dist b/t match center and prior's center
     if not isinstance(normalizer, float):
-        normalizer = torch.tensor(normalizer, device=priors.device)
+        normalizer = paddle.to_tensor(normalizer, device=priors.device)
         assert len(normalizer) == 4, 'Normalizer must have length = 4'
     assert priors.size(0) == gts.size(0)
     prior_centers = (priors[:, 0:2] + priors[:, 2:4]) / 2
@@ -158,7 +158,7 @@ def tblr2bboxes(priors,
         encoded boxes (Tensor): Boxes with shape (N, 4) or (B, N, 4)
     """
     if not isinstance(normalizer, float):
-        normalizer = torch.tensor(normalizer, device=priors.device)
+        normalizer = paddle.to_tensor(normalizer, device=priors.device)
         assert len(normalizer) == 4, 'Normalizer must have length = 4'
     assert priors.size(0) == tblr.size(0)
     if priors.ndim == 3:
@@ -200,7 +200,7 @@ def tblr2bboxes(priors,
         min_xy = priors.new_tensor(0)
         max_xy = paddle.concat([max_shape, max_shape],
                            dim=-1).flip(-1).unsqueeze(-2)
-        bboxes = torch.where(bboxes < min_xy, min_xy, bboxes)
-        bboxes = torch.where(bboxes > max_xy, max_xy, bboxes)
+        bboxes = paddle.where(bboxes < min_xy, min_xy, bboxes)
+        bboxes = paddle.where(bboxes > max_xy, max_xy, bboxes)
 
     return bboxes

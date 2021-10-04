@@ -52,11 +52,11 @@ class RPNHead(AnchorHead):
                         inplace=False))
             self.rpn_conv = nn.Sequential(*rpn_convs)
         else:
-            self.rpn_conv = nn.Conv2d(
+            self.rpn_conv = nn.Conv2D(
                 self.in_channels, self.feat_channels, 3, padding=1)
-        self.rpn_cls = nn.Conv2d(self.feat_channels,
+        self.rpn_cls = nn.Conv2D(self.feat_channels,
                                  self.num_anchors * self.cls_out_channels, 1)
-        self.rpn_reg = nn.Conv2d(self.feat_channels, self.num_anchors * 4, 1)
+        self.rpn_reg = nn.Conv2D(self.feat_channels, self.num_anchors * 4, 1)
 
     def forward_single(self, x):
         """Forward feature map of a single scale level."""
@@ -223,7 +223,7 @@ class RPNHead(AnchorHead):
             mlvl_bbox_preds.append(rpn_bbox_pred)
             mlvl_valid_anchors.append(anchors)
             level_ids.append(
-                scores.new_full((scores.size(0), ), idx, dtype=torch.long))
+                scores.new_full((scores.size(0), ), idx, dtype=paddle.long))
 
         scores = paddle.concat(mlvl_scores)
         anchors = paddle.concat(mlvl_valid_anchors)
@@ -283,8 +283,8 @@ class RPNHead(AnchorHead):
         mlvl_bbox_preds = []
         mlvl_valid_anchors = []
         batch_size = cls_scores[0].shape[0]
-        nms_pre_tensor = torch.tensor(
-            cfg.nms_pre, device=cls_scores[0].device, dtype=torch.long)
+        nms_pre_tensor = paddle.to_tensor(
+            cfg.nms_pre, device=cls_scores[0].device, dtype=paddle.long)
         for idx in range(len(cls_scores)):
             rpn_cls_score = cls_scores[idx]
             rpn_bbox_pred = bbox_preds[idx]
@@ -309,7 +309,7 @@ class RPNHead(AnchorHead):
             nms_pre = get_k_for_topk(nms_pre_tensor, rpn_bbox_pred.shape[1])
             if nms_pre > 0:
                 _, topk_inds = scores.topk(nms_pre)
-                batch_inds = torch.arange(batch_size).view(
+                batch_inds = paddle.arange(batch_size).view(
                     -1, 1).expand_as(topk_inds)
                 # Avoid onnx2tensorrt issue in https://github.com/NVIDIA/TensorRT/issues/1134 # noqa: E501
                 # Mind k<=3480 in TensorRT for TopK

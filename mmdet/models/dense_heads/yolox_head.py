@@ -166,9 +166,9 @@ class YOLOXHead(BaseDenseHead, BBoxTestMixin):
 
     def _build_predictor(self):
         """Initialize predictor layers of a single level head."""
-        conv_cls = nn.Conv2d(self.feat_channels, self.cls_out_channels, 1)
-        conv_reg = nn.Conv2d(self.feat_channels, 4, 1)
-        conv_obj = nn.Conv2d(self.feat_channels, 1, 1)
+        conv_cls = nn.Conv2D(self.feat_channels, self.cls_out_channels, 1)
+        conv_reg = nn.Conv2D(self.feat_channels, 4, 1)
+        conv_obj = nn.Conv2D(self.feat_channels, 1, 1)
         return conv_cls, conv_reg, conv_obj
 
     def init_weights(self):
@@ -300,7 +300,7 @@ class YOLOXHead(BaseDenseHead, BBoxTestMixin):
         br_x = (xys[..., 0] + whs[..., 0] / 2)
         br_y = (xys[..., 1] + whs[..., 1] / 2)
 
-        decoded_bboxes = torch.stack([tl_x, tl_y, br_x, br_y], -1)
+        decoded_bboxes = paddle.stack([tl_x, tl_y, br_x, br_y], -1)
         return decoded_bboxes
 
     def _bboxes_nms(self, cls_scores, bboxes, score_factor, cfg):
@@ -456,14 +456,14 @@ class YOLOXHead(BaseDenseHead, BBoxTestMixin):
         # IOU aware classification score
         cls_target = F.one_hot(sampling_result.pos_gt_labels,
                                self.num_classes) * pos_ious.unsqueeze(-1)
-        obj_target = torch.zeros_like(objectness).unsqueeze(-1)
+        obj_target = paddle.zeros_like(objectness).unsqueeze(-1)
         obj_target[pos_inds] = 1
         bbox_target = sampling_result.pos_gt_bboxes
         l1_target = cls_preds.new_zeros((num_pos_per_img, 4))
         if self.use_l1:
             l1_target = self._get_l1_target(l1_target, bbox_target,
                                             priors[pos_inds])
-        foreground_mask = torch.zeros_like(objectness).to(torch.bool)
+        foreground_mask = paddle.zeros_like(objectness).to(paddle.bool)
         foreground_mask[pos_inds] = 1
         return (foreground_mask, cls_target, obj_target, bbox_target,
                 l1_target, num_pos_per_img)
@@ -472,5 +472,5 @@ class YOLOXHead(BaseDenseHead, BBoxTestMixin):
         """Convert gt bboxes to center offset and log width height."""
         gt_cxcywh = bbox_xyxy_to_cxcywh(gt_bboxes)
         l1_target[:, :2] = (gt_cxcywh[:, :2] - priors[:, :2]) / priors[:, 2:]
-        l1_target[:, 2:] = torch.log(gt_cxcywh[:, 2:] / priors[:, 2:] + eps)
+        l1_target[:, 2:] = paddle.log(gt_cxcywh[:, 2:] / priors[:, 2:] + eps)
         return l1_target

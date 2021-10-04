@@ -80,19 +80,19 @@ def bounded_iou_loss(pred, target, beta=0.2, eps=1e-3):
 
     loss_dx = 1 - torch.max(
         (target_w - 2 * dx.abs()) /
-        (target_w + 2 * dx.abs() + eps), torch.zeros_like(dx))
+        (target_w + 2 * dx.abs() + eps), paddle.zeros_like(dx))
     loss_dy = 1 - torch.max(
         (target_h - 2 * dy.abs()) /
-        (target_h + 2 * dy.abs() + eps), torch.zeros_like(dy))
+        (target_h + 2 * dy.abs() + eps), paddle.zeros_like(dy))
     loss_dw = 1 - torch.min(target_w / (pred_w + eps), pred_w /
                             (target_w + eps))
     loss_dh = 1 - torch.min(target_h / (pred_h + eps), pred_h /
                             (target_h + eps))
     # view(..., -1) does not work for empty tensor
-    loss_comb = torch.stack([loss_dx, loss_dy, loss_dw, loss_dh],
+    loss_comb = paddle.stack([loss_dx, loss_dy, loss_dw, loss_dh],
                             dim=-1).flatten(1)
 
-    loss = torch.where(loss_comb < beta, 0.5 * loss_comb * loss_comb / beta,
+    loss = paddle.where(loss_comb < beta, 0.5 * loss_comb * loss_comb / beta,
                        loss_comb - 0.5 * beta)
     return loss
 

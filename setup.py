@@ -8,9 +8,6 @@ import warnings
 from setuptools import find_packages, setup
 
 import paddle
-from torch.utils.cpp_extension import (BuildExtension, CppExtension,
-                                       CUDAExtension)
-
 
 def readme():
     with open('README.md', encoding='utf-8') as f:

@@ -68,7 +68,7 @@ class PanopticFPNHead(BaseSemanticHead):
                     conv_cfg=conv_cfg,
                     norm_cfg=norm_cfg,
                 ))
-        self.conv_logits = nn.Conv2d(inner_channels, num_classes, 1)
+        self.conv_logits = nn.Conv2D(inner_channels, num_classes, 1)
 
     def _set_things_to_void(self, gt_semantic_seg):
         """Merge thing classes to one class.
@@ -83,9 +83,9 @@ class PanopticFPNHead(BaseSemanticHead):
             gt_semantic_seg <= self.bg_range[1])
 
         new_gt_seg = torch.clone(gt_semantic_seg)
-        new_gt_seg = torch.where(bg_mask, gt_semantic_seg - self.fg_nums,
+        new_gt_seg = paddle.where(bg_mask, gt_semantic_seg - self.fg_nums,
                                  new_gt_seg)
-        new_gt_seg = torch.where(fg_mask,
+        new_gt_seg = paddle.where(fg_mask,
                                  fg_mask.int() * self.bg_nums, new_gt_seg)
         return new_gt_seg
 
@@ -112,7 +112,7 @@ class PanopticFPNHead(BaseSemanticHead):
             f = layer(x[self.start_level + i])
             feats.append(f)
 
-        feats = torch.sum(torch.stack(feats, dim=0), dim=0)
+        feats = torch.sum(paddle.stack(feats, dim=0), dim=0)
         seg_preds = self.conv_logits(feats)
         out = dict(seg_preds=seg_preds, feats=feats)
         return out

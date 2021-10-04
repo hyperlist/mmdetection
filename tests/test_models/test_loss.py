@@ -18,9 +18,9 @@ from mmdet.models.losses.iou_loss import (BoundedIoULoss, CIoULoss, DIoULoss,
 @pytest.mark.parametrize(
     'loss_class', [IoULoss, BoundedIoULoss, GIoULoss, DIoULoss, CIoULoss])
 def test_iou_type_loss_zeros_weight(loss_class):
-    pred = torch.rand((10, 4))
-    target = torch.rand((10, 4))
-    weight = torch.zeros(10)
+    pred = paddle.rand((10, 4))
+    target = paddle.rand((10, 4))
+    weight = paddle.zeros(10)
 
     loss = loss_class()(pred, target, weight)
     assert loss == 0.
@@ -33,8 +33,8 @@ def test_iou_type_loss_zeros_weight(loss_class):
     SmoothL1Loss, KnowledgeDistillationKLDivLoss, DiceLoss
 ])
 def test_loss_with_reduction_override(loss_class):
-    pred = torch.rand((10, 4))
-    target = torch.rand((10, 4)),
+    pred = paddle.rand((10, 4))
+    target = paddle.rand((10, 4)),
     weight = None
 
     with pytest.raises(AssertionError):
@@ -51,9 +51,9 @@ def test_loss_with_reduction_override(loss_class):
 ])
 @pytest.mark.parametrize('input_shape', [(10, 4), (0, 4)])
 def test_regression_losses(loss_class, input_shape):
-    pred = torch.rand(input_shape)
-    target = torch.rand(input_shape)
-    weight = torch.rand(input_shape)
+    pred = paddle.rand(input_shape)
+    target = paddle.rand(input_shape)
+    weight = paddle.rand(input_shape)
 
     # Test loss forward
     loss = loss_class()(pred, target)
@@ -94,7 +94,7 @@ def test_classification_losses(loss_class, input_shape):
             f'CELoss in PyTorch {torch.__version__} does not support empty'
             f'tensor.')
 
-    pred = torch.rand(input_shape)
+    pred = paddle.rand(input_shape)
     target = torch.randint(0, 5, (input_shape[0], ))
 
     # Test loss forward
@@ -126,9 +126,9 @@ def test_classification_losses(loss_class, input_shape):
 @pytest.mark.parametrize('loss_class', [GHMR])
 @pytest.mark.parametrize('input_shape', [(10, 4), (0, 4)])
 def test_GHMR_loss(loss_class, input_shape):
-    pred = torch.rand(input_shape)
-    target = torch.rand(input_shape)
-    weight = torch.rand(input_shape)
+    pred = paddle.rand(input_shape)
+    target = paddle.rand(input_shape)
+    weight = paddle.rand(input_shape)
 
     # Test loss forward
     loss = loss_class()(pred, target, weight)
@@ -140,10 +140,10 @@ def test_loss_with_ignore_index(use_sigmoid):
     # Test cross_entropy loss
     loss_class = CrossEntropyLoss(
         use_sigmoid=use_sigmoid, use_mask=False, ignore_index=255)
-    pred = torch.rand((10, 5))
+    pred = paddle.rand((10, 5))
     target = torch.randint(0, 5, (10, ))
 
-    ignored_indices = torch.randint(0, 10, (2, ), dtype=torch.long)
+    ignored_indices = torch.randint(0, 10, (2, ), dtype=paddle.long)
     target[ignored_indices] = 255
 
     # Test loss forward with default ignore
@@ -168,9 +168,9 @@ def test_loss_with_ignore_index(use_sigmoid):
 
 def test_dice_loss():
     loss_class = DiceLoss
-    pred = torch.rand((10, 4, 4))
-    target = torch.rand((10, 4, 4))
-    weight = torch.rand((10))
+    pred = paddle.rand((10, 4, 4))
+    target = paddle.rand((10, 4, 4))
+    weight = paddle.rand((10))
 
     # Test loss forward
     loss = loss_class()(pred, target)
@@ -207,10 +207,10 @@ def test_dice_loss():
 
     # Test loss forward with weight.ndim != loss.ndim
     with pytest.raises(AssertionError):
-        weight = torch.rand((2, 8))
+        weight = paddle.rand((2, 8))
         loss_class()(pred, target, weight)
 
     # Test loss forward with len(weight) != len(pred)
     with pytest.raises(AssertionError):
-        weight = torch.rand((8))
+        weight = paddle.rand((8))
         loss_class()(pred, target, weight)

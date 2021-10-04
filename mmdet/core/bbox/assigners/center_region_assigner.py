@@ -26,7 +26,7 @@ def scale_boxes(bboxes, scale):
     w_half *= scale
     h_half *= scale
 
-    boxes_scaled = torch.zeros_like(bboxes)
+    boxes_scaled = paddle.zeros_like(bboxes)
     boxes_scaled[:, 0] = x_c - w_half
     boxes_scaled[:, 2] = x_c + w_half
     boxes_scaled[:, 1] = y_c - h_half
@@ -198,7 +198,7 @@ class CenterRegionAssigner(BaseAssigner):
             # If no gts exist, assign all pixels to negative
             assigned_gt_ids = \
                 is_bbox_in_gt_core.new_zeros((num_bboxes,),
-                                             dtype=torch.long)
+                                             dtype=paddle.long)
             pixels_in_gt_shadow = assigned_gt_ids.new_empty((0, 2))
         else:
             # Step 3: assign a one-hot gt id to each pixel, and smaller objects
@@ -286,13 +286,13 @@ class CenterRegionAssigner(BaseAssigner):
         num_bboxes, num_gts = is_bbox_in_gt_core.shape
 
         if gt_priority is None:
-            gt_priority = torch.arange(
+            gt_priority = paddle.arange(
                 num_gts, device=is_bbox_in_gt_core.device)
         assert gt_priority.size(0) == num_gts
         # The bigger gt_priority, the more preferable to be assigned
         # The assigned inds are by default 0 (background)
         assigned_gt_inds = is_bbox_in_gt_core.new_zeros((num_bboxes, ),
-                                                        dtype=torch.long)
+                                                        dtype=paddle.long)
         # Shadowed bboxes are assigned to be background. But the corresponding
         #   label is ignored during loss calculation, which is done through
         #   shadowed_gt_inds
@@ -306,7 +306,7 @@ class CenterRegionAssigner(BaseAssigner):
         #  is saved
         pair_priority = is_bbox_in_gt_core.new_full((num_bboxes, num_gts),
                                                     -1,
-                                                    dtype=torch.long)
+                                                    dtype=paddle.long)
 
         # Each bbox could match with multiple gts.
         # The following codes deal with this situation

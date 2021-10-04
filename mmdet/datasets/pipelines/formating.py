@@ -23,9 +23,9 @@ def to_tensor(data):
     if isinstance(data, torch.Tensor):
         return data
     elif isinstance(data, np.ndarray):
-        return torch.from_numpy(data)
+        return paddle.to_tensor(data)
     elif isinstance(data, Sequence) and not mmcv.is_str(data):
-        return torch.tensor(data)
+        return paddle.to_tensor(data)
     elif isinstance(data, int):
         return torch.LongTensor([data])
     elif isinstance(data, float):

@@ -25,7 +25,7 @@ class DistributedSampler(_DistributedSampler):
             g.manual_seed(self.epoch + self.seed)
             indices = torch.randperm(len(self.dataset), generator=g).tolist()
         else:
-            indices = torch.arange(len(self.dataset)).tolist()
+            indices = paddle.arange(len(self.dataset)).tolist()
 
         # add extra samples to make it evenly divisible
         # in case that indices is shorter than half of total_size

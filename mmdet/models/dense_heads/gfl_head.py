@@ -78,7 +78,7 @@ class GFLHead(AnchorHead):
         init_cfg (dict or list[dict], optional): Initialization config dict.
     Example:
         >>> self = GFLHead(11, 7)
-        >>> feats = [torch.rand(1, 7, s, s) for s in [4, 8, 16, 32, 64]]
+        >>> feats = [paddle.rand(1, 7, s, s) for s in [4, 8, 16, 32, 64]]
         >>> cls_quality_score, bbox_pred = self.forward(feats)
         >>> assert len(cls_quality_score) == len(self.scales)
     """
@@ -144,9 +144,9 @@ class GFLHead(AnchorHead):
                     conv_cfg=self.conv_cfg,
                     norm_cfg=self.norm_cfg))
         assert self.num_anchors == 1, 'anchor free version'
-        self.gfl_cls = nn.Conv2d(
+        self.gfl_cls = nn.Conv2D(
             self.feat_channels, self.cls_out_channels, 3, padding=1)
-        self.gfl_reg = nn.Conv2d(
+        self.gfl_reg = nn.Conv2D(
             self.feat_channels, 4 * (self.reg_max + 1), 3, padding=1)
         self.scales = nn.LayerList(
             [Scale(1.0) for _ in self.anchor_generator.strides])
@@ -206,7 +206,7 @@ class GFLHead(AnchorHead):
         """
         anchors_cx = (anchors[..., 2] + anchors[..., 0]) / 2
         anchors_cy = (anchors[..., 3] + anchors[..., 1]) / 2
-        return torch.stack([anchors_cx, anchors_cy], dim=-1)
+        return paddle.stack([anchors_cx, anchors_cy], dim=-1)
 
     def loss_single(self, anchors, cls_score, bbox_pred, labels, label_weights,
                     bbox_targets, stride, num_total_samples):
@@ -347,7 +347,7 @@ class GFLHead(AnchorHead):
          bbox_weights_list, num_total_pos, num_total_neg) = cls_reg_targets
 
         num_total_samples = reduce_mean(
-            torch.tensor(num_total_pos, dtype=torch.float,
+            paddle.to_tensor(num_total_pos, dtype=torch.float,
                          device=device)).item()
         num_total_samples = max(num_total_samples, 1.0)
 
@@ -430,7 +430,7 @@ class GFLHead(AnchorHead):
             if nms_pre > 0 and scores.shape[1] > nms_pre:
                 max_scores, _ = scores.max(-1)
                 _, topk_inds = max_scores.topk(nms_pre)
-                batch_inds = torch.arange(batch_size).view(
+                batch_inds = paddle.arange(batch_size).view(
                     -1, 1).expand_as(topk_inds).long()
                 anchors = anchors[topk_inds, :]
                 bbox_pred = bbox_pred[batch_inds, topk_inds, :]
@@ -600,11 +600,11 @@ class GFLHead(AnchorHead):
                                               gt_bboxes)
 
         num_valid_anchors = anchors.shape[0]
-        bbox_targets = torch.zeros_like(anchors)
-        bbox_weights = torch.zeros_like(anchors)
+        bbox_targets = paddle.zeros_like(anchors)
+        bbox_weights = paddle.zeros_like(anchors)
         labels = anchors.new_full((num_valid_anchors, ),
                                   self.num_classes,
-                                  dtype=torch.long)
+                                  dtype=paddle.long)
         label_weights = anchors.new_zeros(num_valid_anchors, dtype=torch.float)
 
         pos_inds = sampling_result.pos_inds

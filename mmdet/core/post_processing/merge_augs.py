@@ -102,18 +102,18 @@ def merge_aug_bboxes(aug_bboxes, aug_scores, img_metas, rcnn_test_cfg):
         bboxes = bbox_mapping_back(bboxes, img_shape, scale_factor, flip,
                                    flip_direction)
         recovered_bboxes.append(bboxes)
-    bboxes = torch.stack(recovered_bboxes).mean(dim=0)
+    bboxes = paddle.stack(recovered_bboxes).mean(dim=0)
     if aug_scores is None:
         return bboxes
     else:
-        scores = torch.stack(aug_scores).mean(dim=0)
+        scores = paddle.stack(aug_scores).mean(dim=0)
         return bboxes, scores
 
 
 def merge_aug_scores(aug_scores):
     """Merge augmented bbox scores."""
     if isinstance(aug_scores[0], torch.Tensor):
-        return torch.mean(torch.stack(aug_scores), dim=0)
+        return torch.mean(paddle.stack(aug_scores), dim=0)
     else:
         return np.mean(aug_scores, axis=0)
 

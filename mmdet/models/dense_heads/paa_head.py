@@ -346,8 +346,8 @@ class PAAHead(ATSSHead):
             gmm.fit(pos_loss_gmm)
             gmm_assignment = gmm.predict(pos_loss_gmm)
             scores = gmm.score_samples(pos_loss_gmm)
-            gmm_assignment = torch.from_numpy(gmm_assignment).to(device)
-            scores = torch.from_numpy(scores).to(device)
+            gmm_assignment = paddle.to_tensor(gmm_assignment).to(device)
+            scores = paddle.to_tensor(scores).to(device)
 
             pos_inds_temp, ignore_inds_temp = self.gmm_separation_scheme(
                 gmm_assignment, scores, pos_inds_gmm)
@@ -391,8 +391,8 @@ class PAAHead(ATSSHead):
         # https://github.com/kkhoot/PAA/issues/8 and
         # https://github.com/kkhoot/PAA/issues/9.
         fgs = gmm_assignment == 0
-        pos_inds_temp = fgs.new_tensor([], dtype=torch.long)
-        ignore_inds_temp = fgs.new_tensor([], dtype=torch.long)
+        pos_inds_temp = fgs.new_tensor([], dtype=paddle.long)
+        ignore_inds_temp = fgs.new_tensor([], dtype=paddle.long)
         if fgs.nonzero().numel():
             _, pos_thr_ind = scores[fgs].topk(1)
             pos_inds_temp = pos_inds_gmm[fgs][:pos_thr_ind + 1]
@@ -558,7 +558,7 @@ class PAAHead(ATSSHead):
             if nms_pre > 0 and scores.shape[1] > nms_pre:
                 max_scores, _ = (scores * iou_preds[..., None]).sqrt().max(-1)
                 _, topk_inds = max_scores.topk(nms_pre)
-                batch_inds = torch.arange(batch_size).view(
+                batch_inds = paddle.arange(batch_size).view(
                     -1, 1).expand_as(topk_inds).long()
                 anchors = anchors[topk_inds, :]
                 bbox_pred = bbox_pred[batch_inds, topk_inds, :]

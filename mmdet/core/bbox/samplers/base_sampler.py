@@ -70,14 +70,14 @@ class BaseSampler(metaclass=ABCMeta):
 
         bboxes = bboxes[:, :4]
 
-        gt_flags = bboxes.new_zeros((bboxes.shape[0], ), dtype=torch.uint8)
+        gt_flags = bboxes.new_zeros((bboxes.shape[0], ), dtype=paddle.uint8)
         if self.add_gt_as_proposals and len(gt_bboxes) > 0:
             if gt_labels is None:
                 raise ValueError(
                     'gt_labels must be given when add_gt_as_proposals is True')
             bboxes = paddle.concat([gt_bboxes, bboxes], dim=0)
             assign_result.add_gt_(gt_labels)
-            gt_ones = bboxes.new_ones(gt_bboxes.shape[0], dtype=torch.uint8)
+            gt_ones = bboxes.new_ones(gt_bboxes.shape[0], dtype=paddle.uint8)
             gt_flags = paddle.concat([gt_ones, gt_flags])
 
         num_expected_pos = int(self.num * self.pos_fraction)

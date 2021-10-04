@@ -47,7 +47,7 @@ class DropBlock(nn.Layer):
         N, C, H, W = list(x.shape)
         gamma = self._compute_gamma((H, W))
         mask_shape = (N, C, H - self.block_size + 1, W - self.block_size + 1)
-        mask = torch.bernoulli(torch.full(mask_shape, gamma, device=x.device))
+        mask = torch.bernoulli(paddle.full(mask_shape, gamma, device=x.device))
 
         mask = F.pad(mask, [self.block_size // 2] * 4, value=0)
         mask = F.max_pool2d(

@@ -130,9 +130,9 @@ def bbox2delta(proposals, gt, means=(0., 0., 0., 0.), stds=(1., 1., 1., 1.)):
 
     dx = (gx - px) / pw
     dy = (gy - py) / ph
-    dw = torch.log(gw / pw)
-    dh = torch.log(gh / ph)
-    deltas = torch.stack([dx, dy, dw, dh], dim=-1)
+    dw = paddle.log(gw / pw)
+    dh = paddle.log(gh / ph)
+    deltas = paddle.stack([dx, dy, dw, dh], dim=-1)
 
     means = deltas.new_tensor(means).unsqueeze(0)
     stds = deltas.new_tensor(stds).unsqueeze(0)
@@ -246,14 +246,14 @@ def delta2bbox(rois,
     x2 = gx + gw * 0.5
     y2 = gy + gh * 0.5
 
-    bboxes = torch.stack([x1, y1, x2, y2], dim=-1).view(deltas.size())
+    bboxes = paddle.stack([x1, y1, x2, y2], dim=-1).view(deltas.size())
 
     if clip_border and max_shape is not None:
         # clip bboxes with dynamic `min` and `max` for onnx
         if torch.onnx.is_in_onnx_export():
             from mmdet.core.export import dynamic_clip_for_onnx
             x1, y1, x2, y2 = dynamic_clip_for_onnx(x1, y1, x2, y2, max_shape)
-            bboxes = torch.stack([x1, y1, x2, y2], dim=-1).view(deltas.size())
+            bboxes = paddle.stack([x1, y1, x2, y2], dim=-1).view(deltas.size())
             return bboxes
         if not isinstance(max_shape, torch.Tensor):
             max_shape = x1.new_tensor(max_shape)
@@ -266,7 +266,7 @@ def delta2bbox(rois,
         max_xy = paddle.concat(
             [max_shape] * (deltas.size(-1) // 2),
             dim=-1).flip(-1).unsqueeze(-2)
-        bboxes = torch.where(bboxes < min_xy, min_xy, bboxes)
-        bboxes = torch.where(bboxes > max_xy, max_xy, bboxes)
+        bboxes = paddle.where(bboxes < min_xy, min_xy, bboxes)
+        bboxes = paddle.where(bboxes > max_xy, max_xy, bboxes)
 
     return bboxes

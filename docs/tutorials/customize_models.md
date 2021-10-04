@@ -19,7 +19,7 @@ Here we show how to develop new components with an example of MobileNet.
 Create a new file `mmdet/models/backbones/mobilenet.py`.
 
 ```python
-import torch.nn as nn
+import paddle.nn as nn
 
 from ..builder import BACKBONES
 
@@ -306,7 +306,7 @@ The decorator `weighted_loss` enable the loss to be weighted for each element.
 
 ```python
 import torch
-import torch.nn as nn
+import paddle.nn as nn
 
 from ..builder import LOSSES
 from .utils import weighted_loss
@@ -314,7 +314,7 @@ from .utils import weighted_loss
 @weighted_loss
 def my_loss(pred, target):
     assert pred.size() == target.size() and target.numel() > 0
-    loss = torch.abs(pred - target)
+    loss = paddle.abs(pred - target)
     return loss
 
 @LOSSES.register_module()

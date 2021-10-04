@@ -127,25 +127,25 @@ class GridHead(BaseModule):
                 # 1x1 conv.
                 fo_trans.append(
                     nn.Sequential(
-                        nn.Conv2d(
+                        nn.Conv2D(
                             self.point_feat_channels,
                             self.point_feat_channels,
                             5,
                             stride=1,
                             padding=2,
                             groups=self.point_feat_channels),
-                        nn.Conv2d(self.point_feat_channels,
+                        nn.Conv2D(self.point_feat_channels,
                                   self.point_feat_channels, 1)))
                 so_trans.append(
                     nn.Sequential(
-                        nn.Conv2d(
+                        nn.Conv2D(
                             self.point_feat_channels,
                             self.point_feat_channels,
                             5,
                             1,
                             2,
                             groups=self.point_feat_channels),
-                        nn.Conv2d(self.point_feat_channels,
+                        nn.Conv2D(self.point_feat_channels,
                                   self.point_feat_channels, 1)))
             self.forder_trans.append(fo_trans)
             self.sorder_trans.append(so_trans)
@@ -234,14 +234,14 @@ class GridHead(BaseModule):
         y1 = pos_bboxes[:, 1] - (pos_bboxes[:, 3] - pos_bboxes[:, 1]) / 2
         x2 = pos_bboxes[:, 2] + (pos_bboxes[:, 2] - pos_bboxes[:, 0]) / 2
         y2 = pos_bboxes[:, 3] + (pos_bboxes[:, 3] - pos_bboxes[:, 1]) / 2
-        pos_bboxes = torch.stack([x1, y1, x2, y2], dim=-1)
+        pos_bboxes = paddle.stack([x1, y1, x2, y2], dim=-1)
         pos_bbox_ws = (pos_bboxes[:, 2] - pos_bboxes[:, 0]).unsqueeze(-1)
         pos_bbox_hs = (pos_bboxes[:, 3] - pos_bboxes[:, 1]).unsqueeze(-1)
 
         num_rois = pos_bboxes.shape[0]
         map_size = self.whole_map_size
         # this is not the final target shape
-        targets = torch.zeros((num_rois, self.grid_points, map_size, map_size),
+        targets = paddle.zeros((num_rois, self.grid_points, map_size, map_size),
                               dtype=torch.float)
 
         # pre-compute interpolation factors for all grid points.

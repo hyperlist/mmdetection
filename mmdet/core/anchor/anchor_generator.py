@@ -174,7 +174,7 @@ class AnchorGenerator:
         else:
             x_center, y_center = center
 
-        h_ratios = torch.sqrt(ratios)
+        h_ratios = paddle.sqrt(ratios)
         w_ratios = 1 / h_ratios
         if self.scale_major:
             ws = (w * w_ratios[:, None] * scales[None, :]).view(-1)
@@ -189,7 +189,7 @@ class AnchorGenerator:
             x_center - 0.5 * ws, y_center - 0.5 * hs, x_center + 0.5 * ws,
             y_center + 0.5 * hs
         ]
-        base_anchors = torch.stack(base_anchors, dim=-1)
+        base_anchors = paddle.stack(base_anchors, dim=-1)
 
         return base_anchors
 
@@ -255,11 +255,11 @@ class AnchorGenerator:
         base_anchors = self.base_anchors[level_idx].to(device)
         feat_h, feat_w = featmap_size
         stride_w, stride_h = self.strides[level_idx]
-        shift_x = torch.arange(0, feat_w, device=device) * stride_w
-        shift_y = torch.arange(0, feat_h, device=device) * stride_h
+        shift_x = paddle.arange(0, feat_w, device=device) * stride_w
+        shift_y = paddle.arange(0, feat_h, device=device) * stride_h
 
         shift_xx, shift_yy = self._meshgrid(shift_x, shift_y)
-        shifts = torch.stack([shift_xx, shift_yy, shift_xx, shift_yy], dim=-1)
+        shifts = paddle.stack([shift_xx, shift_yy, shift_xx, shift_yy], dim=-1)
         shifts = shifts.type_as(base_anchors)
         # first feat_w elements correspond to the first row of shifts
         # add A anchors (1, A, 4) to K shifts (K, 1, 4) to get
@@ -301,7 +301,7 @@ class AnchorGenerator:
              num_base_anchors) % width * self.strides[level_idx][0]
         y = (prior_idxs // width //
              num_base_anchors) % height * self.strides[level_idx][1]
-        priors = torch.stack([x, y, x, y], 1).to(dtype).to(device) + \
+        priors = paddle.stack([x, y, x, y], 1).to(dtype).to(device) + \
             self.base_anchors[level_idx][base_anchor_id, :].to(device)
 
         return priors
@@ -364,11 +364,11 @@ class AnchorGenerator:
         # keep featmap_size as Tensor instead of int, so that we
         # can covert to ONNX correctly
         feat_h, feat_w = featmap_size
-        shift_x = torch.arange(0, feat_w, device=device) * stride[0]
-        shift_y = torch.arange(0, feat_h, device=device) * stride[1]
+        shift_x = paddle.arange(0, feat_w, device=device) * stride[0]
+        shift_y = paddle.arange(0, feat_h, device=device) * stride[1]
 
         shift_xx, shift_yy = self._meshgrid(shift_x, shift_y)
-        shifts = torch.stack([shift_xx, shift_yy, shift_xx, shift_yy], dim=-1)
+        shifts = paddle.stack([shift_xx, shift_yy, shift_xx, shift_yy], dim=-1)
         shifts = shifts.type_as(base_anchors)
         # first feat_w elements correspond to the first row of shifts
         # add A anchors (1, A, 4) to K shifts (K, 1, 4) to get
@@ -429,8 +429,8 @@ class AnchorGenerator:
         feat_h, feat_w = featmap_size
         valid_h, valid_w = valid_size
         assert valid_h <= feat_h and valid_w <= feat_w
-        valid_x = torch.zeros(feat_w, dtype=torch.bool, device=device)
-        valid_y = torch.zeros(feat_h, dtype=torch.bool, device=device)
+        valid_x = paddle.zeros(feat_w, dtype=paddle.bool, device=device)
+        valid_y = paddle.zeros(feat_h, dtype=paddle.bool, device=device)
         valid_x[:valid_w] = 1
         valid_y[:valid_h] = 1
         valid_xx, valid_yy = self._meshgrid(valid_x, valid_y)
@@ -575,7 +575,7 @@ class SSDAnchorGenerator(AnchorGenerator):
                 center=self.centers[i])
             indices = list(range(len(self.ratios[i])))
             indices.insert(1, len(indices))
-            base_anchors = torch.index_select(base_anchors, 0,
+            base_anchors = paddle.index_select(base_anchors, 0,
                                               torch.LongTensor(indices))
             multi_level_base_anchors.append(base_anchors)
         return multi_level_base_anchors
@@ -676,7 +676,7 @@ class LegacyAnchorGenerator(AnchorGenerator):
         else:
             x_center, y_center = center
 
-        h_ratios = torch.sqrt(ratios)
+        h_ratios = paddle.sqrt(ratios)
         w_ratios = 1 / h_ratios
         if self.scale_major:
             ws = (w * w_ratios[:, None] * scales[None, :]).view(-1)
@@ -691,7 +691,7 @@ class LegacyAnchorGenerator(AnchorGenerator):
             x_center - 0.5 * (ws - 1), y_center - 0.5 * (hs - 1),
             x_center + 0.5 * (ws - 1), y_center + 0.5 * (hs - 1)
         ]
-        base_anchors = torch.stack(base_anchors, dim=-1).round()
+        base_anchors = paddle.stack(base_anchors, dim=-1).round()
 
         return base_anchors
 
@@ -790,7 +790,7 @@ class YOLOAnchorGenerator(AnchorGenerator):
                 y_center + 0.5 * h
             ])
             base_anchors.append(base_anchor)
-        base_anchors = torch.stack(base_anchors, dim=0)
+        base_anchors = paddle.stack(base_anchors, dim=0)
 
         return base_anchors
 
@@ -848,8 +848,8 @@ class YOLOAnchorGenerator(AnchorGenerator):
         # row major indexing
         gt_bboxes_grid_idx = gt_bboxes_grid_y * feat_w + gt_bboxes_grid_x
 
-        responsible_grid = torch.zeros(
-            feat_h * feat_w, dtype=torch.uint8, device=device)
+        responsible_grid = paddle.zeros(
+            feat_h * feat_w, dtype=paddle.uint8, device=device)
         responsible_grid[gt_bboxes_grid_idx] = 1
 
         responsible_grid = responsible_grid[:, None].expand(

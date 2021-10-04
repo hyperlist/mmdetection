@@ -10,24 +10,24 @@ arch_settings = {50: (3, 4, 6, 3), 101: (3, 4, 23, 3)}
 
 def convert_bn(blobs, state_dict, caffe_name, torch_name, converted_names):
     # detectron replace bn with affine channel layer
-    state_dict[torch_name + '.bias'] = torch.from_numpy(blobs[caffe_name +
+    state_dict[torch_name + '.bias'] = paddle.to_tensor(blobs[caffe_name +
                                                               '_b'])
-    state_dict[torch_name + '.weight'] = torch.from_numpy(blobs[caffe_name +
+    state_dict[torch_name + '.weight'] = paddle.to_tensor(blobs[caffe_name +
                                                                 '_s'])
     bn_size = state_dict[torch_name + '.weight'].size()
-    state_dict[torch_name + '.running_mean'] = torch.zeros(bn_size)
-    state_dict[torch_name + '.running_var'] = torch.ones(bn_size)
+    state_dict[torch_name + '.running_mean'] = paddle.zeros(bn_size)
+    state_dict[torch_name + '.running_var'] = paddle.ones(bn_size)
     converted_names.add(caffe_name + '_b')
     converted_names.add(caffe_name + '_s')
 
 
 def convert_conv_fc(blobs, state_dict, caffe_name, torch_name,
                     converted_names):
-    state_dict[torch_name + '.weight'] = torch.from_numpy(blobs[caffe_name +
+    state_dict[torch_name + '.weight'] = paddle.to_tensor(blobs[caffe_name +
                                                                 '_w'])
     converted_names.add(caffe_name + '_w')
     if caffe_name + '_b' in blobs:
-        state_dict[torch_name + '.bias'] = torch.from_numpy(blobs[caffe_name +
+        state_dict[torch_name + '.bias'] = paddle.to_tensor(blobs[caffe_name +
                                                                   '_b'])
         converted_names.add(caffe_name + '_b')
 
@@ -67,7 +67,7 @@ def convert(src, dst, depth):
     # save checkpoint
     checkpoint = dict()
     checkpoint['state_dict'] = state_dict
-    torch.save(checkpoint, dst)
+    paddle.save(checkpoint, dst)
 
 
 def main():

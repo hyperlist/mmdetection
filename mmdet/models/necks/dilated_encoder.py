@@ -75,10 +75,10 @@ class DilatedEncoder(nn.Layer):
         self._init_layers()
 
     def _init_layers(self):
-        self.lateral_conv = nn.Conv2d(
+        self.lateral_conv = nn.Conv2D(
             self.in_channels, self.out_channels, kernel_size=1)
         self.lateral_norm = BatchNorm2d(self.out_channels)
-        self.fpn_conv = nn.Conv2d(
+        self.fpn_conv = nn.Conv2D(
             self.out_channels, self.out_channels, kernel_size=3, padding=1)
         self.fpn_norm = BatchNorm2d(self.out_channels)
         encoder_blocks = []
@@ -97,7 +97,7 @@ class DilatedEncoder(nn.Layer):
         for m in [self.lateral_norm, self.fpn_norm]:
             constant_init(m, 1)
         for m in self.dilated_encoder_blocks.modules():
-            if isinstance(m, nn.Conv2d):
+            if isinstance(m, nn.Conv2D):
                 normal_init(m, mean=0, std=0.01)
             if is_norm(m):
                 constant_init(m, 1)

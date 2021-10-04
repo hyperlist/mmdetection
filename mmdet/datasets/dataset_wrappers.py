@@ -7,7 +7,6 @@ from collections import defaultdict
 
 import numpy as np
 from mmcv.utils import build_from_cfg, print_log
-from torch.utils.data.dataset import ConcatDataset as _ConcatDataset
 
 from .builder import DATASETS, PIPELINES
 from .coco import CocoDataset
@@ -17,7 +16,6 @@ from .coco import CocoDataset
 class ConcatDataset(_ConcatDataset):
     """A wrapper of concatenated dataset.
 
-    Same as :obj:`torch.utils.data.dataset.ConcatDataset`, but
     concat the group flag for image aspect ratio.
 
     Args:

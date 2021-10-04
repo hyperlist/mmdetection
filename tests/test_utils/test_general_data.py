@@ -21,11 +21,11 @@ def test_general_data():
         img_size=[256, 256],
         path='dadfaff',
         scale_factor=np.array([1.5, 1.5]),
-        img_shape=torch.rand(4))
+        img_shape=paddle.rand(4))
 
     data = dict(
-        bboxes=torch.rand(4, 4),
-        labels=torch.rand(4),
+        bboxes=paddle.rand(4, 4),
+        labels=paddle.rand(4),
         masks=np.random.rand(4, 2, 2))
 
     instance_data = GeneralData(meta_info=meta_info)
@@ -51,7 +51,7 @@ def test_general_data():
             assert '[1.5 1.5]' in line
 
     instance_data = GeneralData(
-        meta_info=meta_info, data=dict(bboxes=torch.rand(5)))
+        meta_info=meta_info, data=dict(bboxes=paddle.rand(5)))
     assert 'bboxes' in instance_data
     assert len(instance_data.bboxes) == 5
 
@@ -168,8 +168,8 @@ def test_general_data():
 
     # test __setattr__
     new_instance_data = GeneralData(data=data)
-    new_instance_data.mask = torch.rand(3, 4, 5)
-    new_instance_data.bboxes = torch.rand(2, 4)
+    new_instance_data.mask = paddle.rand(3, 4, 5)
+    new_instance_data.bboxes = paddle.rand(2, 4)
     assert 'mask' in new_instance_data
     assert len(new_instance_data.mask) == 3
     assert len(new_instance_data.bboxes) == 2
@@ -214,7 +214,7 @@ def test_general_data():
     assert not hasattr(new_instance_data, 'mask')
 
     # tset __delitem__
-    new_instance_data.mask = torch.rand(1, 2, 3)
+    new_instance_data.mask = paddle.rand(1, 2, 3)
     assert 'mask' in new_instance_data._data_fields
     assert 'mask' in new_instance_data
     assert hasattr(new_instance_data, 'mask')
@@ -225,7 +225,7 @@ def test_general_data():
     assert not hasattr(new_instance_data, 'mask')
 
     # test __setitem__
-    new_instance_data['mask'] = torch.rand(1, 2, 3)
+    new_instance_data['mask'] = paddle.rand(1, 2, 3)
     assert 'mask' in new_instance_data._data_fields
     assert 'mask' in new_instance_data.keys()
     assert hasattr(new_instance_data, 'mask')
@@ -263,7 +263,7 @@ def test_general_data():
     with pytest.raises(KeyError):
         new_instance_data.pop('img_size')
     # test pop attribute in instance_data_filed
-    new_instance_data['mask'] = torch.rand(1, 2, 3)
+    new_instance_data['mask'] = paddle.rand(1, 2, 3)
     new_instance_data.pop('mask')
     # test data_field has been updated
     assert 'mask' not in new_instance_data
@@ -271,7 +271,7 @@ def test_general_data():
     assert 'mask' not in new_instance_data
 
     # test_keys
-    new_instance_data.mask = torch.ones(1, 2, 3)
+    new_instance_data.mask = paddle.ones(1, 2, 3)
     'mask' in new_instance_data.keys()
     has_flag = False
     for key in new_instance_data.keys():
@@ -307,7 +307,7 @@ def test_general_data():
         devices = ('cpu', 'cuda')
         for i in range(10):
             device = devices[i % 2]
-            newnew_instance_data[f'{i}'] = torch.rand(1, 2, 3, device=device)
+            newnew_instance_data[f'{i}'] = paddle.rand(1, 2, 3, device=device)
         newnew_instance_data = newnew_instance_data.cpu()
         for value in newnew_instance_data.values():
             assert not value.is_cuda
@@ -315,7 +315,7 @@ def test_general_data():
         devices = ('cuda', 'cpu')
         for i in range(10):
             device = devices[i % 2]
-            newnew_instance_data[f'{i}'] = torch.rand(1, 2, 3, device=device)
+            newnew_instance_data[f'{i}'] = paddle.rand(1, 2, 3, device=device)
         newnew_instance_data = newnew_instance_data.cuda()
         for value in newnew_instance_data.values():
             assert value.is_cuda
@@ -323,16 +323,16 @@ def test_general_data():
     double_instance_data = instance_data.new()
     double_instance_data.long = torch.LongTensor(1, 2, 3, 4)
     double_instance_data.bool = torch.BoolTensor(1, 2, 3, 4)
-    double_instance_data = instance_data.to(torch.double)
+    double_instance_data = instance_data.to(paddle.double)
     for k, v in double_instance_data.items():
         if isinstance(v, torch.Tensor):
-            assert v.dtype is torch.double
+            assert v.dtype is paddle.double
 
     # test .cpu() .cuda()
     if torch.cuda.is_available():
         cpu_instance_data = double_instance_data.new()
-        cpu_instance_data.mask = torch.rand(1)
-        cuda_tensor = torch.rand(1, 2, 3).cuda()
+        cpu_instance_data.mask = paddle.rand(1)
+        cuda_tensor = paddle.rand(1, 2, 3).cuda()
         cuda_instance_data = cpu_instance_data.to(cuda_tensor.device)
         for value in cuda_instance_data.values():
             assert value.is_cuda
@@ -345,23 +345,23 @@ def test_general_data():
 
     # test detach
     grad_instance_data = double_instance_data.new()
-    grad_instance_data.mask = torch.rand(2, requires_grad=True)
-    grad_instance_data.mask_1 = torch.rand(2, requires_grad=True)
+    grad_instance_data.mask = paddle.rand(2, requires_grad=True)
+    grad_instance_data.mask_1 = paddle.rand(2, requires_grad=True)
     detach_instance_data = grad_instance_data.detach()
     for value in detach_instance_data.values():
         assert not value.requires_grad
 
     # test numpy
     tensor_instance_data = double_instance_data.new()
-    tensor_instance_data.mask = torch.rand(2, requires_grad=True)
-    tensor_instance_data.mask_1 = torch.rand(2, requires_grad=True)
+    tensor_instance_data.mask = paddle.rand(2, requires_grad=True)
+    tensor_instance_data.mask_1 = paddle.rand(2, requires_grad=True)
     numpy_instance_data = tensor_instance_data.numpy()
     for value in numpy_instance_data.values():
         assert isinstance(value, np.ndarray)
     if torch.cuda.is_available():
         tensor_instance_data = double_instance_data.new()
-        tensor_instance_data.mask = torch.rand(2)
-        tensor_instance_data.mask_1 = torch.rand(2)
+        tensor_instance_data.mask = paddle.rand(2)
+        tensor_instance_data.mask_1 = paddle.rand(2)
         tensor_instance_data = tensor_instance_data.cuda()
         numpy_instance_data = tensor_instance_data.numpy()
         for value in numpy_instance_data.values():
@@ -380,10 +380,10 @@ def test_general_data():
     instance_data._meta = 1000
     assert '_meta' in instance_data.keys()
     if torch.cuda.is_available():
-        instance_data.bbox = torch.ones(2, 3, 4, 5).cuda()
-        instance_data.score = torch.ones(2, 3, 4, 4)
+        instance_data.bbox = paddle.ones(2, 3, 4, 5).cuda()
+        instance_data.score = paddle.ones(2, 3, 4, 4)
     else:
-        instance_data.bbox = torch.ones(2, 3, 4, 5)
+        instance_data.bbox = paddle.ones(2, 3, 4, 5)
 
     assert len(instance_data.new().keys()) == 0
     with pytest.raises(AttributeError):
@@ -417,8 +417,8 @@ def test_instance_data():
         scale_factor=np.array([1.5, 1.5, 1, 1]))
 
     data = dict(
-        bboxes=torch.rand(4, 4),
-        masks=torch.rand(4, 2, 2),
+        bboxes=paddle.rand(4, 4),
+        masks=paddle.rand(4, 2, 2),
         labels=np.random.rand(4),
         size=[(i, i) for i in range(4)])
 
@@ -450,11 +450,11 @@ def test_instance_data():
     # data fields should have same length
     with pytest.raises(AssertionError):
         temp_data = copy.deepcopy(data)
-        temp_data['bboxes'] = torch.rand(5, 4)
+        temp_data['bboxes'] = paddle.rand(5, 4)
         instance_data.new(data=temp_data)
 
     temp_data = copy.deepcopy(data)
-    temp_data['scores'] = torch.rand(4)
+    temp_data['scores'] = paddle.rand(4)
     new_instance_data = instance_data.new(data=temp_data)
     for k, v in new_instance_data.items():
         if k in instance_data:
@@ -479,10 +479,10 @@ def test_instance_data():
 
     # instance_data field should has same length
     new_instance_data = instance_data.new()
-    new_instance_data.det_bbox = torch.rand(100, 4)
-    new_instance_data.det_label = torch.arange(100)
+    new_instance_data.det_bbox = paddle.rand(100, 4)
+    new_instance_data.det_label = paddle.arange(100)
     with pytest.raises(AssertionError):
-        new_instance_data.scores = torch.rand(101, 1)
+        new_instance_data.scores = paddle.rand(101, 1)
     new_instance_data.none = [None] * 100
     with pytest.raises(AssertionError):
         new_instance_data.scores = [None] * 101
@@ -537,7 +537,7 @@ def test_instance_data():
             len(long_tensor) == len(value)
 
     # test bool tensor
-    bool_tensor = torch.rand(100) > 0.5
+    bool_tensor = paddle.rand(100) > 0.5
     bool_index_instance_data = new_instance_data[bool_tensor]
     assert len(bool_index_instance_data) == bool_tensor.sum()
     for key, value in bool_index_instance_data.items():
@@ -555,13 +555,13 @@ def test_instance_data():
         instance_data.cat(instance_data_list)
 
     for _ in range(2):
-        instance_data['bbox'] = torch.rand(num_instance, 4)
-        instance_data['label'] = torch.rand(num_instance, 1)
-        instance_data['mask'] = torch.rand(num_instance, 224, 224)
+        instance_data['bbox'] = paddle.rand(num_instance, 4)
+        instance_data['label'] = paddle.rand(num_instance, 1)
+        instance_data['mask'] = paddle.rand(num_instance, 224, 224)
         instance_data['instances_infos'] = [1] * num_instance
         instance_data['cpu_bbox'] = np.random.random((num_instance, 4))
         if torch.cuda.is_available():
-            instance_data.cuda_tensor = torch.rand(num_instance).cuda()
+            instance_data.cuda_tensor = paddle.rand(num_instance).cuda()
             assert instance_data.cuda_tensor.is_cuda
             cuda_instance_data = instance_data.cuda()
             assert cuda_instance_data.cuda_tensor.is_cuda
@@ -570,9 +570,9 @@ def test_instance_data():
         with pytest.raises(IndexError):
             return instance_data[num_instance + 1]
         with pytest.raises(AssertionError):
-            instance_data.centerness = torch.rand(num_instance + 1, 1)
+            instance_data.centerness = paddle.rand(num_instance + 1, 1)
 
-        mask_tensor = torch.rand(num_instance) > 0.5
+        mask_tensor = paddle.rand(num_instance) > 0.5
         length = mask_tensor.sum()
         assert len(instance_data[mask_tensor]) == length
 
@@ -586,6 +586,6 @@ def test_instance_data():
     cat_resutls = InstanceData.cat(instance_data_list)
     assert len(cat_resutls) == num_instance * 2
 
-    instances = InstanceData(data=dict(bboxes=torch.rand(4, 4)))
+    instances = InstanceData(data=dict(bboxes=paddle.rand(4, 4)))
     # cat only single instance
     assert len(InstanceData.cat([instances])) == 4

@@ -164,7 +164,7 @@ class MaskIoUHead(BaseModule):
                 ratio = gt_mask_in_proposal.areas[0] / (
                     gt_instance_mask_area[pos_assigned_gt_inds[i]] + 1e-7)
                 area_ratios.append(ratio)
-            area_ratios = torch.from_numpy(np.stack(area_ratios)).float().to(
+            area_ratios = paddle.to_tensor(np.stack(area_ratios)).float().to(
                 pos_proposals.device)
         else:
             area_ratios = pos_proposals.new_zeros((0, ))

@@ -10,7 +10,6 @@ import paddle
 import paddle.nn as nn
 from mmcv.runner import EpochBasedRunner, build_optimizer
 from mmcv.utils import get_logger
-from torch.utils.data import DataLoader, Dataset
 
 from mmdet.core import DistEvalHook, EvalHook
 
@@ -22,7 +21,7 @@ class ExampleDataset(Dataset):
         self.eval_result = [0.1, 0.4, 0.3, 0.7, 0.2, 0.05, 0.4, 0.6]
 
     def __getitem__(self, idx):
-        results = dict(imgs=torch.tensor([1]))
+        results = dict(imgs=paddle.to_tensor([1]))
         return results
 
     def __len__(self):
@@ -73,7 +72,7 @@ def test_eval_hook(EvalHookCls):
         # dataloader must be a pytorch DataLoader
         test_dataset = ExampleDataset()
         data_loader = [
-            DataLoader(
+            paddle.io.DataLoader
                 test_dataset,
                 batch_size=1,
                 sampler=None,
@@ -85,7 +84,7 @@ def test_eval_hook(EvalHookCls):
     with pytest.raises(KeyError):
         # rule must be in keys of rule_map
         test_dataset = ExampleDataset()
-        data_loader = DataLoader(
+        data_loader = paddle.io.DataLoader
             test_dataset,
             batch_size=1,
             sampler=None,
@@ -96,7 +95,7 @@ def test_eval_hook(EvalHookCls):
     with pytest.raises(ValueError):
         # key_indicator must be valid when rule_map is None
         test_dataset = ExampleDataset()
-        data_loader = DataLoader(
+        data_loader = paddle.io.DataLoader
             test_dataset,
             batch_size=1,
             sampler=None,
@@ -108,11 +107,11 @@ def test_eval_hook(EvalHookCls):
         type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
 
     test_dataset = ExampleDataset()
-    loader = DataLoader(test_dataset, batch_size=1)
+    loader = paddle.io.DataLoadertest_dataset, batch_size=1)
     model = ExampleModel()
     optimizer = build_optimizer(model, optimizer_cfg)
 
-    data_loader = DataLoader(test_dataset, batch_size=1)
+    data_loader = paddle.io.DataLoadertest_dataset, batch_size=1)
     eval_hook = EvalHookCls(data_loader, save_best=None)
     with tempfile.TemporaryDirectory() as tmpdir:
         logger = get_logger('test_eval')
@@ -130,9 +129,9 @@ def test_eval_hook(EvalHookCls):
             'hook_msgs']
 
     # when `save_best` is set to 'auto', first metric will be used.
-    loader = DataLoader(EvalDataset(), batch_size=1)
+    loader = paddle.io.DataLoaderEvalDataset(), batch_size=1)
     model = ExampleModel()
-    data_loader = DataLoader(EvalDataset(), batch_size=1)
+    data_loader = paddle.io.DataLoaderEvalDataset(), batch_size=1)
     eval_hook = EvalHookCls(data_loader, interval=1, save_best='auto')
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -152,9 +151,9 @@ def test_eval_hook(EvalHookCls):
         assert runner.meta['hook_msgs']['best_ckpt'] == osp.realpath(real_path)
         assert runner.meta['hook_msgs']['best_score'] == 0.7
 
-    loader = DataLoader(EvalDataset(), batch_size=1)
+    loader = paddle.io.DataLoaderEvalDataset(), batch_size=1)
     model = ExampleModel()
-    data_loader = DataLoader(EvalDataset(), batch_size=1)
+    data_loader = paddle.io.DataLoaderEvalDataset(), batch_size=1)
     eval_hook = EvalHookCls(data_loader, interval=1, save_best='mAP')
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -174,7 +173,7 @@ def test_eval_hook(EvalHookCls):
         assert runner.meta['hook_msgs']['best_ckpt'] == osp.realpath(real_path)
         assert runner.meta['hook_msgs']['best_score'] == 0.7
 
-    data_loader = DataLoader(EvalDataset(), batch_size=1)
+    data_loader = paddle.io.DataLoaderEvalDataset(), batch_size=1)
     eval_hook = EvalHookCls(
         data_loader, interval=1, save_best='score', rule='greater')
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -194,7 +193,7 @@ def test_eval_hook(EvalHookCls):
         assert runner.meta['hook_msgs']['best_ckpt'] == osp.realpath(real_path)
         assert runner.meta['hook_msgs']['best_score'] == 0.7
 
-    data_loader = DataLoader(EvalDataset(), batch_size=1)
+    data_loader = paddle.io.DataLoaderEvalDataset(), batch_size=1)
     eval_hook = EvalHookCls(data_loader, save_best='mAP', rule='less')
     with tempfile.TemporaryDirectory() as tmpdir:
         logger = get_logger('test_eval')
@@ -213,7 +212,7 @@ def test_eval_hook(EvalHookCls):
         assert runner.meta['hook_msgs']['best_ckpt'] == osp.realpath(real_path)
         assert runner.meta['hook_msgs']['best_score'] == 0.05
 
-    data_loader = DataLoader(EvalDataset(), batch_size=1)
+    data_loader = paddle.io.DataLoaderEvalDataset(), batch_size=1)
     eval_hook = EvalHookCls(data_loader, save_best='mAP')
     with tempfile.TemporaryDirectory() as tmpdir:
         logger = get_logger('test_eval')
@@ -233,7 +232,7 @@ def test_eval_hook(EvalHookCls):
         assert runner.meta['hook_msgs']['best_score'] == 0.4
 
         resume_from = osp.join(tmpdir, 'latest.pth')
-        loader = DataLoader(ExampleDataset(), batch_size=1)
+        loader = paddle.io.DataLoaderExampleDataset(), batch_size=1)
         eval_hook = EvalHookCls(data_loader, save_best='mAP')
         runner = EpochBasedRunner(
             model=model,

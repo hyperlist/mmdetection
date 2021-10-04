@@ -128,10 +128,10 @@ class BaseAnchorOptimizer:
             Tensor: Tensor of bboxes with shape (num_bboxes, 4)
             in [xmin, ymin, xmax, ymax] format.
         """
-        whs = torch.from_numpy(self.bbox_whs).to(
+        whs = paddle.to_tensor(self.bbox_whs).to(
             self.device, dtype=torch.float32)
         bboxes = bbox_cxcywh_to_xyxy(
-            paddle.concat([torch.zeros_like(whs), whs], dim=1))
+            paddle.concat([paddle.zeros_like(whs), whs], dim=1))
         return bboxes
 
     def optimize(self):
@@ -174,7 +174,7 @@ class YOLOKMeansAnchorOptimizer(BaseAnchorOptimizer):
         cluster_center_idx = torch.randint(
             0, bboxes.shape[0], (self.num_anchors, )).to(self.device)
 
-        assignments = torch.zeros((bboxes.shape[0], )).to(self.device)
+        assignments = paddle.zeros((bboxes.shape[0], )).to(self.device)
         cluster_centers = bboxes[cluster_center_idx]
         if self.num_anchors == 1:
             cluster_centers = self.kmeans_maximization(bboxes, assignments,
@@ -205,7 +205,7 @@ class YOLOKMeansAnchorOptimizer(BaseAnchorOptimizer):
 
     def kmeans_maximization(self, bboxes, assignments, centers):
         """Maximization part of EM algorithm(Expectation-Maximization)"""
-        new_centers = torch.zeros_like(centers)
+        new_centers = paddle.zeros_like(centers)
         for i in range(centers.shape[0]):
             mask = (assignments == i)
             if mask.sum():
@@ -307,12 +307,12 @@ class YOLODEAnchorOptimizer(BaseAnchorOptimizer):
     @staticmethod
     def avg_iou_cost(anchor_params, bboxes):
         assert len(anchor_params) % 2 == 0
-        anchor_whs = torch.tensor(
+        anchor_whs = paddle.to_tensor(
             [[w, h]
              for w, h in zip(anchor_params[::2], anchor_params[1::2])]).to(
                  bboxes.device, dtype=bboxes.dtype)
         anchor_boxes = bbox_cxcywh_to_xyxy(
-            paddle.concat([torch.zeros_like(anchor_whs), anchor_whs], dim=1))
+            paddle.concat([paddle.zeros_like(anchor_whs), anchor_whs], dim=1))
         ious = bbox_overlaps(bboxes, anchor_boxes)
         max_ious, _ = ious.max(1)
         cost = 1 - max_ious.mean().item()

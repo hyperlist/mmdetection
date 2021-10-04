@@ -82,7 +82,7 @@ class ScoreHLRSampler(BaseSampler):
                 device = torch.cuda.current_device()
             else:
                 device = 'cpu'
-            gallery = torch.tensor(gallery, dtype=torch.long, device=device)
+            gallery = paddle.to_tensor(gallery, dtype=paddle.long, device=device)
         perm = torch.randperm(gallery.numel(), device=gallery.device)[:num]
         rand_inds = gallery[perm]
         if not is_tensor:
@@ -237,11 +237,11 @@ class ScoreHLRSampler(BaseSampler):
         """
         bboxes = bboxes[:, :4]
 
-        gt_flags = bboxes.new_zeros((bboxes.shape[0], ), dtype=torch.uint8)
+        gt_flags = bboxes.new_zeros((bboxes.shape[0], ), dtype=paddle.uint8)
         if self.add_gt_as_proposals:
             bboxes = paddle.concat([gt_bboxes, bboxes], dim=0)
             assign_result.add_gt_(gt_labels)
-            gt_ones = bboxes.new_ones(gt_bboxes.shape[0], dtype=torch.uint8)
+            gt_ones = bboxes.new_ones(gt_bboxes.shape[0], dtype=paddle.uint8)
             gt_flags = paddle.concat([gt_ones, gt_flags])
 
         num_expected_pos = int(self.num * self.pos_fraction)

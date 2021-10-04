@@ -99,7 +99,7 @@ class SingleStageInstanceSegmentor(BaseDetector):
         """
 
         gt_masks = [
-            gt_mask.to_tensor(dtype=torch.bool, device=img.device)
+            gt_mask.to_tensor(dtype=paddle.bool, device=img.device)
             for gt_mask in gt_masks
         ]
         x = self.extract_feat(img)
@@ -323,7 +323,7 @@ class SingleStageInstanceSegmentor(BaseDetector):
             masks = mmcv.concat_list(mask_result)
 
             if isinstance(masks[0], torch.Tensor):
-                masks = torch.stack(masks, dim=0).detach().cpu().numpy()
+                masks = paddle.stack(masks, dim=0).detach().cpu().numpy()
             else:
                 masks = np.stack(masks, axis=0)
             # dummy bboxes

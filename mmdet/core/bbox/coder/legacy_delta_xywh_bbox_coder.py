@@ -119,9 +119,9 @@ def legacy_bbox2delta(proposals,
 
     dx = (gx - px) / pw
     dy = (gy - py) / ph
-    dw = torch.log(gw / pw)
-    dh = torch.log(gh / ph)
-    deltas = torch.stack([dx, dy, dw, dh], dim=-1)
+    dw = paddle.log(gw / pw)
+    dh = paddle.log(gh / ph)
+    deltas = paddle.stack([dx, dy, dw, dh], dim=-1)
 
     means = deltas.new_tensor(means).unsqueeze(0)
     stds = deltas.new_tensor(stds).unsqueeze(0)
@@ -212,5 +212,5 @@ def legacy_delta2bbox(rois,
         y1 = y1.clamp(min=0, max=max_shape[0] - 1)
         x2 = x2.clamp(min=0, max=max_shape[1] - 1)
         y2 = y2.clamp(min=0, max=max_shape[0] - 1)
-    bboxes = torch.stack([x1, y1, x2, y2], dim=-1).view_as(deltas)
+    bboxes = paddle.stack([x1, y1, x2, y2], dim=-1).view_as(deltas)
     return bboxes

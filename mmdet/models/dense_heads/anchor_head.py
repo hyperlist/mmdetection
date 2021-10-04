@@ -99,9 +99,9 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
 
     def _init_layers(self):
         """Initialize layers of the head."""
-        self.conv_cls = nn.Conv2d(self.in_channels,
+        self.conv_cls = nn.Conv2D(self.in_channels,
                                   self.num_anchors * self.cls_out_channels, 1)
-        self.conv_reg = nn.Conv2d(self.in_channels, self.num_anchors * 4, 1)
+        self.conv_reg = nn.Conv2D(self.in_channels, self.num_anchors * 4, 1)
 
     def forward_single(self, x):
         """Forward feature of a single scale level.
@@ -222,11 +222,11 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
                                               gt_bboxes)
 
         num_valid_anchors = anchors.shape[0]
-        bbox_targets = torch.zeros_like(anchors)
-        bbox_weights = torch.zeros_like(anchors)
+        bbox_targets = paddle.zeros_like(anchors)
+        bbox_weights = paddle.zeros_like(anchors)
         labels = anchors.new_full((num_valid_anchors, ),
                                   self.num_classes,
-                                  dtype=torch.long)
+                                  dtype=paddle.long)
         label_weights = anchors.new_zeros(num_valid_anchors, dtype=torch.float)
 
         pos_inds = sampling_result.pos_inds
@@ -539,7 +539,7 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
             >>>     score_thr=0.00,
             >>>     nms=dict(type='nms', iou_thr=1.0),
             >>>     max_per_img=10))
-            >>> feat = torch.rand(1, 1, 3, 3)
+            >>> feat = paddle.rand(1, 1, 3, 3)
             >>> cls_score, bbox_pred = self.forward_single(feat)
             >>> # note the input lists are over different levels, not images
             >>> cls_scores, bbox_preds = [cls_score], [bbox_pred]
@@ -632,10 +632,10 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
             mlvl_anchors)
         batch_size = mlvl_cls_scores[0].shape[0]
         # convert to tensor to keep tracing
-        nms_pre_tensor = torch.tensor(
+        nms_pre_tensor = paddle.to_tensor(
             cfg.get('nms_pre', -1),
             device=mlvl_cls_scores[0].device,
-            dtype=torch.long)
+            dtype=paddle.long)
 
         mlvl_bboxes = []
         mlvl_scores = []
@@ -667,7 +667,7 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
                     max_scores, _ = scores[..., :-1].max(-1)
 
                 _, topk_inds = max_scores.topk(nms_pre)
-                batch_inds = torch.arange(batch_size).view(
+                batch_inds = paddle.arange(batch_size).view(
                     -1, 1).expand_as(topk_inds)
                 anchors = anchors[batch_inds, topk_inds, :]
                 bbox_pred = bbox_pred[batch_inds, topk_inds, :]

@@ -32,12 +32,12 @@ def test_fcos_head_loss():
         loss_cls=dict(
             type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0))
     feat = [
-        torch.rand(1, 1, s // feat_size, s // feat_size)
+        paddle.rand(1, 1, s // feat_size, s // feat_size)
         for feat_size in [4, 8, 16, 32, 64]
     ]
     cls_scores, bbox_preds, centerness = self.forward(feat)
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
     gt_bboxes_ignore = None
     empty_gt_losses = self.loss(cls_scores, bbox_preds, centerness, gt_bboxes,

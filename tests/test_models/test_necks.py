@@ -53,7 +53,7 @@ def test_fpn():
 
     # FPN expects a multiple levels of features per image
     feats = [
-        torch.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
+        paddle.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
         for i in range(len(in_channels))
     ]
     outs = fpn_model(feats)
@@ -179,7 +179,7 @@ def test_channel_mapper():
     out_channels = 8
     kernel_size = 3
     feats = [
-        torch.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
+        paddle.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
         for i in range(len(in_channels))
     ]
 
@@ -213,7 +213,7 @@ def test_dilated_encoder():
     out_channels = 32
     out_shape = 34
     dilated_encoder = DilatedEncoder(in_channels, out_channels, 16, 2)
-    feat = [torch.rand(1, in_channels, 34, 34)]
+    feat = [paddle.rand(1, in_channels, 34, 34)]
     out_feat = dilated_encoder(feat)[0]
     assert out_feat.shape == (1, out_channels, out_shape, out_shape)
 
@@ -234,7 +234,7 @@ def test_ct_resnet_neck():
     in_channels = 16
     num_filters = (8, 8)
     num_kernels = (4, 4)
-    feat = torch.rand(1, 16, 4, 4)
+    feat = paddle.rand(1, 16, 4, 4)
     ct_resnet_neck = CTResNetNeck(
         in_channel=in_channels,
         num_deconv_filters=num_filters,
@@ -269,7 +269,7 @@ def test_yolov3_neck():
     with pytest.raises(AssertionError):
         neck = YOLOV3Neck(
             num_scales=3, in_channels=[16, 8, 4], out_channels=[8, 4, 2])
-        feats = (torch.rand(1, 4, 16, 16), torch.rand(1, 8, 16, 16))
+        feats = (paddle.rand(1, 4, 16, 16), paddle.rand(1, 8, 16, 16))
         neck(feats)
 
     # test normal channels
@@ -278,7 +278,7 @@ def test_yolov3_neck():
     out_channels = [8, 4, 2]
     feat_sizes = [s // 2**i for i in range(len(in_channels) - 1, -1, -1)]
     feats = [
-        torch.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
+        paddle.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
         for i in range(len(in_channels) - 1, -1, -1)
     ]
     neck = YOLOV3Neck(
@@ -296,7 +296,7 @@ def test_yolov3_neck():
     out_channels = [19, 21, 5]
     feat_sizes = [s // 2**i for i in range(len(in_channels) - 1, -1, -1)]
     feats = [
-        torch.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
+        paddle.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
         for i in range(len(in_channels) - 1, -1, -1)
     ]
     neck = YOLOV3Neck(
@@ -347,7 +347,7 @@ def test_ssd_neck():
         out_channels=[4, 8, 16],
         level_strides=[2, 1],
         level_paddings=[1, 0])
-    feats = (torch.rand(1, 4, 16, 16), )
+    feats = (paddle.rand(1, 4, 16, 16), )
     outs = ssd_neck(feats)
     assert outs[0].shape == (1, 4, 16, 16)
     assert outs[1].shape == (1, 8, 8, 8)
@@ -369,7 +369,7 @@ def test_ssd_neck():
     assert isinstance(ssd_neck.extra_layers[0][-1],
                       DepthwiseSeparableConvModule)
 
-    feats = (torch.rand(1, 4, 8, 8), torch.rand(1, 8, 8, 8))
+    feats = (paddle.rand(1, 4, 8, 8), paddle.rand(1, 8, 8, 8))
     outs = ssd_neck(feats)
     assert outs[0].shape == (1, 4, 8, 8)
     assert outs[1].shape == (1, 8, 8, 8)
@@ -382,7 +382,7 @@ def test_yolox_pafpn():
     feat_sizes = [s // 2**i for i in range(4)]  # [64, 32, 16, 8]
     out_channels = 24
     feats = [
-        torch.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
+        paddle.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
         for i in range(len(in_channels))
     ]
     neck = YOLOXPAFPN(in_channels=in_channels, out_channels=out_channels)

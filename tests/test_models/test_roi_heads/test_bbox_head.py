@@ -21,7 +21,7 @@ def test_bbox_head_loss():
     target_cfg = mmcv.Config(dict(pos_weight=1))
 
     # Test bbox loss when truth is empty
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
 
     sampling_results = _dummy_bbox_sampling(proposal_list, gt_bboxes,
@@ -34,7 +34,7 @@ def test_bbox_head_loss():
     # Create dummy features "extracted" for each sampled bbox
     num_sampled = sum(len(res.bboxes) for res in sampling_results)
     rois = bbox2roi([res.bboxes for res in sampling_results])
-    dummy_feats = torch.rand(num_sampled, 8 * 3 * 3)
+    dummy_feats = paddle.rand(num_sampled, 8 * 3 * 3)
     cls_scores, bbox_preds = self.forward(dummy_feats)
 
     losses = self.loss(cls_scores, bbox_preds, rois, labels, label_weights,
@@ -58,7 +58,7 @@ def test_bbox_head_loss():
 
     # Create dummy features "extracted" for each sampled bbox
     num_sampled = sum(len(res.bboxes) for res in sampling_results)
-    dummy_feats = torch.rand(num_sampled, 8 * 3 * 3)
+    dummy_feats = paddle.rand(num_sampled, 8 * 3 * 3)
     cls_scores, bbox_preds = self.forward(dummy_feats)
 
     losses = self.loss(cls_scores, bbox_preds, rois, labels, label_weights,
@@ -72,9 +72,9 @@ def test_bbox_head_get_bboxes(num_sample):
     self = BBoxHead(reg_class_agnostic=True)
 
     num_class = 6
-    rois = torch.rand((num_sample, 5))
-    cls_score = torch.rand((num_sample, num_class))
-    bbox_pred = torch.rand((num_sample, 4))
+    rois = paddle.rand((num_sample, 5))
+    cls_score = paddle.rand((num_sample, num_class))
+    bbox_pred = paddle.rand((num_sample, 4))
 
     scale_factor = np.array([2.0, 2.0, 2.0, 2.0])
     det_bboxes, det_labels = self.get_bboxes(
@@ -227,15 +227,15 @@ def _demodata_refine_boxes(n_roi, n_img, rng=0):
     roi_boxes = random_boxes(n_roi, scale=scale, rng=rng)
     if n_img == 0:
         assert n_roi == 0, 'cannot have any rois if there are no images'
-        img_ids = torch.empty((0, ), dtype=torch.long)
-        roi_boxes = torch.empty((0, 4), dtype=torch.float32)
+        img_ids = paddle.empty((0, ), dtype=paddle.long)
+        roi_boxes = paddle.empty((0, 4), dtype=torch.float32)
     else:
         img_ids = rng.randint(0, n_img, (n_roi, ))
-        img_ids = torch.from_numpy(img_ids)
+        img_ids = paddle.to_tensor(img_ids)
     rois = paddle.concat([img_ids[:, None].float(), roi_boxes], dim=1)
     # Create other args
     labels = rng.randint(0, 2, (n_roi, ))
-    labels = torch.from_numpy(labels).long()
+    labels = paddle.to_tensor(labels).long()
     bbox_preds = random_boxes(n_roi, scale=scale, rng=rng)
     # For each image, pretend random positive boxes are gts
     is_label_pos = (labels.numpy() > 0).astype(np.int)
@@ -246,6 +246,6 @@ def _demodata_refine_boxes(n_roi, n_img, rng=0):
         rng.randint(0, 2, (npos, )).astype(np.uint8) for npos in pos_per_img
     ]
     pos_is_gts = [
-        torch.from_numpy(p).sort(descending=True)[0] for p in _pos_is_gts
+        paddle.to_tensor(p).sort(descending=True)[0] for p in _pos_is_gts
     ]
     return rois, labels, bbox_preds, pos_is_gts, img_metas

@@ -1,6 +1,6 @@
 # Tutorial 10: Weight initialization
 
-During training, a proper initialization strategy is beneficial to speeding up the training or obtaining a higher performance. [MMCV](https://github.com/open-mmlab/mmcv/blob/master/mmcv/cnn/utils/weight_init.py) provide some commonly used methods for initializing modules like `nn.Conv2d`. Model initialization in MMdetection mainly uses `init_cfg`. Users can initialize models with following two steps:
+During training, a proper initialization strategy is beneficial to speeding up the training or obtaining a higher performance. [MMCV](https://github.com/open-mmlab/mmcv/blob/master/mmcv/cnn/utils/weight_init.py) provide some commonly used methods for initializing modules like `nn.Conv2D`. Model initialization in MMdetection mainly uses `init_cfg`. Users can initialize models with following two steps:
 
 1. Define `init_cfg` for a model or its components in `model_cfg`,  but `init_cfg` of children components have higher priority and will override `init_cfg` of parents modules.
 2. Build model as usual, but call `model.init_weights()` method explicitly, and model parameters will be initialized as configuration.
@@ -24,7 +24,7 @@ It is dict or list[dict], and contains the following keys and values:
 Inherit a new model from `mmcv.runner.BaseModule` or `mmdet.models`  Here we show an example of FooModel.
 
 ```python
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.runner import BaseModule
 
 class FooModel(BaseModule)
@@ -39,7 +39,7 @@ class FooModel(BaseModule)
 - Initialize model by using `init_cfg` directly in code
 
 	```python
-	import torch.nn as nn
+	import paddle.nn as nn
 	from mmcv.runner import BaseModule
 	# or directly inherit mmdet models
 
@@ -102,7 +102,7 @@ class FooModel(BaseModule)
               dict(type='Constant', layer='Conv2d', val=2),
               dict(type='Constant', layer='Linear', val=3)]
   # nn.Conv1d will be initialized with dict(type='Constant', val=1)
-  # nn.Conv2d will be initialized with dict(type='Constant', val=2)
+  # nn.Conv2D will be initialized with dict(type='Constant', val=2)
   # nn.Linear will be initialized with dict(type='Constant', val=3)
   ```
 
@@ -113,7 +113,7 @@ class FooModel(BaseModule)
   ```python
   # layers：
   # self.feat = nn.Conv1d(3, 1, 3)
-  # self.reg = nn.Conv2d(3, 3, 3)
+  # self.reg = nn.Conv2D(3, 3, 3)
   # self.cls = nn.Linear(1,2)
 
   init_cfg = dict(type='Constant',
@@ -128,7 +128,7 @@ class FooModel(BaseModule)
 	```python
 	# layers：
 	# self.feat = nn.Conv1d(3, 1, 3)
-	# self.reg = nn.Conv2d(3, 3, 3)
+	# self.reg = nn.Conv2D(3, 3, 3)
 	# self.cls = nn.Linear(1,2)
 
 	init_cfg = dict(type='Constant', val=1, bias=2, 	override=dict(name='reg'))

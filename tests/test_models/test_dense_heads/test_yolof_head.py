@@ -45,11 +45,11 @@ def test_yolof_head_loss():
             alpha=0.25,
             loss_weight=1.0),
         loss_bbox=dict(type='GIoULoss', loss_weight=1.0))
-    feat = [torch.rand(1, 1, s // 32, s // 32)]
+    feat = [paddle.rand(1, 1, s // 32, s // 32)]
     cls_scores, bbox_preds = self.forward(feat)
 
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
     gt_bboxes_ignore = None
     empty_gt_losses = self.loss(cls_scores, bbox_preds, gt_bboxes, gt_labels,

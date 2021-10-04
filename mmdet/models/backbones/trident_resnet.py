@@ -51,10 +51,10 @@ class TridentConv(BaseModule):
         self.out_channels = out_channels
         self.bias = bias
 
-        self.weight = nn.Parameter(
+        self.weight = paddle.create_parameter(
             torch.Tensor(out_channels, in_channels, *self.kernel_size))
         if bias:
-            self.bias = nn.Parameter(torch.Tensor(out_channels))
+            self.bias = paddle.create_parameter(torch.Tensor(out_channels))
         else:
             self.bias = None
 

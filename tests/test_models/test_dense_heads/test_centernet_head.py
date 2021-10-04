@@ -18,10 +18,10 @@ def test_center_head_loss():
     self = CenterNetHead(
         num_classes=4, in_channel=1, feat_channel=4, test_cfg=test_cfg)
 
-    feat = [torch.rand(1, 1, s, s)]
+    feat = [paddle.rand(1, 1, s, s)]
     center_out, wh_out, offset_out = self.forward(feat)
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
 
     gt_bboxes_ignore = None

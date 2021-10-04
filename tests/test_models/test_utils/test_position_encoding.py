@@ -14,7 +14,7 @@ def test_sine_positional_encoding(num_feats=16, batch_size=2):
 
     module = SinePositionalEncoding(num_feats)
     h, w = 10, 6
-    mask = (torch.rand(batch_size, h, w) > 0.5).to(torch.int)
+    mask = (paddle.rand(batch_size, h, w) > 0.5).to(torch.int)
     assert not module.normalize
     out = module(mask)
     assert out.shape == (batch_size, num_feats * 2, h, w)
@@ -34,6 +34,6 @@ def test_learned_positional_encoding(num_feats=16,
     assert module.row_embed.weight.shape == (row_num_embed, num_feats)
     assert module.col_embed.weight.shape == (col_num_embed, num_feats)
     h, w = 10, 6
-    mask = torch.rand(batch_size, h, w) > 0.5
+    mask = paddle.rand(batch_size, h, w) > 0.5
     out = module(mask)
     assert out.shape == (batch_size, num_feats * 2, h, w)

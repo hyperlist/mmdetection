@@ -179,7 +179,7 @@ class MaskPointHead(BaseModule):
         loss = dict()
         if self.class_agnostic:
             loss_point = self.loss_point(point_pred, point_targets,
-                                         torch.zeros_like(labels))
+                                         paddle.zeros_like(labels))
         else:
             loss_point = self.loss_point(point_pred, point_targets, labels)
         loss['loss_point'] = loss_point
@@ -206,9 +206,9 @@ class MaskPointHead(BaseModule):
         if mask_pred.shape[1] == 1:
             gt_class_logits = mask_pred.clone()
         else:
-            inds = torch.arange(mask_pred.shape[0], device=mask_pred.device)
+            inds = paddle.arange(mask_pred.shape[0], device=mask_pred.device)
             gt_class_logits = mask_pred[inds, labels].unsqueeze(1)
-        return -torch.abs(gt_class_logits)
+        return -paddle.abs(gt_class_logits)
 
     def get_roi_rel_points_train(self, mask_pred, labels, cfg):
         """Get ``num_points`` most uncertain points with random points during
@@ -237,7 +237,7 @@ class MaskPointHead(BaseModule):
         assert 0 <= importance_sample_ratio <= 1
         batch_size = mask_pred.shape[0]
         num_sampled = int(num_points * oversample_ratio)
-        point_coords = torch.rand(
+        point_coords = paddle.rand(
             batch_size, num_sampled, 2, device=mask_pred.device)
         point_logits = point_sample(mask_pred, point_coords)
         # It is crucial to calculate uncertainty based on the sampled
@@ -254,13 +254,13 @@ class MaskPointHead(BaseModule):
         num_random_points = num_points - num_uncertain_points
         idx = torch.topk(
             point_uncertainties[:, 0, :], k=num_uncertain_points, dim=1)[1]
-        shift = num_sampled * torch.arange(
-            batch_size, dtype=torch.long, device=mask_pred.device)
+        shift = num_sampled * paddle.arange(
+            batch_size, dtype=paddle.long, device=mask_pred.device)
         idx += shift[:, None]
         point_coords = point_coords.view(-1, 2)[idx.view(-1), :].view(
             batch_size, num_uncertain_points, 2)
         if num_random_points > 0:
-            rand_roi_coords = torch.rand(
+            rand_roi_coords = paddle.rand(
                 batch_size, num_random_points, 2, device=mask_pred.device)
             point_coords = paddle.concat((point_coords, rand_roi_coords), dim=1)
         return point_coords
@@ -302,5 +302,5 @@ class MaskPointHead(BaseModule):
         point_indices = uncertainty_map.topk(num_points, dim=1)[1]
         xs = w_step / 2.0 + (point_indices % mask_width).float() * w_step
         ys = h_step / 2.0 + (point_indices // mask_width).float() * h_step
-        point_coords = torch.stack([xs, ys], dim=2)
+        point_coords = paddle.stack([xs, ys], dim=2)
         return point_indices, point_coords

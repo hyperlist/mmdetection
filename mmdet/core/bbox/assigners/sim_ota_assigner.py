@@ -125,7 +125,7 @@ class SimOTAAssigner(BaseAssigner):
         # assign 0 by default
         assigned_gt_inds = decoded_bboxes.new_full((num_bboxes, ),
                                                    0,
-                                                   dtype=torch.long)
+                                                   dtype=paddle.long)
         if num_gt == 0 or num_bboxes == 0:
             # No ground truth or boxes, return empty assignment
             max_overlaps = decoded_bboxes.new_zeros((num_bboxes, ))
@@ -137,7 +137,7 @@ class SimOTAAssigner(BaseAssigner):
             else:
                 assigned_labels = decoded_bboxes.new_full((num_bboxes, ),
                                                           -1,
-                                                          dtype=torch.long)
+                                                          dtype=paddle.long)
             return AssignResult(
                 num_gt, assigned_gt_inds, max_overlaps, labels=assigned_labels)
 
@@ -149,7 +149,7 @@ class SimOTAAssigner(BaseAssigner):
         num_valid = valid_decoded_bbox.size(0)
 
         pairwise_ious = bbox_overlaps(valid_decoded_bbox, gt_bboxes)
-        iou_cost = -torch.log(pairwise_ious + eps)
+        iou_cost = -paddle.log(pairwise_ious + eps)
 
         gt_onehot_label = (
             F.one_hot(gt_labels.to(torch.int64),
@@ -194,7 +194,7 @@ class SimOTAAssigner(BaseAssigner):
         r_ = gt_bboxes[:, 2] - repeated_x
         b_ = gt_bboxes[:, 3] - repeated_y
 
-        deltas = torch.stack([l_, t_, r_, b_], dim=1)
+        deltas = paddle.stack([l_, t_, r_, b_], dim=1)
         is_in_gts = deltas.min(dim=1).values > 0
         is_in_gts_all = is_in_gts.sum(dim=1) > 0
 
@@ -211,7 +211,7 @@ class SimOTAAssigner(BaseAssigner):
         cr_ = ct_box_r - repeated_x
         cb_ = ct_box_b - repeated_y
 
-        ct_deltas = torch.stack([cl_, ct_, cr_, cb_], dim=1)
+        ct_deltas = paddle.stack([cl_, ct_, cr_, cb_], dim=1)
         is_in_cts = ct_deltas.min(dim=1).values > 0
         is_in_cts_all = is_in_cts.sum(dim=1) > 0
 
@@ -225,7 +225,7 @@ class SimOTAAssigner(BaseAssigner):
         return is_in_gts_or_centers, is_in_boxes_and_centers
 
     def dynamic_k_matching(self, cost, pairwise_ious, num_gt, valid_mask):
-        matching_matrix = torch.zeros_like(cost)
+        matching_matrix = paddle.zeros_like(cost)
         # select candidate topk ious for dynamic-k calculation
         topk_ious, _ = torch.topk(pairwise_ious, self.candidate_topk, dim=0)
         # calculate dynamic k for each gt

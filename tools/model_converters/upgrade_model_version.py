@@ -119,7 +119,7 @@ def convert(in_file, out_file, num_classes):
     and this tool is used for upgrading checkpoints trained with old versions
     to the latest one.
     """
-    checkpoint = torch.load(in_file)
+    checkpoint = paddle.load(in_file)
     in_state_dict = checkpoint.pop('state_dict')
     out_state_dict = OrderedDict()
     meta_info = checkpoint['meta']
@@ -174,7 +174,7 @@ def convert(in_file, out_file, num_classes):
 
         m = re.search(r'(cls_convs|reg_convs).\d.(weight|bias)', key)
         # Legacy issues in RetinaNet since V1.x
-        # Use ConvModule instead of nn.Conv2d in RetinaNet
+        # Use ConvModule instead of nn.Conv2D in RetinaNet
         # cls_convs.0.weight -> cls_convs.0.conv.weight
         if m is not None and upgrade_retina:
             param = m.groups()[1]
@@ -190,7 +190,7 @@ def convert(in_file, out_file, num_classes):
 
         out_state_dict[new_key] = new_val
     checkpoint['state_dict'] = out_state_dict
-    torch.save(checkpoint, out_file)
+    paddle.save(checkpoint, out_file)
 
 
 def main():

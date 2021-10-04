@@ -161,7 +161,7 @@ class BBoxHead(BaseModule):
         # FG cat_id = [0, num_classes-1]
         labels = pos_bboxes.new_full((num_samples, ),
                                      self.num_classes,
-                                     dtype=torch.long)
+                                     dtype=paddle.long)
         label_weights = pos_bboxes.new_zeros(num_samples)
         bbox_targets = pos_bboxes.new_zeros(num_samples, 4)
         bbox_weights = pos_bboxes.new_zeros(num_samples, 4)
@@ -295,16 +295,16 @@ class BBoxHead(BaseModule):
                     bbox_pred = self.bbox_coder.decode(rois[:, 1:], bbox_pred)
                 if self.reg_class_agnostic:
                     pos_bbox_pred = bbox_pred.view(
-                        bbox_pred.size(0), 4)[pos_inds.type(torch.bool)]
+                        bbox_pred.size(0), 4)[pos_inds.type(paddle.bool)]
                 else:
                     pos_bbox_pred = bbox_pred.view(
                         bbox_pred.size(0), -1,
-                        4)[pos_inds.type(torch.bool),
-                           labels[pos_inds.type(torch.bool)]]
+                        4)[pos_inds.type(paddle.bool),
+                           labels[pos_inds.type(paddle.bool)]]
                 losses['loss_bbox'] = self.loss_bbox(
                     pos_bbox_pred,
-                    bbox_targets[pos_inds.type(torch.bool)],
-                    bbox_weights[pos_inds.type(torch.bool)],
+                    bbox_targets[pos_inds.type(paddle.bool)],
+                    bbox_weights[pos_inds.type(paddle.bool)],
                     avg_factor=bbox_targets.size(0),
                     reduction_override=reduction_override)
             else:
@@ -451,7 +451,7 @@ class BBoxHead(BaseModule):
             keep_inds = pos_is_gts_.new_ones(num_rois)
             keep_inds[:len(pos_is_gts_)] = pos_keep
 
-            bboxes_list.append(bboxes[keep_inds.type(torch.bool)])
+            bboxes_list.append(bboxes[keep_inds.type(paddle.bool)])
 
         return bboxes_list
 
@@ -479,7 +479,7 @@ class BBoxHead(BaseModule):
 
         if not self.reg_class_agnostic:
             label = label * 4
-            inds = torch.stack((label, label + 1, label + 2, label + 3), 1)
+            inds = paddle.stack((label, label + 1, label + 2, label + 3), 1)
             bbox_pred = torch.gather(bbox_pred, 1, inds)
         assert bbox_pred.size(1) == 4
 
@@ -538,8 +538,8 @@ class BBoxHead(BaseModule):
                 min_xy = bboxes.new_tensor(0)
                 max_xy = paddle.concat(
                     [max_shape] * 2, dim=-1).flip(-1).unsqueeze(-2)
-                bboxes = torch.where(bboxes < min_xy, min_xy, bboxes)
-                bboxes = torch.where(bboxes > max_xy, max_xy, bboxes)
+                bboxes = paddle.where(bboxes < min_xy, min_xy, bboxes)
+                bboxes = paddle.where(bboxes > max_xy, max_xy, bboxes)
 
         # Replace multiclass_nms with ONNX::NonMaxSuppression in deployment
         from mmdet.core.export import add_dummy_nms_for_onnx
@@ -561,8 +561,8 @@ class BBoxHead(BaseModule):
                 after_top_k=cfg.max_per_img)
         else:
             batch_size = scores.shape[0]
-            labels = torch.arange(
-                self.num_classes, dtype=torch.long).to(scores.device)
+            labels = paddle.arange(
+                self.num_classes, dtype=paddle.long).to(scores.device)
             labels = labels.view(1, 1, -1).expand_as(scores)
             labels = labels.reshape(batch_size, -1)
             scores = scores.reshape(batch_size, -1)

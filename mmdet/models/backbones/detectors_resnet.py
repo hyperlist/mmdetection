@@ -302,7 +302,7 @@ class DetectoRS_ResNet(ResNet):
             load_checkpoint(self, self.pretrained, strict=False, logger=logger)
         elif self.pretrained is None:
             for m in self.modules():
-                if isinstance(m, nn.Conv2d):
+                if isinstance(m, nn.Conv2D):
                     kaiming_init(m)
                 elif isinstance(m, (_BatchNorm, nn.GroupNorm)):
                     constant_init(m, 1)

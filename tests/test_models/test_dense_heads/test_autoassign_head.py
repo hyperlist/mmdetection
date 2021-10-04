@@ -25,13 +25,13 @@ def test_autoassign_head_loss():
             type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
         loss_bbox=dict(type='GIoULoss', loss_weight=1.3))
     feat = [
-        torch.rand(1, 1, s // feat_size, s // feat_size)
+        paddle.rand(1, 1, s // feat_size, s // feat_size)
         for feat_size in [4, 8, 16, 32, 64]
     ]
     self.init_weights()
     cls_scores, bbox_preds, objectnesses = self(feat)
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
     gt_bboxes_ignore = None
     empty_gt_losses = self.loss(cls_scores, bbox_preds, objectnesses,
@@ -63,14 +63,14 @@ def test_autoassign_head_loss():
     assert onegt_neg_loss.item() > 0, 'box loss should be non-zero'
     assert onegt_center_loss.item() > 0, 'box loss should be non-zero'
     n, c, h, w = 10, 4, 20, 20
-    mlvl_tensor = [torch.ones(n, c, h, w) for i in range(5)]
+    mlvl_tensor = [paddle.ones(n, c, h, w) for i in range(5)]
     results = levels_to_images(mlvl_tensor)
     assert len(results) == n
     assert results[0].size() == (h * w * 5, c)
-    cls_scores = [torch.ones(2, 4, 5, 5)]
-    bbox_preds = [torch.ones(2, 4, 5, 5)]
-    iou_preds = [torch.ones(2, 1, 5, 5)]
-    mlvl_anchors = [torch.ones(5 * 5, 2)]
+    cls_scores = [paddle.ones(2, 4, 5, 5)]
+    bbox_preds = [paddle.ones(2, 4, 5, 5)]
+    iou_preds = [paddle.ones(2, 1, 5, 5)]
+    mlvl_anchors = [paddle.ones(5 * 5, 2)]
     img_shape = None
     scale_factor = [0.5, 0.5]
     cfg = mmcv.Config(

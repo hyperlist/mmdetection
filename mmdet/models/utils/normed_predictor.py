@@ -40,7 +40,7 @@ class NormedLinear(nn.Linear):
 
 
 @CONV_LAYERS.register_module(name='NormedConv2d')
-class NormedConv2d(nn.Conv2d):
+class NormedConv2d(nn.Conv2D):
     """Normalized Conv2d Layer.
 
     Args:

@@ -120,7 +120,7 @@ class HourglassNet(BaseModule):
         >>> import paddle
         >>> self = HourglassNet()
         >>> self.eval()
-        >>> inputs = torch.rand(1, 3, 511, 511)
+        >>> inputs = paddle.rand(1, 3, 511, 511)
         >>> level_outputs = self.forward(inputs)
         >>> for level_output in level_outputs:
         ...     print(tuple(level_output.shape))
@@ -197,7 +197,7 @@ class HourglassNet(BaseModule):
         # Training Centripetal Model needs to reset parameters for Conv2d
         super(HourglassNet, self).init_weights()
         for m in self.modules():
-            if isinstance(m, nn.Conv2d):
+            if isinstance(m, nn.Conv2D):
                 m.reset_parameters()
 
     def forward(self, x):

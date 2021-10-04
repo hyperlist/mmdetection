@@ -51,7 +51,7 @@ class RandomSampler(BaseSampler):
                 device = torch.cuda.current_device()
             else:
                 device = 'cpu'
-            gallery = torch.tensor(gallery, dtype=torch.long, device=device)
+            gallery = paddle.to_tensor(gallery, dtype=paddle.long, device=device)
         # This is a temporary fix. We can revert the following code
         # when PyTorch fixes the abnormal return of torch.randperm.
         # See: https://github.com/open-mmlab/mmdetection/pull/5014

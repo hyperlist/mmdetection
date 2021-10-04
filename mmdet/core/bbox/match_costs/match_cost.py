@@ -18,9 +18,9 @@ class BBoxL1Cost:
          >>> from mmdet.core.bbox.match_costs.match_cost import BBoxL1Cost
          >>> import paddle
          >>> self = BBoxL1Cost()
-         >>> bbox_pred = torch.rand(1, 4)
+         >>> bbox_pred = paddle.rand(1, 4)
          >>> gt_bboxes= torch.FloatTensor([[0, 0, 2, 4], [1, 2, 3, 4]])
-         >>> factor = torch.tensor([10, 8, 10, 8])
+         >>> factor = paddle.to_tensor([10, 8, 10, 8])
          >>> self(bbox_pred, gt_bboxes, factor)
          tensor([[1.6172, 1.6422]])
     """
@@ -64,9 +64,9 @@ class FocalLossCost:
          >>> from mmdet.core.bbox.match_costs.match_cost import FocalLossCost
          >>> import paddle
          >>> self = FocalLossCost()
-         >>> cls_pred = torch.rand(4, 3)
-         >>> gt_labels = torch.tensor([0, 1, 2])
-         >>> factor = torch.tensor([10, 8, 10, 8])
+         >>> cls_pred = paddle.rand(4, 3)
+         >>> gt_labels = paddle.to_tensor([0, 1, 2])
+         >>> factor = paddle.to_tensor([10, 8, 10, 8])
          >>> self(cls_pred, gt_labels)
          tensor([[-0.3236, -0.3364, -0.2699],
                 [-0.3439, -0.3209, -0.4807],
@@ -111,9 +111,9 @@ class ClassificationCost:
          ... ClassificationCost
          >>> import paddle
          >>> self = ClassificationCost()
-         >>> cls_pred = torch.rand(4, 3)
-         >>> gt_labels = torch.tensor([0, 1, 2])
-         >>> factor = torch.tensor([10, 8, 10, 8])
+         >>> cls_pred = paddle.rand(4, 3)
+         >>> gt_labels = paddle.to_tensor([0, 1, 2])
+         >>> factor = paddle.to_tensor([10, 8, 10, 8])
          >>> self(cls_pred, gt_labels)
          tensor([[-0.3430, -0.3525, -0.3045],
                 [-0.3077, -0.2931, -0.3992],

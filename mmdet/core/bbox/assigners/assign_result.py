@@ -132,19 +132,19 @@ class AssignResult(util_mixins.NiceRepr):
             num_preds = rng.randint(0, 16)
 
         if num_gts == 0:
-            max_overlaps = torch.zeros(num_preds, dtype=torch.float32)
-            gt_inds = torch.zeros(num_preds, dtype=torch.int64)
+            max_overlaps = paddle.zeros(num_preds, dtype=torch.float32)
+            gt_inds = paddle.zeros(num_preds, dtype=torch.int64)
             if p_use_label is True or p_use_label < rng.rand():
-                labels = torch.zeros(num_preds, dtype=torch.int64)
+                labels = paddle.zeros(num_preds, dtype=torch.int64)
             else:
                 labels = None
         else:
             import numpy as np
             # Create an overlap for each predicted box
-            max_overlaps = torch.from_numpy(rng.rand(num_preds))
+            max_overlaps = paddle.to_tensor(rng.rand(num_preds))
 
             # Construct gt_inds for each predicted box
-            is_assigned = torch.from_numpy(rng.rand(num_preds) < p_assigned)
+            is_assigned = paddle.to_tensor(rng.rand(num_preds) < p_assigned)
             # maximum number of assignments constraints
             n_assigned = min(num_preds, min(num_gts, is_assigned.sum()))
 
@@ -156,17 +156,17 @@ class AssignResult(util_mixins.NiceRepr):
             is_assigned[:] = 0
             is_assigned[assigned_idxs] = True
 
-            is_ignore = torch.from_numpy(
+            is_ignore = paddle.to_tensor(
                 rng.rand(num_preds) < p_ignore) & is_assigned
 
-            gt_inds = torch.zeros(num_preds, dtype=torch.int64)
+            gt_inds = paddle.zeros(num_preds, dtype=torch.int64)
 
             true_idxs = np.arange(num_gts)
             rng.shuffle(true_idxs)
-            true_idxs = torch.from_numpy(true_idxs)
+            true_idxs = paddle.to_tensor(true_idxs)
             gt_inds[is_assigned] = true_idxs[:n_assigned]
 
-            gt_inds = torch.from_numpy(
+            gt_inds = paddle.to_tensor(
                 rng.randint(1, num_gts + 1, size=num_preds))
             gt_inds[is_ignore] = -1
             gt_inds[~is_assigned] = 0
@@ -174,9 +174,9 @@ class AssignResult(util_mixins.NiceRepr):
 
             if p_use_label is True or p_use_label < rng.rand():
                 if num_classes == 0:
-                    labels = torch.zeros(num_preds, dtype=torch.int64)
+                    labels = paddle.zeros(num_preds, dtype=torch.int64)
                 else:
-                    labels = torch.from_numpy(
+                    labels = paddle.to_tensor(
                         # remind that we set FG labels to [0, num_class-1]
                         # since mmdet v2.0
                         # BG cat_id: num_class
@@ -194,8 +194,8 @@ class AssignResult(util_mixins.NiceRepr):
         Args:
             gt_labels (torch.Tensor): Labels of gt boxes
         """
-        self_inds = torch.arange(
-            1, len(gt_labels) + 1, dtype=torch.long, device=gt_labels.device)
+        self_inds = paddle.arange(
+            1, len(gt_labels) + 1, dtype=paddle.long, device=gt_labels.device)
         self.gt_inds = paddle.concat([self_inds, self.gt_inds])
 
         self.max_overlaps = paddle.concat(

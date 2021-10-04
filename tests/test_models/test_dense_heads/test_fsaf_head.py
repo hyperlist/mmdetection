@@ -48,7 +48,7 @@ def test_fsaf_head_loss():
         head.cuda()
         # FSAF head expects a multiple levels of features per image
         feat = [
-            torch.rand(1, 1, s // (2**(i + 2)), s // (2**(i + 2))).cuda()
+            paddle.rand(1, 1, s // (2**(i + 2)), s // (2**(i + 2))).cuda()
             for i in range(len(head.anchor_generator.strides))
         ]
         cls_scores, bbox_preds = head.forward(feat)
@@ -68,7 +68,7 @@ def test_fsaf_head_loss():
         assert onegt_box_loss.item() > 0, 'box loss should be non-zero'
 
         # Test that empty ground truth encourages the network to predict bkg
-        gt_bboxes = [torch.empty((0, 4)).cuda()]
+        gt_bboxes = [paddle.empty((0, 4)).cuda()]
         gt_labels = [torch.LongTensor([]).cuda()]
 
         empty_gt_losses = head.loss(cls_scores, bbox_preds, gt_bboxes,

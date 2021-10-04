@@ -48,7 +48,7 @@ class InstanceBalancedPosSampler(RandomSampler):
                     list(set(pos_inds.cpu()) - set(sampled_inds.cpu())))
                 if len(extra_inds) > num_extra:
                     extra_inds = self.random_choice(extra_inds, num_extra)
-                extra_inds = torch.from_numpy(extra_inds).to(
+                extra_inds = paddle.to_tensor(extra_inds).to(
                     assign_result.gt_inds.device).long()
                 sampled_inds = paddle.concat([sampled_inds, extra_inds])
             elif len(sampled_inds) > num_expected:

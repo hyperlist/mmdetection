@@ -227,7 +227,7 @@ class FPG(BaseModule):
         # build lateral 1x1 convs to reduce channels
         self.lateral_convs = nn.LayerList()
         for i in range(self.start_level, self.backbone_end_level):
-            l_conv = nn.Conv2d(self.in_channels[i],
+            l_conv = nn.Conv2D(self.in_channels[i],
                                self.inter_channels[i - self.start_level], 1)
             self.lateral_convs.append(l_conv)
 
@@ -236,7 +236,7 @@ class FPG(BaseModule):
         for i in range(extra_levels):
             if self.add_extra_convs:
                 fpn_idx = self.backbone_end_level - self.start_level + i
-                extra_conv = nn.Conv2d(
+                extra_conv = nn.Conv2D(
                     self.inter_channels[fpn_idx - 1],
                     self.inter_channels[fpn_idx],
                     3,

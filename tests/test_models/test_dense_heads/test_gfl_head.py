@@ -36,13 +36,13 @@ def test_gfl_head_loss():
             loss_weight=1.0),
         loss_bbox=dict(type='GIoULoss', loss_weight=2.0))
     feat = [
-        torch.rand(1, 1, s // feat_size, s // feat_size)
+        paddle.rand(1, 1, s // feat_size, s // feat_size)
         for feat_size in [4, 8, 16, 32, 64]
     ]
     cls_scores, bbox_preds = self.forward(feat)
 
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
     gt_bboxes_ignore = None
     empty_gt_losses = self.loss(cls_scores, bbox_preds, gt_bboxes, gt_labels,

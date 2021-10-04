@@ -70,7 +70,7 @@ def get_k_for_topk(k, size):
                 ret_k = k
         else:
             # Always keep topk op for dynamic input in onnx for ONNX Runtime
-            ret_k = torch.where(k < size, k, size)
+            ret_k = paddle.where(k < size, k, size)
     elif k < size:
         ret_k = k
     else:
@@ -116,18 +116,18 @@ def add_dummy_nms_for_onnx(boxes,
             of shape [N, num_det].
     """
     max_output_boxes_per_class = torch.LongTensor([max_output_boxes_per_class])
-    iou_threshold = torch.tensor([iou_threshold], dtype=torch.float32)
-    score_threshold = torch.tensor([score_threshold], dtype=torch.float32)
+    iou_threshold = paddle.to_tensor([iou_threshold], dtype=torch.float32)
+    score_threshold = paddle.to_tensor([score_threshold], dtype=torch.float32)
     batch_size = scores.shape[0]
     num_class = scores.shape[2]
 
-    nms_pre = torch.tensor(pre_top_k, device=scores.device, dtype=torch.long)
+    nms_pre = paddle.to_tensor(pre_top_k, device=scores.device, dtype=paddle.long)
     nms_pre = get_k_for_topk(nms_pre, boxes.shape[1])
 
     if nms_pre > 0:
         max_scores, _ = scores.max(-1)
         _, topk_inds = max_scores.topk(nms_pre)
-        batch_inds = torch.arange(batch_size).view(
+        batch_inds = paddle.arange(batch_size).view(
             -1, 1).expand_as(topk_inds).long()
         # Avoid onnx2tensorrt issue in https://github.com/NVIDIA/TensorRT/issues/1134 # noqa: E501
         transformed_inds = boxes.shape[1] * batch_inds + topk_inds
@@ -161,7 +161,7 @@ def add_dummy_nms_for_onnx(boxes,
     batch_inds, cls_inds = selected_indices[:, 0], selected_indices[:, 1]
     box_inds = selected_indices[:, 2]
     if labels is None:
-        labels = torch.arange(num_class, dtype=torch.long).to(scores.device)
+        labels = paddle.arange(num_class, dtype=paddle.long).to(scores.device)
         labels = labels.view(1, num_class, 1).expand_as(scores)
     scores = scores.reshape(-1, 1)
     boxes = boxes.reshape(batch_size, -1).repeat(1, num_class).reshape(-1, 4)
@@ -177,13 +177,13 @@ def add_dummy_nms_for_onnx(boxes,
     boxes = boxes.reshape(batch_size, -1, 4)
     labels = labels.reshape(batch_size, -1)
 
-    nms_after = torch.tensor(
-        after_top_k, device=scores.device, dtype=torch.long)
+    nms_after = paddle.to_tensor(
+        after_top_k, device=scores.device, dtype=paddle.long)
     nms_after = get_k_for_topk(nms_after, num_box * num_class)
 
     if nms_after > 0:
         _, topk_inds = scores.topk(nms_after)
-        batch_inds = torch.arange(batch_size).view(-1, 1).expand_as(topk_inds)
+        batch_inds = paddle.arange(batch_size).view(-1, 1).expand_as(topk_inds)
         # Avoid onnx2tensorrt issue in https://github.com/NVIDIA/TensorRT/issues/1134 # noqa: E501
         transformed_inds = scores.shape[1] * batch_inds + topk_inds
         scores = scores.reshape(-1, 1)[transformed_inds, :].reshape(

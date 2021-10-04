@@ -145,7 +145,7 @@ def mask_cross_entropy(pred,
         >>> N, C = 3, 11
         >>> H, W = 2, 2
         >>> pred = torch.randn(N, C, H, W) * 1000
-        >>> target = torch.rand(N, H, W)
+        >>> target = paddle.rand(N, H, W)
         >>> label = torch.randint(0, C, size=(N,))
         >>> reduction = 'mean'
         >>> avg_factor = None
@@ -158,7 +158,7 @@ def mask_cross_entropy(pred,
     # TODO: handle these two reserved arguments
     assert reduction == 'mean' and avg_factor is None
     num_rois = pred.size()[0]
-    inds = torch.arange(0, num_rois, dtype=torch.long, device=pred.device)
+    inds = paddle.arange(0, num_rois, dtype=paddle.long, device=pred.device)
     pred_slice = pred[inds, label].squeeze(1)
     return F.binary_cross_entropy_with_logits(
         pred_slice, target, weight=class_weight, reduction='mean')[None]

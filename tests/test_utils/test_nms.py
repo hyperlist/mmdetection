@@ -5,28 +5,28 @@ from mmdet.core.post_processing import mask_matrix_nms
 
 
 def _create_mask(N, h, w):
-    masks = torch.rand((N, h, w)) > 0.5
-    labels = torch.rand(N)
-    scores = torch.rand(N)
+    masks = paddle.rand((N, h, w)) > 0.5
+    labels = paddle.rand(N)
+    scores = paddle.rand(N)
     return masks, labels, scores
 
 
 def test_nms_input_errors():
     with pytest.raises(AssertionError):
         mask_matrix_nms(
-            torch.rand((10, 28, 28)), torch.rand(11), torch.rand(11))
+            paddle.rand((10, 28, 28)), paddle.rand(11), paddle.rand(11))
     with pytest.raises(AssertionError):
-        masks = torch.rand((10, 28, 28))
+        masks = paddle.rand((10, 28, 28))
         mask_matrix_nms(
             masks,
-            torch.rand(11),
-            torch.rand(11),
+            paddle.rand(11),
+            paddle.rand(11),
             mask_area=masks.sum((1, 2)).float()[:8])
     with pytest.raises(NotImplementedError):
         mask_matrix_nms(
-            torch.rand((10, 28, 28)),
-            torch.rand(10),
-            torch.rand(10),
+            paddle.rand((10, 28, 28)),
+            paddle.rand(10),
+            paddle.rand(10),
             kernel='None')
     # test an empty results
     masks, labels, scores = _create_mask(0, 28, 28)

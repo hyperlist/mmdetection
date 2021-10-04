@@ -59,7 +59,7 @@ class RegNet(ResNet):
                     depth=25,
                     bot_mul=1.0))
         >>> self.eval()
-        >>> inputs = torch.rand(1, 3, 32, 32)
+        >>> inputs = paddle.rand(1, 3, 32, 32)
         >>> level_outputs = self.forward(inputs)
         >>> for level_out in level_outputs:
         ...     print(tuple(level_out.shape))
@@ -260,7 +260,7 @@ class RegNet(ResNet):
         Args:
             initial_width ([int]): Initial width of the backbone
             width_slope ([float]): Slope of the quantized linear function
-            width_parameter ([int]): Parameter used to quantize the width.
+            width_parameter ([int]): create_parameter used to quantize the width.
             depth ([int]): Depth of the backbone.
             divisor (int, optional): The divisor of channels. Defaults to 8.
 

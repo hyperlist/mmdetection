@@ -50,7 +50,7 @@ class SplitAttentionConv2d(BaseModule):
         dilation (int | tuple[int]): Spacing between kernel elements.
         groups (int): Number of blocked connections from input channels to
             output channels.
-        groups (int): Same as nn.Conv2d.
+        groups (int): Same as nn.Conv2D.
         radix (int): Radix of SpltAtConv2d. Default: 2
         reduction_factor (int): Reduction factor of inter_channels. Default: 4.
         conv_cfg (dict): Config dict for convolution layer. Default: None,

@@ -38,7 +38,7 @@ def test_mask_head_loss():
 
     # Create dummy features "extracted" for each sampled bbox
     num_sampled = sum(len(res.bboxes) for res in sampling_results)
-    dummy_feats = torch.rand(num_sampled, 8, 6, 6)
+    dummy_feats = paddle.rand(num_sampled, 8, 6, 6)
 
     mask_pred = self.forward(dummy_feats)
     mask_targets = self.get_targets(sampling_results, gt_masks, train_cfg)

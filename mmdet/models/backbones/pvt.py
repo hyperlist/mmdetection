@@ -270,8 +270,8 @@ class AbsolutePositionEmbedding(BaseModule):
         self.pos_shape = pos_shape
         self.pos_dim = pos_dim
 
-        self.pos_embed = nn.Parameter(
-            torch.zeros(1, pos_shape[0] * pos_shape[1], pos_dim))
+        self.pos_embed = paddle.create_parameter(
+            paddle.zeros(1, pos_shape[0] * pos_shape[1], pos_dim))
         self.drop = nn.Dropout(p=drop_rate)
 
     def init_weights(self):
@@ -492,7 +492,7 @@ class PyramidVisionTransformer(BaseModule):
                 elif isinstance(m, nn.LayerNorm):
                     constant_init(m.bias, 0)
                     constant_init(m.weight, 1.0)
-                elif isinstance(m, nn.Conv2d):
+                elif isinstance(m, nn.Conv2D):
                     fan_out = m.kernel_size[0] * m.kernel_size[
                         1] * m.out_channels
                     fan_out //= m.groups

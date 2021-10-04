@@ -52,14 +52,14 @@ def test_ga_anchor_head_loss():
     if torch.cuda.is_available():
         head.cuda()
         feat = [
-            torch.rand(1, 4, s // (2**(i + 2)), s // (2**(i + 2))).cuda()
+            paddle.rand(1, 4, s // (2**(i + 2)), s // (2**(i + 2))).cuda()
             for i in range(len(head.approx_anchor_generator.base_anchors))
         ]
         cls_scores, bbox_preds, shape_preds, loc_preds = head.forward(feat)
 
         # Test that empty ground truth encourages the network to predict
         # background
-        gt_bboxes = [torch.empty((0, 4)).cuda()]
+        gt_bboxes = [paddle.empty((0, 4)).cuda()]
         gt_labels = [torch.LongTensor([]).cuda()]
 
         gt_bboxes_ignore = None

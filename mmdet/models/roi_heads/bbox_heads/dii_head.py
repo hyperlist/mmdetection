@@ -128,7 +128,7 @@ class DIIHead(BBoxHead):
         super(DIIHead, self).init_weights()
         for p in self.parameters():
             if p.dim() > 1:
-                nn.init.xavier_uniform_(p)
+                nn.initializer.XavierUniform(p)
             else:
                 # adopt the default initialization for
                 # the weight and bias of the layer norm
@@ -261,18 +261,18 @@ class DIIHead(BBoxHead):
             # do not perform bounding box regression for BG anymore.
             if pos_inds.any():
                 pos_bbox_pred = bbox_pred.reshape(bbox_pred.size(0),
-                                                  4)[pos_inds.type(torch.bool)]
+                                                  4)[pos_inds.type(paddle.bool)]
                 imgs_whwh = imgs_whwh.reshape(bbox_pred.size(0),
-                                              4)[pos_inds.type(torch.bool)]
+                                              4)[pos_inds.type(paddle.bool)]
                 losses['loss_bbox'] = self.loss_bbox(
                     pos_bbox_pred / imgs_whwh,
-                    bbox_targets[pos_inds.type(torch.bool)] / imgs_whwh,
-                    bbox_weights[pos_inds.type(torch.bool)],
+                    bbox_targets[pos_inds.type(paddle.bool)] / imgs_whwh,
+                    bbox_weights[pos_inds.type(paddle.bool)],
                     avg_factor=avg_factor)
                 losses['loss_iou'] = self.loss_iou(
                     pos_bbox_pred,
-                    bbox_targets[pos_inds.type(torch.bool)],
-                    bbox_weights[pos_inds.type(torch.bool)],
+                    bbox_targets[pos_inds.type(paddle.bool)],
+                    bbox_weights[pos_inds.type(paddle.bool)],
                     avg_factor=avg_factor)
             else:
                 losses['loss_bbox'] = bbox_pred.sum() * 0
@@ -332,7 +332,7 @@ class DIIHead(BBoxHead):
         # FG cat_id = [0, num_classes-1]
         labels = pos_bboxes.new_full((num_samples, ),
                                      self.num_classes,
-                                     dtype=torch.long)
+                                     dtype=paddle.long)
         label_weights = pos_bboxes.new_zeros(num_samples)
         bbox_targets = pos_bboxes.new_zeros(num_samples, 4)
         bbox_weights = pos_bboxes.new_zeros(num_samples, 4)

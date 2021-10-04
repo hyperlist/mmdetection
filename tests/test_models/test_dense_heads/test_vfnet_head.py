@@ -28,13 +28,13 @@ def test_vfnet_head_loss():
     if torch.cuda.is_available():
         self.cuda()
         feat = [
-            torch.rand(1, 1, s // feat_size, s // feat_size).cuda()
+            paddle.rand(1, 1, s // feat_size, s // feat_size).cuda()
             for feat_size in [4, 8, 16, 32, 64]
         ]
         cls_scores, bbox_preds, bbox_preds_refine = self.forward(feat)
         # Test that empty ground truth encourages the network to predict
         # background
-        gt_bboxes = [torch.empty((0, 4)).cuda()]
+        gt_bboxes = [paddle.empty((0, 4)).cuda()]
         gt_labels = [torch.LongTensor([]).cuda()]
         gt_bboxes_ignore = None
         empty_gt_losses = self.loss(cls_scores, bbox_preds, bbox_preds_refine,

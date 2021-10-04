@@ -212,7 +212,7 @@ def _demo_mm_inputs(
         gt_bboxes.append(torch.FloatTensor(boxes))
         gt_labels.append(torch.LongTensor(class_idxs))
         if with_track:
-            gt_match_indices.append(torch.arange(boxes.shape[0]))
+            gt_match_indices.append(paddle.arange(boxes.shape[0]))
 
     mask = np.random.randint(0, 2, (len(boxes), H, W), dtype=np.uint8)
     gt_masks.append(BitmapMasks(mask, H, W))

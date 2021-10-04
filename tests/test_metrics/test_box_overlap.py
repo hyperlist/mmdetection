@@ -15,8 +15,8 @@ def test_bbox_overlaps_2d(eps=1e-7):
         img_w = int(np.random.randint(3, 1000))
         if num_bbox is None:
             num_bbox = np.random.randint(1, 10)
-        x1y1 = torch.rand((num_bbox, 2))
-        x2y2 = torch.max(torch.rand((num_bbox, 2)), x1y1)
+        x1y1 = paddle.rand((num_bbox, 2))
+        x2y2 = torch.max(paddle.rand((num_bbox, 2)), x1y1)
         bboxes = paddle.concat((x1y1, x2y2), -1)
         bboxes[:, 0::2] *= img_w
         bboxes[:, 1::2] *= img_h
@@ -26,18 +26,18 @@ def test_bbox_overlaps_2d(eps=1e-7):
     self = BboxOverlaps2D()
     bboxes1, num_bbox = _construct_bbox()
     bboxes2, _ = _construct_bbox(num_bbox)
-    bboxes1 = paddle.concat((bboxes1, torch.rand((num_bbox, 1))), 1)
-    bboxes2 = paddle.concat((bboxes2, torch.rand((num_bbox, 1))), 1)
+    bboxes1 = paddle.concat((bboxes1, paddle.rand((num_bbox, 1))), 1)
+    bboxes2 = paddle.concat((bboxes2, paddle.rand((num_bbox, 1))), 1)
     gious = self(bboxes1, bboxes2, 'giou', True)
     assert gious.size() == (num_bbox, ), gious.size()
     assert torch.all(gious >= -1) and torch.all(gious <= 1)
 
     # is_aligned is True, bboxes1.size(-2) == 0
-    bboxes1 = torch.empty((0, 4))
-    bboxes2 = torch.empty((0, 4))
+    bboxes1 = paddle.empty((0, 4))
+    bboxes2 = paddle.empty((0, 4))
     gious = self(bboxes1, bboxes2, 'giou', True)
     assert gious.size() == (0, ), gious.size()
-    assert torch.all(gious == torch.empty((0, )))
+    assert torch.all(gious == paddle.empty((0, )))
     assert torch.all(gious >= -1) and torch.all(gious <= 1)
 
     # is_aligned is True, and bboxes.ndims > 2
@@ -77,8 +77,8 @@ def test_bbox_overlaps_2d(eps=1e-7):
     assert gious.size() == (1, 2, num_bbox1, num_bbox2)
 
     # is_aligned is False, bboxes1.size(-2) == 0
-    gious = self(torch.empty(1, 2, 0, 4), bboxes2, 'giou')
-    assert torch.all(gious == torch.empty(1, 2, 0, bboxes2.size(-2)))
+    gious = self(paddle.empty(1, 2, 0, 4), bboxes2, 'giou')
+    assert torch.all(gious == paddle.empty(1, 2, 0, bboxes2.size(-2)))
     assert torch.all(gious >= -1) and torch.all(gious <= 1)
 
     # test allclose between bbox_overlaps and the original official
@@ -115,8 +115,8 @@ def test_voc_recall_overlaps():
         img_w = int(np.random.randint(3, 1000))
         if num_bbox is None:
             num_bbox = np.random.randint(1, 10)
-        x1y1 = torch.rand((num_bbox, 2))
-        x2y2 = torch.max(torch.rand((num_bbox, 2)), x1y1)
+        x1y1 = paddle.rand((num_bbox, 2))
+        x2y2 = torch.max(paddle.rand((num_bbox, 2)), x1y1)
         bboxes = paddle.concat((x1y1, x2y2), -1)
         bboxes[:, 0::2] *= img_w
         bboxes[:, 1::2] *= img_h

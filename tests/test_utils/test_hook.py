@@ -11,9 +11,6 @@ import paddle
 import paddle.nn as nn
 from mmcv.runner import (CheckpointHook, IterTimerHook, PaviLoggerHook,
                          build_runner)
-from torch.nn.init import constant_
-from torch.utils.data import DataLoader, Dataset
-
 from mmdet.core.hook import ExpMomentumEMAHook, YOLOXLrUpdaterHook
 from mmdet.core.hook.sync_norm_hook import SyncNormHook
 from mmdet.core.hook.sync_random_size_hook import SyncRandomSizeHook
@@ -29,7 +26,7 @@ def _build_demo_runner_without_hook(runner_type='EpochBasedRunner',
         def __init__(self):
             super().__init__()
             self.linear = nn.Linear(2, 1)
-            self.conv = nn.Conv2d(3, 3, 3)
+            self.conv = nn.Conv2D(3, 3, 3)
 
         def forward(self, x):
             return self.linear(x)
@@ -89,7 +86,7 @@ def test_yolox_lrupdater_hook(multi_optimziers):
     YOLOXLrUpdaterHook(0, min_lr_ratio=0.05)
 
     sys.modules['pavi'] = MagicMock()
-    loader = DataLoader(torch.ones((10, 2)))
+    loader = paddle.io.DataLoaderpaddle.ones((10, 2)))
     runner = _build_demo_runner(multi_optimziers=multi_optimziers)
 
     hook_cfg = dict(
@@ -162,7 +159,7 @@ def test_ema_hook():
 
         def __init__(self):
             super().__init__()
-            self.conv = nn.Conv2d(
+            self.conv = nn.Conv2D(
                 in_channels=1,
                 out_channels=2,
                 kernel_size=1,
@@ -187,7 +184,7 @@ def test_ema_hook():
         def val_step(self, x, optimizer, **kwargs):
             return dict(loss=self(x))
 
-    loader = DataLoader(torch.ones((1, 1, 1, 1)))
+    loader = paddle.io.DataLoaderpaddle.ones((1, 1, 1, 1)))
     runner = _build_demo_runner()
     demo_model = DemoModel()
     runner.model = demo_model
@@ -201,14 +198,14 @@ def test_ema_hook():
     runner.register_hook(ema_hook, priority='HIGHEST')
     runner.register_hook(checkpointhook)
     runner.run([loader, loader], [('train', 1), ('val', 1)])
-    checkpoint = torch.load(f'{runner.work_dir}/epoch_1.pth')
+    checkpoint = paddle.load(f'{runner.work_dir}/epoch_1.pth')
     num_eam_params = 0
     for name, value in checkpoint['state_dict'].items():
         if 'ema' in name:
             num_eam_params += 1
             value.fill_(1)
     assert num_eam_params == 4
-    torch.save(checkpoint, f'{runner.work_dir}/epoch_1.pth')
+    paddle.save(checkpoint, f'{runner.work_dir}/epoch_1.pth')
 
     work_dir = runner.work_dir
     resume_ema_hook = ExpMomentumEMAHook(
@@ -223,7 +220,7 @@ def test_ema_hook():
     checkpointhook = CheckpointHook(interval=1, by_epoch=True)
     runner.register_hook(checkpointhook)
     runner.run([loader, loader], [('train', 1), ('val', 1)])
-    checkpoint = torch.load(f'{runner.work_dir}/epoch_2.pth')
+    checkpoint = paddle.load(f'{runner.work_dir}/epoch_2.pth')
     num_eam_params = 0
     desired_output = [0.9094, 0.9094]
     for name, value in checkpoint['state_dict'].items():
@@ -243,7 +240,7 @@ def test_sync_norm_hook():
     # Only used to prevent program errors
     SyncNormHook()
 
-    loader = DataLoader(torch.ones((5, 2)))
+    loader = paddle.io.DataLoaderpaddle.ones((5, 2)))
     runner = _build_demo_runner()
     runner.register_hook_from_cfg(dict(type='SyncNormHook'))
     runner.run([loader, loader], [('train', 1), ('val', 1)])
@@ -257,7 +254,7 @@ def test_sync_random_size_hook():
     class DemoDataset(Dataset):
 
         def __getitem__(self, item):
-            return torch.ones(2)
+            return paddle.ones(2)
 
         def __len__(self):
             return 5
@@ -265,7 +262,7 @@ def test_sync_random_size_hook():
         def update_dynamic_scale(self, dynamic_scale):
             pass
 
-    loader = DataLoader(DemoDataset())
+    loader = paddle.io.DataLoaderDemoDataset())
     runner = _build_demo_runner()
     runner.register_hook_from_cfg(
         dict(type='SyncRandomSizeHook', device='cpu'))
@@ -301,13 +298,13 @@ def test_check_invalid_loss_hook(set_loss):
 
         def train_step(self, x, optimizer, **kwargs):
             if self.set_loss_nan:
-                return dict(loss=torch.tensor(float('nan')))
+                return dict(loss=paddle.to_tensor(float('nan')))
             elif self.set_loss_inf:
-                return dict(loss=torch.tensor(float('inf')))
+                return dict(loss=paddle.to_tensor(float('inf')))
             else:
                 return dict(loss=self(x))
 
-    loader = DataLoader(torch.ones((5, 2)))
+    loader = paddle.io.DataLoaderpaddle.ones((5, 2)))
     runner = _build_demo_runner()
 
     demo_model = DemoModel(**set_loss)

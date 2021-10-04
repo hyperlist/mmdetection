@@ -43,11 +43,11 @@ def balanced_l1_loss(pred,
 
     assert pred.size() == target.size()
 
-    diff = torch.abs(pred - target)
+    diff = paddle.abs(pred - target)
     b = np.e**(gamma / alpha) - 1
-    loss = torch.where(
+    loss = paddle.where(
         diff < beta, alpha / b *
-        (b * diff + 1) * torch.log(b * diff / beta + 1) - alpha * diff,
+        (b * diff + 1) * paddle.log(b * diff / beta + 1) - alpha * diff,
         gamma * diff + gamma / b - alpha * beta)
 
     return loss

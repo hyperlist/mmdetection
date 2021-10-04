@@ -28,7 +28,7 @@ class TridentRoIHead(StandardRoIHead):
         """Merge bbox predictions of each branch."""
         if trident_det_bboxes.numel() == 0:
             det_bboxes = trident_det_bboxes.new_zeros((0, 5))
-            det_labels = trident_det_bboxes.new_zeros((0, ), dtype=torch.long)
+            det_labels = trident_det_bboxes.new_zeros((0, ), dtype=paddle.long)
         else:
             nms_bboxes = trident_det_bboxes[:, :4]
             nms_scores = trident_det_bboxes[:, 4].contiguous()

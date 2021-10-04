@@ -141,7 +141,7 @@ class MaxIoUAssigner(BaseAssigner):
         # 1. assign -1 by default
         assigned_gt_inds = overlaps.new_full((num_bboxes, ),
                                              -1,
-                                             dtype=torch.long)
+                                             dtype=paddle.long)
 
         if num_gts == 0 or num_bboxes == 0:
             # No ground truth or boxes, return empty assignment
@@ -154,7 +154,7 @@ class MaxIoUAssigner(BaseAssigner):
             else:
                 assigned_labels = overlaps.new_full((num_bboxes, ),
                                                     -1,
-                                                    dtype=torch.long)
+                                                    dtype=paddle.long)
             return AssignResult(
                 num_gts,
                 assigned_gt_inds,
@@ -201,7 +201,7 @@ class MaxIoUAssigner(BaseAssigner):
 
         if gt_labels is not None:
             assigned_labels = assigned_gt_inds.new_full((num_bboxes, ), -1)
-            pos_inds = torch.nonzero(
+            pos_inds = paddle.nonzero(
                 assigned_gt_inds > 0, as_tuple=False).squeeze()
             if pos_inds.numel() > 0:
                 assigned_labels[pos_inds] = gt_labels[

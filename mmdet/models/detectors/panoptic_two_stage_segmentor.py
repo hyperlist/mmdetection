@@ -151,7 +151,7 @@ class TwoStagePanopticSegmentor(TwoStageDetector):
 
             mask_pred = mask_preds[i].sigmoid()
 
-            box_inds = torch.arange(mask_pred.shape[0])
+            box_inds = paddle.arange(mask_pred.shape[0])
             mask_pred = mask_pred[box_inds, det_label][:, None]
 
             img_h, img_w, _ = img_shapes[i]

@@ -26,7 +26,7 @@ def test_sabl_bbox_head_loss():
     target_cfg = mmcv.Config(dict(pos_weight=1))
 
     # Test bbox loss when truth is empty
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
 
     sampling_results = _dummy_bbox_sampling(proposal_list, gt_bboxes,
@@ -39,7 +39,7 @@ def test_sabl_bbox_head_loss():
     # Create dummy features "extracted" for each sampled bbox
     num_sampled = sum(len(res.bboxes) for res in sampling_results)
     rois = bbox2roi([res.bboxes for res in sampling_results])
-    dummy_feats = torch.rand(num_sampled, 3, 7, 7)
+    dummy_feats = paddle.rand(num_sampled, 3, 7, 7)
     cls_scores, bbox_preds = self.forward(dummy_feats)
 
     losses = self.loss(cls_scores, bbox_preds, rois, labels, label_weights,
@@ -66,7 +66,7 @@ def test_sabl_bbox_head_loss():
 
     # Create dummy features "extracted" for each sampled bbox
     num_sampled = sum(len(res.bboxes) for res in sampling_results)
-    dummy_feats = torch.rand(num_sampled, 3, 7, 7)
+    dummy_feats = paddle.rand(num_sampled, 3, 7, 7)
     cls_scores, bbox_preds = self.forward(dummy_feats)
 
     losses = self.loss(cls_scores, bbox_preds, rois, labels, label_weights,

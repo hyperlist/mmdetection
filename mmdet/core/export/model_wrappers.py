@@ -78,7 +78,7 @@ class DeployBaseDetector(BaseDetector):
                 masks = masks[:, :img_h, :img_w]
                 if rescale:
                     masks = masks.astype(np.float32)
-                    masks = torch.from_numpy(masks)
+                    masks = paddle.to_tensor(masks)
                     masks = torch.nn.functional.interpolate(
                         masks.unsqueeze(0), size=(ori_h, ori_w))
                     masks = masks.squeeze(0).detach().numpy()

@@ -15,7 +15,7 @@ def test_adaptive_padding():
         kernel_size = 16
         stride = 16
         dilation = 1
-        input = torch.rand(1, 1, 15, 17)
+        input = paddle.rand(1, 1, 15, 17)
         pool = AdaptivePadding(
             kernel_size=kernel_size,
             stride=stride,
@@ -24,7 +24,7 @@ def test_adaptive_padding():
         out = pool(input)
         # padding to divisible by 16
         assert (out.shape[2], out.shape[3]) == (16, 32)
-        input = torch.rand(1, 1, 16, 17)
+        input = paddle.rand(1, 1, 16, 17)
         out = pool(input)
         # padding to divisible by 16
         assert (out.shape[2], out.shape[3]) == (16, 32)
@@ -38,7 +38,7 @@ def test_adaptive_padding():
             stride=stride,
             dilation=dilation,
             padding=padding)
-        input = torch.rand(1, 1, 11, 13)
+        input = paddle.rand(1, 1, 11, 13)
         out = adap_pad(input)
         # padding to divisible by 2
         assert (out.shape[2], out.shape[3]) == (12, 14)
@@ -52,7 +52,7 @@ def test_adaptive_padding():
             stride=stride,
             dilation=dilation,
             padding=padding)
-        input = torch.rand(1, 1, 10, 13)
+        input = paddle.rand(1, 1, 10, 13)
         out = adap_pad(input)
         #  no padding
         assert (out.shape[2], out.shape[3]) == (10, 13)
@@ -63,13 +63,13 @@ def test_adaptive_padding():
             stride=stride,
             dilation=dilation,
             padding=padding)
-        input = torch.rand(1, 1, 11, 13)
+        input = paddle.rand(1, 1, 11, 13)
         out = adap_pad(input)
         #  all padding
         assert (out.shape[2], out.shape[3]) == (21, 21)
 
         # test padding as kernel is (7,9)
-        input = torch.rand(1, 1, 11, 13)
+        input = paddle.rand(1, 1, 11, 13)
         stride = (3, 4)
         kernel_size = (4, 5)
         dilation = (2, 2)
@@ -109,7 +109,7 @@ def test_patch_embed():
     embed_dims = 10
     kernel_size = 3
     stride = 1
-    dummy_input = torch.rand(B, C, H, W)
+    dummy_input = paddle.rand(B, C, H, W)
     patch_merge_1 = PatchEmbed(
         in_channels=C,
         embed_dims=embed_dims,
@@ -134,7 +134,7 @@ def test_patch_embed():
     embed_dims = 10
     kernel_size = 5
     stride = 2
-    dummy_input = torch.rand(B, C, H, W)
+    dummy_input = paddle.rand(B, C, H, W)
     # test dilation
     patch_merge_2 = PatchEmbed(
         in_channels=C,
@@ -157,7 +157,7 @@ def test_patch_embed():
     stride = 2
     input_size = (10, 10)
 
-    dummy_input = torch.rand(B, C, H, W)
+    dummy_input = paddle.rand(B, C, H, W)
     # test stride and norm
     patch_merge_3 = PatchEmbed(
         in_channels=C,
@@ -185,7 +185,7 @@ def test_patch_embed():
     H = 11
     W = 12
     input_size = (H, W)
-    dummy_input = torch.rand(B, C, H, W)
+    dummy_input = paddle.rand(B, C, H, W)
     # test stride and norm
     patch_merge_3 = PatchEmbed(
         in_channels=C,
@@ -203,7 +203,7 @@ def test_patch_embed():
     assert shape == patch_merge_3.init_out_size
 
     input_size = (H, W)
-    dummy_input = torch.rand(B, C, H, W)
+    dummy_input = paddle.rand(B, C, H, W)
     # test stride and norm
     patch_merge_3 = PatchEmbed(
         in_channels=C,
@@ -233,7 +233,7 @@ def test_patch_embed():
         dilation = 1
         bias = False
 
-        x = torch.rand(B, in_c, *input_size)
+        x = paddle.rand(B, in_c, *input_size)
         patch_embed = PatchEmbed(
             in_channels=in_c,
             embed_dims=embed_dims,
@@ -255,7 +255,7 @@ def test_patch_embed():
         dilation = 1
         bias = False
 
-        x = torch.rand(B, in_c, *input_size)
+        x = paddle.rand(B, in_c, *input_size)
         patch_embed = PatchEmbed(
             in_channels=in_c,
             embed_dims=embed_dims,
@@ -277,7 +277,7 @@ def test_patch_embed():
         dilation = 1
         bias = False
 
-        x = torch.rand(B, in_c, *input_size)
+        x = paddle.rand(B, in_c, *input_size)
         patch_embed = PatchEmbed(
             in_channels=in_c,
             embed_dims=embed_dims,
@@ -299,7 +299,7 @@ def test_patch_embed():
         dilation = 1
         bias = False
 
-        x = torch.rand(B, in_c, *input_size)
+        x = paddle.rand(B, in_c, *input_size)
         patch_embed = PatchEmbed(
             in_channels=in_c,
             embed_dims=embed_dims,
@@ -336,7 +336,7 @@ def test_patch_merging():
         bias=bias)
     B, L, C = 1, 100, 3
     input_size = (10, 10)
-    x = torch.rand(B, L, C)
+    x = paddle.rand(B, L, C)
     x_out, out_size = patch_merge(x, input_size)
     assert x_out.size() == (1, 16, 4)
     assert out_size == (4, 4)
@@ -359,7 +359,7 @@ def test_patch_merging():
         bias=bias)
     B, L, C = 1, 100, 4
     input_size = (10, 10)
-    x = torch.rand(B, L, C)
+    x = paddle.rand(B, L, C)
     x_out, out_size = patch_merge(x, input_size)
     assert x_out.size() == (1, 4, 5)
     assert out_size == (2, 2)
@@ -380,7 +380,7 @@ def test_patch_merging():
         bias = False
         L = input_size[0] * input_size[1]
 
-        x = torch.rand(B, L, in_c)
+        x = paddle.rand(B, L, in_c)
         patch_merge = PatchMerging(
             in_channels=in_c,
             out_channels=out_c,
@@ -403,7 +403,7 @@ def test_patch_merging():
         bias = False
         L = input_size[0] * input_size[1]
 
-        x = torch.rand(B, L, in_c)
+        x = paddle.rand(B, L, in_c)
         patch_merge = PatchMerging(
             in_channels=in_c,
             out_channels=out_c,
@@ -426,7 +426,7 @@ def test_patch_merging():
         bias = False
         L = input_size[0] * input_size[1]
 
-        x = torch.rand(B, L, in_c)
+        x = paddle.rand(B, L, in_c)
         patch_merge = PatchMerging(
             in_channels=in_c,
             out_channels=out_c,
@@ -449,7 +449,7 @@ def test_patch_merging():
         bias = False
         L = input_size[0] * input_size[1]
 
-        x = torch.rand(B, L, in_c)
+        x = paddle.rand(B, L, in_c)
         patch_merge = PatchMerging(
             in_channels=in_c,
             out_channels=out_c,

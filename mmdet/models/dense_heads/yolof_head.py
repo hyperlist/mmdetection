@@ -86,19 +86,19 @@ class YOLOFHead(AnchorHead):
                     norm_cfg=self.norm_cfg))
         self.cls_subnet = nn.Sequential(*cls_subnet)
         self.bbox_subnet = nn.Sequential(*bbox_subnet)
-        self.cls_score = nn.Conv2d(
+        self.cls_score = nn.Conv2D(
             self.in_channels,
             self.num_anchors * self.num_classes,
             kernel_size=3,
             stride=1,
             padding=1)
-        self.bbox_pred = nn.Conv2d(
+        self.bbox_pred = nn.Conv2D(
             self.in_channels,
             self.num_anchors * 4,
             kernel_size=3,
             stride=1,
             padding=1)
-        self.object_pred = nn.Conv2d(
+        self.object_pred = nn.Conv2D(
             self.in_channels,
             self.num_anchors,
             kernel_size=3,
@@ -107,7 +107,7 @@ class YOLOFHead(AnchorHead):
 
     def init_weights(self):
         for m in self.modules():
-            if isinstance(m, nn.Conv2d):
+            if isinstance(m, nn.Conv2D):
                 normal_init(m, mean=0, std=0.01)
             if is_norm(m):
                 constant_init(m, 1)
@@ -127,7 +127,7 @@ class YOLOFHead(AnchorHead):
 
         # implicit objectness
         objectness = objectness.view(N, -1, 1, H, W)
-        normalized_cls_score = cls_score + objectness - torch.log(
+        normalized_cls_score = cls_score + objectness - paddle.log(
             1. + torch.clamp(cls_score.exp(), max=INF) +
             torch.clamp(objectness.exp(), max=INF))
         normalized_cls_score = normalized_cls_score.view(N, -1, H, W)
@@ -299,8 +299,8 @@ class YOLOFHead(AnchorHead):
         num_total_pos = sum([max(inds.numel(), 1) for inds in pos_inds_list])
         num_total_neg = sum([max(inds.numel(), 1) for inds in neg_inds_list])
 
-        batch_labels = torch.stack(all_labels, 0)
-        batch_label_weights = torch.stack(all_label_weights, 0)
+        batch_labels = paddle.stack(all_labels, 0)
+        batch_label_weights = paddle.stack(all_label_weights, 0)
 
         res = (batch_labels, batch_label_weights, num_total_pos, num_total_neg)
         for i, rests in enumerate(rest_results):  # user-added return values
@@ -383,7 +383,7 @@ class YOLOFHead(AnchorHead):
         num_valid_anchors = anchors.shape[0]
         labels = anchors.new_full((num_valid_anchors, ),
                                   self.num_classes,
-                                  dtype=torch.long)
+                                  dtype=paddle.long)
         label_weights = anchors.new_zeros(num_valid_anchors, dtype=torch.float)
 
         pos_inds = sampling_result.pos_inds

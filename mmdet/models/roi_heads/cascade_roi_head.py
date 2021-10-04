@@ -276,7 +276,7 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
                     if cls_score.numel() == 0:
                         break
 
-                    roi_labels = torch.where(
+                    roi_labels = paddle.where(
                         roi_labels == self.bbox_head[i].num_classes,
                         cls_score[:, :-1].argmax(1), roi_labels)
                     proposal_list = self.bbox_head[i].refine_bboxes(
@@ -407,7 +407,7 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
             else:
                 if rescale and not isinstance(scale_factors[0], float):
                     scale_factors = [
-                        torch.from_numpy(scale_factor).to(det_bboxes[0].device)
+                        paddle.to_tensor(scale_factor).to(det_bboxes[0].device)
                         for scale_factor in scale_factors
                     ]
                 _bboxes = [
@@ -607,7 +607,7 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
         if not self.with_mask:
             return det_bboxes, det_labels
         else:
-            batch_index = torch.arange(
+            batch_index = paddle.arange(
                 det_bboxes.size(0),
                 device=det_bboxes.device).float().view(-1, 1, 1).expand(
                     det_bboxes.size(0), det_bboxes.size(1), 1)

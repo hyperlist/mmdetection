@@ -25,15 +25,15 @@ def test_solo_head_loss():
             alpha=0.25,
             loss_weight=1.0))
     feat = [
-        torch.rand(1, 1, s // feat_size, s // feat_size)
+        paddle.rand(1, 1, s // feat_size, s // feat_size)
         for feat_size in [4, 8, 16, 32, 64]
     ]
     mask_preds, cls_preds = self.forward(feat)
     # Test that empty ground truth encourages the network to
     # predict background.
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
-    gt_masks = [torch.empty((0, 550, 550))]
+    gt_masks = [paddle.empty((0, 550, 550))]
     gt_bboxes_ignore = None
     empty_gt_losses = self.loss(
         mask_preds,
@@ -57,7 +57,7 @@ def test_solo_head_loss():
         torch.Tensor([[23.6667, 23.8757, 238.6326, 151.8874]]),
     ]
     gt_labels = [torch.LongTensor([2])]
-    gt_masks = [(torch.rand((1, 256, 256)) > 0.5).float()]
+    gt_masks = [(paddle.rand((1, 256, 256)) > 0.5).float()]
     one_gt_losses = self.loss(
         mask_preds,
         cls_preds,
@@ -88,7 +88,7 @@ def test_solo_head_loss():
     # When input feature length is not equal to num_levels.
     with pytest.raises(AssertionError):
         feat = [
-            torch.rand(1, 1, s // feat_size, s // feat_size)
+            paddle.rand(1, 1, s // feat_size, s // feat_size)
             for feat_size in [4, 8, 16, 32]
         ]
         self.forward(feat)
@@ -116,15 +116,15 @@ def test_desolo_head_loss():
             alpha=0.25,
             loss_weight=1.0))
     feat = [
-        torch.rand(1, 1, s // feat_size, s // feat_size)
+        paddle.rand(1, 1, s // feat_size, s // feat_size)
         for feat_size in [4, 8, 16, 32, 64]
     ]
     mask_preds_x, mask_preds_y, cls_preds = self.forward(feat)
     # Test that empty ground truth encourages the network to
     # predict background.
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
-    gt_masks = [torch.empty((0, 550, 550))]
+    gt_masks = [paddle.empty((0, 550, 550))]
     gt_bboxes_ignore = None
     empty_gt_losses = self.loss(
         mask_preds_x,
@@ -149,7 +149,7 @@ def test_desolo_head_loss():
         torch.Tensor([[23.6667, 23.8757, 238.6326, 151.8874]]),
     ]
     gt_labels = [torch.LongTensor([2])]
-    gt_masks = [(torch.rand((1, 256, 256)) > 0.5).float()]
+    gt_masks = [(paddle.rand((1, 256, 256)) > 0.5).float()]
     one_gt_losses = self.loss(
         mask_preds_x,
         mask_preds_y,
@@ -185,7 +185,7 @@ def test_desolo_head_loss():
     # When input feature length is not equal to num_levels.
     with pytest.raises(AssertionError):
         feat = [
-            torch.rand(1, 1, s // feat_size, s // feat_size)
+            paddle.rand(1, 1, s // feat_size, s // feat_size)
             for feat_size in [4, 8, 16, 32]
         ]
         self.forward(feat)
@@ -213,15 +213,15 @@ def test_desolo_light_head_loss():
             alpha=0.25,
             loss_weight=1.0))
     feat = [
-        torch.rand(1, 1, s // feat_size, s // feat_size)
+        paddle.rand(1, 1, s // feat_size, s // feat_size)
         for feat_size in [4, 8, 16, 32, 64]
     ]
     mask_preds_x, mask_preds_y, cls_preds = self.forward(feat)
     # Test that empty ground truth encourages the network to
     # predict background.
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
-    gt_masks = [torch.empty((0, 550, 550))]
+    gt_masks = [paddle.empty((0, 550, 550))]
     gt_bboxes_ignore = None
     empty_gt_losses = self.loss(
         mask_preds_x,
@@ -246,7 +246,7 @@ def test_desolo_light_head_loss():
         torch.Tensor([[23.6667, 23.8757, 238.6326, 151.8874]]),
     ]
     gt_labels = [torch.LongTensor([2])]
-    gt_masks = [(torch.rand((1, 256, 256)) > 0.5).float()]
+    gt_masks = [(paddle.rand((1, 256, 256)) > 0.5).float()]
     one_gt_losses = self.loss(
         mask_preds_x,
         mask_preds_y,
@@ -278,7 +278,7 @@ def test_desolo_light_head_loss():
     # When input feature length is not equal to num_levels.
     with pytest.raises(AssertionError):
         feat = [
-            torch.rand(1, 1, s // feat_size, s // feat_size)
+            paddle.rand(1, 1, s // feat_size, s // feat_size)
             for feat_size in [4, 8, 16, 32]
         ]
         self.forward(feat)

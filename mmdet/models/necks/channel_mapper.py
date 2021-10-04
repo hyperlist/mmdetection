@@ -31,7 +31,7 @@ class ChannelMapper(BaseModule):
         >>> import paddle
         >>> in_channels = [2, 3, 5, 7]
         >>> scales = [340, 170, 84, 43]
-        >>> inputs = [torch.rand(1, c, s, s)
+        >>> inputs = [paddle.rand(1, c, s, s)
         ...           for c, s in zip(in_channels, scales)]
         >>> self = ChannelMapper(in_channels, 11, 3).eval()
         >>> outputs = self.forward(inputs)

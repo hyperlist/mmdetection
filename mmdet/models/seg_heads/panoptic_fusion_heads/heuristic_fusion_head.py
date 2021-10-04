@@ -38,8 +38,8 @@ class HeuristicFusionHead(BasePanopticFusionHead):
             Tensor: The result map, (H, W).
         """
         num_insts = bboxes.shape[0]
-        id_map = torch.zeros(
-            masks.shape[-2:], device=bboxes.device, dtype=torch.long)
+        id_map = paddle.zeros(
+            masks.shape[-2:], device=bboxes.device, dtype=paddle.long)
         if num_insts == 0:
             return id_map, labels
 
@@ -56,8 +56,8 @@ class HeuristicFusionHead(BasePanopticFusionHead):
         for idx in range(bboxes.shape[0]):
             _cls = labels[idx]
             _mask = segm_masks[idx]
-            instance_id_map = torch.ones_like(
-                _mask, dtype=torch.long) * instance_id
+            instance_id_map = paddle.ones_like(
+                _mask, dtype=paddle.long) * instance_id
             area = _mask.sum()
             if area == 0:
                 continue
@@ -68,14 +68,14 @@ class HeuristicFusionHead(BasePanopticFusionHead):
                 continue
 
             _part = _mask * (~pasted)
-            id_map = torch.where(_part, instance_id_map, id_map)
+            id_map = paddle.where(_part, instance_id_map, id_map)
             left_labels.append(_cls)
             instance_id += 1
 
         if len(left_labels) > 0:
-            instance_labels = torch.stack(left_labels)
+            instance_labels = paddle.stack(left_labels)
         else:
-            instance_labels = bboxes.new_zeros((0, ), dtype=torch.long)
+            instance_labels = bboxes.new_zeros((0, ), dtype=paddle.long)
         assert instance_id == (len(instance_labels) + 1)
         return id_map, instance_labels
 
@@ -112,7 +112,7 @@ class HeuristicFusionHead(BasePanopticFusionHead):
             pan_results[_mask] = segment_id
             instance_id += 1
 
-        ids, counts = torch.unique(
+        ids, counts = paddle.unique(
             pan_results % INSTANCE_OFFSET, return_counts=True)
         stuff_ids = ids[ids >= self.num_things_classes]
         stuff_counts = counts[ids >= self.num_things_classes]

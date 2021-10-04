@@ -7,7 +7,7 @@ from mmdet.core import build_assigner, build_sampler
 def _dummy_bbox_sampling(proposal_list, gt_bboxes, gt_labels):
     """Create sample results that can be passed to BBoxHead.get_targets."""
     num_imgs = 1
-    feat = torch.rand(1, 1, 3, 3)
+    feat = paddle.rand(1, 1, 3, 3)
     assign_config = dict(
         type='MaxIoUAssigner',
         pos_iou_thr=0.5,

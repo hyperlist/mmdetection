@@ -114,9 +114,9 @@ def test_sparse_rcnn_forward():
     # test empty proposal in roi_head
     with torch.no_grad():
         # test no proposal in the whole batch
-        detector.roi_head.simple_test([imgs[0][None, :]], torch.empty(
-            (1, 0, 4)), torch.empty((1, 100, 4)), [img_metas[0]],
-                                      torch.ones((1, 4)))
+        detector.roi_head.simple_test([imgs[0][None, :]], paddle.empty(
+            (1, 0, 4)), paddle.empty((1, 100, 4)), [img_metas[0]],
+                                      paddle.ones((1, 4)))
 
 
 def test_rpn_forward():
@@ -251,7 +251,7 @@ def test_faster_rcnn_ohem_forward():
     feature = detector.extract_feat(imgs[0][None, :])
     losses = detector.roi_head.forward_train(
         feature,
-        img_metas, [torch.empty((0, 5))],
+        img_metas, [paddle.empty((0, 5))],
         gt_bboxes=gt_bboxes,
         gt_labels=gt_labels)
     assert isinstance(losses, dict)
@@ -331,7 +331,7 @@ def test_two_stage_forward(cfg_file):
 
     feature = detector.extract_feat(imgs[0][None, :])
     losses = detector.roi_head.forward_train(feature, img_metas,
-                                             [torch.empty(
+                                             [paddle.empty(
                                                  (0, 5))], **mm_inputs)
     assert isinstance(losses, dict)
 
@@ -352,18 +352,18 @@ def test_two_stage_forward(cfg_file):
     with torch.no_grad():
         # test no proposal in the whole batch
         detector.simple_test(
-            imgs[0][None, :], [img_metas[0]], proposals=[torch.empty((0, 4))])
+            imgs[0][None, :], [img_metas[0]], proposals=[paddle.empty((0, 4))])
 
         # test no proposal of aug
         features = detector.extract_feats([imgs[0][None, :]] * 2)
-        detector.roi_head.aug_test(features, [torch.empty((0, 4))] * 2,
+        detector.roi_head.aug_test(features, [paddle.empty((0, 4))] * 2,
                                    [[img_metas[0]]] * 2)
 
         # test rcnn_test_cfg is None
         if cfg_file not in cascade_models:
             feature = detector.extract_feat(imgs[0][None, :])
             bboxes, scores = detector.roi_head.simple_test_bboxes(
-                feature, [img_metas[0]], [torch.empty((0, 4))], None)
+                feature, [img_metas[0]], [paddle.empty((0, 4))], None)
             assert all([bbox.shape == torch.Size((0, 4)) for bbox in bboxes])
             assert all([
                 score.shape == torch.Size(
@@ -377,13 +377,13 @@ def test_two_stage_forward(cfg_file):
         x2y2 = x1y1 + torch.randint(1, 100, (10, 2))
         detector.simple_test(
             imgs[0][None, :].repeat(2, 1, 1, 1), [img_metas[0]] * 2,
-            proposals=[torch.empty((0, 4)),
+            proposals=[paddle.empty((0, 4)),
                        paddle.concat([x1y1, x2y2], dim=-1)])
 
         # test no proposal of aug
         detector.roi_head.aug_test(
             features, [paddle.concat([x1y1, x2y2], dim=-1),
-                       torch.empty((0, 4))], [[img_metas[0]]] * 2)
+                       paddle.empty((0, 4))], [[img_metas[0]]] * 2)
 
         # test rcnn_test_cfg is None
         if cfg_file not in cascade_models:
@@ -391,7 +391,7 @@ def test_two_stage_forward(cfg_file):
                 2, 1, 1, 1))
             bboxes, scores = detector.roi_head.simple_test_bboxes(
                 feature, [img_metas[0]] * 2,
-                [torch.empty((0, 4)),
+                [paddle.empty((0, 4)),
                  paddle.concat([x1y1, x2y2], dim=-1)], None)
             assert bboxes[0].shape == torch.Size((0, 4))
             assert scores[0].shape == torch.Size(

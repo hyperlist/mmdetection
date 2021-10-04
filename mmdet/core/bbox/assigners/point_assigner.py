@@ -55,13 +55,13 @@ class PointAssigner(BaseAssigner):
             # If no truth assign everything to the background
             assigned_gt_inds = points.new_full((num_points, ),
                                                0,
-                                               dtype=torch.long)
+                                               dtype=paddle.long)
             if gt_labels is None:
                 assigned_labels = None
             else:
                 assigned_labels = points.new_full((num_points, ),
                                                   -1,
-                                                  dtype=torch.long)
+                                                  dtype=paddle.long)
             return AssignResult(
                 num_gts, assigned_gt_inds, None, labels=assigned_labels)
 
@@ -80,10 +80,10 @@ class PointAssigner(BaseAssigner):
         gt_bboxes_lvl = torch.clamp(gt_bboxes_lvl, min=lvl_min, max=lvl_max)
 
         # stores the assigned gt index of each point
-        assigned_gt_inds = points.new_zeros((num_points, ), dtype=torch.long)
+        assigned_gt_inds = points.new_zeros((num_points, ), dtype=paddle.long)
         # stores the assigned gt dist (to this point) of each point
         assigned_gt_dist = points.new_full((num_points, ), float('inf'))
-        points_range = torch.arange(points.shape[0])
+        points_range = paddle.arange(points.shape[0])
 
         for idx in range(num_gts):
             gt_lvl = gt_bboxes_lvl[idx]

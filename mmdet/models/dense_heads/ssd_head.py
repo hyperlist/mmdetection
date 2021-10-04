@@ -162,13 +162,13 @@ class SSDHead(AnchorHead):
                         norm_cfg=self.norm_cfg,
                         act_cfg=self.act_cfg))
             cls_layers.append(
-                nn.Conv2d(
+                nn.Conv2D(
                     in_channel,
                     num_anchors * self.cls_out_channels,
                     kernel_size=1 if self.use_depthwise else 3,
                     padding=0 if self.use_depthwise else 1))
             reg_layers.append(
-                nn.Conv2d(
+                nn.Conv2D(
                     in_channel,
                     num_anchors * 4,
                     kernel_size=1 if self.use_depthwise else 3,

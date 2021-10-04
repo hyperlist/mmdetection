@@ -318,7 +318,7 @@ class BaseDetector(BaseModule, metaclass=ABCMeta):
         if segm_result is not None and len(labels) > 0:  # non empty
             segms = mmcv.concat_list(segm_result)
             if isinstance(segms[0], torch.Tensor):
-                segms = torch.stack(segms, dim=0).detach().cpu().numpy()
+                segms = paddle.stack(segms, dim=0).detach().cpu().numpy()
             else:
                 segms = np.stack(segms, axis=0)
         # if out_file specified, do not show image in window

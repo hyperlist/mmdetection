@@ -443,7 +443,7 @@ class HybridTaskCascadeRoIHead(CascadeRoIHead):
             else:
                 if rescale and not isinstance(scale_factors[0], float):
                     scale_factors = [
-                        torch.from_numpy(scale_factor).to(det_bboxes[0].device)
+                        paddle.to_tensor(scale_factor).to(det_bboxes[0].device)
                         for scale_factor in scale_factors
                     ]
                 _bboxes = [

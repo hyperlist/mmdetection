@@ -48,13 +48,13 @@ class YOLOBBoxCoder(BaseBBoxCoder):
         y_center = (bboxes[..., 1] + bboxes[..., 3]) * 0.5
         w = bboxes[..., 2] - bboxes[..., 0]
         h = bboxes[..., 3] - bboxes[..., 1]
-        w_target = torch.log((w_gt / w).clamp(min=self.eps))
-        h_target = torch.log((h_gt / h).clamp(min=self.eps))
+        w_target = paddle.log((w_gt / w).clamp(min=self.eps))
+        h_target = paddle.log((h_gt / h).clamp(min=self.eps))
         x_center_target = ((x_center_gt - x_center) / stride + 0.5).clamp(
             self.eps, 1 - self.eps)
         y_center_target = ((y_center_gt - y_center) / stride + 0.5).clamp(
             self.eps, 1 - self.eps)
-        encoded_bboxes = torch.stack(
+        encoded_bboxes = paddle.stack(
             [x_center_target, y_center_target, w_target, h_target], dim=-1)
         return encoded_bboxes
 
@@ -75,7 +75,7 @@ class YOLOBBoxCoder(BaseBBoxCoder):
             pred_bboxes[..., :2] - 0.5) * stride
         whs = (bboxes[..., 2:] -
                bboxes[..., :2]) * 0.5 * pred_bboxes[..., 2:].exp()
-        decoded_bboxes = torch.stack(
+        decoded_bboxes = paddle.stack(
             (xy_centers[..., 0] - whs[..., 0], xy_centers[..., 1] -
              whs[..., 1], xy_centers[..., 0] + whs[..., 0],
              xy_centers[..., 1] + whs[..., 1]),

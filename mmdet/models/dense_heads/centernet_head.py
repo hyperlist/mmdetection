@@ -64,9 +64,9 @@ class CenterNetHead(BaseDenseHead, BBoxTestMixin):
     def _build_head(self, in_channel, feat_channel, out_channel):
         """Build head for each branch."""
         layer = nn.Sequential(
-            nn.Conv2d(in_channel, feat_channel, kernel_size=3, padding=1),
+            nn.Conv2D(in_channel, feat_channel, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(feat_channel, out_channel, kernel_size=1))
+            nn.Conv2D(feat_channel, out_channel, kernel_size=1))
         return layer
 
     def init_weights(self):
@@ -75,7 +75,7 @@ class CenterNetHead(BaseDenseHead, BBoxTestMixin):
         self.heatmap_head[-1].bias.data.fill_(bias_init)
         for head in [self.wh_head, self.offset_head]:
             for m in head.modules():
-                if isinstance(m, nn.Conv2d):
+                if isinstance(m, nn.Conv2D):
                     normal_init(m, std=0.001)
 
     def forward(self, feats):
@@ -359,7 +359,7 @@ class CenterNetHead(BaseDenseHead, BBoxTestMixin):
         br_x = (topk_xs + wh[..., 0] / 2) * (inp_w / width)
         br_y = (topk_ys + wh[..., 1] / 2) * (inp_h / height)
 
-        batch_bboxes = torch.stack([tl_x, tl_y, br_x, br_y], dim=2)
+        batch_bboxes = paddle.stack([tl_x, tl_y, br_x, br_y], dim=2)
         batch_bboxes = paddle.concat((batch_bboxes, batch_scores[..., None]),
                                  dim=-1)
         return batch_bboxes, batch_topk_labels

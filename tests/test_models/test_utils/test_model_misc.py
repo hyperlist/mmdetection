@@ -6,8 +6,8 @@ from mmdet.models.utils import interpolate_as
 
 
 def test_interpolate_as():
-    source = torch.rand((1, 5, 4, 4))
-    target = torch.rand((1, 1, 16, 16))
+    source = paddle.rand((1, 5, 4, 4))
+    target = paddle.rand((1, 1, 16, 16))
 
     # Test 4D source and target
     result = interpolate_as(source, target)

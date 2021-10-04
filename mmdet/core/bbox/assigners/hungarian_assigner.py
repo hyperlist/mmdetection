@@ -98,10 +98,10 @@ class HungarianAssigner(BaseAssigner):
         # 1. assign -1 by default
         assigned_gt_inds = bbox_pred.new_full((num_bboxes, ),
                                               -1,
-                                              dtype=torch.long)
+                                              dtype=paddle.long)
         assigned_labels = bbox_pred.new_full((num_bboxes, ),
                                              -1,
-                                             dtype=torch.long)
+                                             dtype=paddle.long)
         if num_gts == 0 or num_bboxes == 0:
             # No ground truth or boxes, return empty assignment
             if num_gts == 0:
@@ -131,9 +131,9 @@ class HungarianAssigner(BaseAssigner):
             raise ImportError('Please run "pip install scipy" '
                               'to install scipy first.')
         matched_row_inds, matched_col_inds = linear_sum_assignment(cost)
-        matched_row_inds = torch.from_numpy(matched_row_inds).to(
+        matched_row_inds = paddle.to_tensor(matched_row_inds).to(
             bbox_pred.device)
-        matched_col_inds = torch.from_numpy(matched_col_inds).to(
+        matched_col_inds = paddle.to_tensor(matched_col_inds).to(
             bbox_pred.device)
 
         # 4. assign backgrounds and foregrounds

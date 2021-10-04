@@ -55,8 +55,8 @@ def test_random_sampler_empty_gt():
         [5, 5, 15, 15],
         [32, 32, 38, 42],
     ])
-    gt_bboxes = torch.empty(0, 4)
-    gt_labels = torch.empty(0, ).long()
+    gt_bboxes = paddle.empty(0, 4)
+    gt_labels = paddle.empty(0, ).long()
     assign_result = assigner.assign(bboxes, gt_bboxes, gt_labels=gt_labels)
 
     sampler = RandomSampler(
@@ -75,7 +75,7 @@ def test_random_sampler_empty_pred():
         ignore_iof_thr=0.5,
         ignore_wrt_candidates=False,
     )
-    bboxes = torch.empty(0, 4)
+    bboxes = paddle.empty(0, 4)
     gt_bboxes = torch.FloatTensor([
         [0, 0, 10, 9],
         [0, 10, 10, 19],
@@ -144,7 +144,7 @@ def test_ohem_sampler():
         neg_pos_ub=-1,
         add_gt_as_proposals=True)
 
-    feats = [torch.rand(1, 256, int(2**i), int(2**i)) for i in [6, 5, 4, 3, 2]]
+    feats = [paddle.rand(1, 256, int(2**i), int(2**i)) for i in [6, 5, 4, 3, 2]]
     sample_result = sampler.sample(
         assign_result, bboxes, gt_bboxes, gt_labels, feats=feats)
 
@@ -166,7 +166,7 @@ def test_ohem_sampler_empty_gt():
         [5, 5, 15, 15],
         [32, 32, 38, 42],
     ])
-    gt_bboxes = torch.empty(0, 4)
+    gt_bboxes = paddle.empty(0, 4)
     gt_labels = torch.LongTensor([])
     gt_bboxes_ignore = torch.Tensor([])
     assign_result = assigner.assign(
@@ -184,7 +184,7 @@ def test_ohem_sampler_empty_gt():
         neg_pos_ub=-1,
         add_gt_as_proposals=True)
 
-    feats = [torch.rand(1, 256, int(2**i), int(2**i)) for i in [6, 5, 4, 3, 2]]
+    feats = [paddle.rand(1, 256, int(2**i), int(2**i)) for i in [6, 5, 4, 3, 2]]
 
     sample_result = sampler.sample(
         assign_result, bboxes, gt_bboxes, gt_labels, feats=feats)
@@ -200,7 +200,7 @@ def test_ohem_sampler_empty_pred():
         ignore_iof_thr=0.5,
         ignore_wrt_candidates=False,
     )
-    bboxes = torch.empty(0, 4)
+    bboxes = paddle.empty(0, 4)
     gt_bboxes = torch.FloatTensor([
         [0, 0, 10, 10],
         [10, 10, 20, 20],
@@ -224,7 +224,7 @@ def test_ohem_sampler_empty_pred():
         neg_pos_ub=-1,
         add_gt_as_proposals=True)
 
-    feats = [torch.rand(1, 256, int(2**i), int(2**i)) for i in [6, 5, 4, 3, 2]]
+    feats = [paddle.rand(1, 256, int(2**i), int(2**i)) for i in [6, 5, 4, 3, 2]]
 
     sample_result = sampler.sample(
         assign_result, bboxes, gt_bboxes, gt_labels, feats=feats)
@@ -262,10 +262,10 @@ def test_score_hlr_sampler_empty_pred():
         neg_pos_ub=-1,
         add_gt_as_proposals=True)
     gt_bboxes_ignore = torch.Tensor([])
-    feats = [torch.rand(1, 256, int(2**i), int(2**i)) for i in [6, 5, 4, 3, 2]]
+    feats = [paddle.rand(1, 256, int(2**i), int(2**i)) for i in [6, 5, 4, 3, 2]]
 
     # empty bbox
-    bboxes = torch.empty(0, 4)
+    bboxes = paddle.empty(0, 4)
     gt_bboxes = torch.FloatTensor([
         [0, 0, 10, 10],
         [10, 10, 20, 20],
@@ -291,7 +291,7 @@ def test_score_hlr_sampler_empty_pred():
         [5, 5, 15, 15],
         [32, 32, 38, 42],
     ])
-    gt_bboxes = torch.empty(0, 4)
+    gt_bboxes = paddle.empty(0, 4)
     gt_labels = torch.LongTensor([])
     assign_result = assigner.assign(
         bboxes,

@@ -7,7 +7,7 @@ def images_to_levels(target, num_levels):
 
     [target_img0, target_img1] -> [target_level0, target_level1, ...]
     """
-    target = torch.stack(target, 0)
+    target = paddle.stack(target, 0)
     level_targets = []
     start = 0
     for n in num_levels:
@@ -60,10 +60,10 @@ def calc_region(bbox, ratio, featmap_size=None):
     Returns:
         tuple: x1, y1, x2, y2
     """
-    x1 = torch.round((1 - ratio) * bbox[0] + ratio * bbox[2]).long()
-    y1 = torch.round((1 - ratio) * bbox[1] + ratio * bbox[3]).long()
-    x2 = torch.round(ratio * bbox[0] + (1 - ratio) * bbox[2]).long()
-    y2 = torch.round(ratio * bbox[1] + (1 - ratio) * bbox[3]).long()
+    x1 = paddle.round((1 - ratio) * bbox[0] + ratio * bbox[2]).long()
+    y1 = paddle.round((1 - ratio) * bbox[1] + ratio * bbox[3]).long()
+    x2 = paddle.round(ratio * bbox[0] + (1 - ratio) * bbox[2]).long()
+    y2 = paddle.round(ratio * bbox[1] + (1 - ratio) * bbox[3]).long()
     if featmap_size is not None:
         x1 = x1.clamp(min=0, max=featmap_size[1])
         y1 = y1.clamp(min=0, max=featmap_size[0])

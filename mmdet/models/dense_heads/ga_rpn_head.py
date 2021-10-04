@@ -33,7 +33,7 @@ class GARPNHead(GuidedAnchorHead):
 
     def _init_layers(self):
         """Initialize layers of the head."""
-        self.rpn_conv = nn.Conv2d(
+        self.rpn_conv = nn.Conv2D(
             self.in_channels, self.feat_channels, 3, padding=1)
         super(GARPNHead, self)._init_layers()
 

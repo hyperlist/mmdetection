@@ -73,7 +73,7 @@ def test_imshow_det_bboxes():
 
     # test tensor mask type error
     with pytest.raises(AttributeError):
-        segms = torch.tensor(segms)
+        segms = paddle.to_tensor(segms)
         vis.imshow_det_bboxes(image, bbox, label, segms, show=False)
 
 
@@ -114,7 +114,7 @@ def test_imshow_gt_det_bboxes():
     os.remove(tmp_filename)
 
     # test tensor mask
-    gt_mask = torch.ones((2, 10, 10))
+    gt_mask = paddle.ones((2, 10, 10))
     annotation['gt_masks'] = gt_mask
     vis.imshow_gt_det_bboxes(
         image, annotation, result, out_file=tmp_filename, show=False)

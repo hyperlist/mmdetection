@@ -135,9 +135,9 @@ class AnchorFreeHead(BaseDenseHead, BBoxTestMixin):
 
     def _init_predictor(self):
         """Initialize predictor layers of the head."""
-        self.conv_cls = nn.Conv2d(
+        self.conv_cls = nn.Conv2D(
             self.feat_channels, self.cls_out_channels, 3, padding=1)
-        self.conv_reg = nn.Conv2d(self.feat_channels, 4, 3, padding=1)
+        self.conv_reg = nn.Conv2D(self.feat_channels, 4, 3, padding=1)
 
     def _load_from_state_dict(self, state_dict, prefix, local_metadata, strict,
                               missing_keys, unexpected_keys, error_msgs):
@@ -296,8 +296,8 @@ class AnchorFreeHead(BaseDenseHead, BBoxTestMixin):
         h, w = featmap_size
         # First create Range with the default dtype, than convert to
         # target `dtype` for onnx exporting.
-        x_range = torch.arange(w, device=device).to(dtype)
-        y_range = torch.arange(h, device=device).to(dtype)
+        x_range = paddle.arange(w, device=device).to(dtype)
+        y_range = paddle.arange(h, device=device).to(dtype)
         y, x = torch.meshgrid(y_range, x_range)
         if flatten:
             y = y.flatten()

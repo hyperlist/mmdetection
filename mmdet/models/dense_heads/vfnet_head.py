@@ -58,7 +58,7 @@ class VFNetHead(ATSSHead, FCOSHead):
 
     Example:
         >>> self = VFNetHead(11, 7)
-        >>> feats = [torch.rand(1, 7, s, s) for s in [4, 8, 16, 32, 64]]
+        >>> feats = [paddle.rand(1, 7, s, s) for s in [4, 8, 16, 32, 64]]
         >>> cls_score, bbox_pred, bbox_pred_refine= self.forward(feats)
         >>> assert len(cls_score) == len(self.scales)
     """  # noqa: E501
@@ -118,7 +118,7 @@ class VFNetHead(ATSSHead, FCOSHead):
         dcn_base_x = np.tile(dcn_base, self.dcn_kernel)
         dcn_base_offset = np.stack([dcn_base_y, dcn_base_x], axis=1).reshape(
             (-1))
-        self.dcn_base_offset = torch.tensor(dcn_base_offset).view(1, -1, 1, 1)
+        self.dcn_base_offset = paddle.to_tensor(dcn_base_offset).view(1, -1, 1, 1)
 
         super(FCOSHead, self).__init__(
             num_classes,
@@ -170,7 +170,7 @@ class VFNetHead(ATSSHead, FCOSHead):
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             bias=self.conv_bias)
-        self.vfnet_reg = nn.Conv2d(self.feat_channels, 4, 3, padding=1)
+        self.vfnet_reg = nn.Conv2D(self.feat_channels, 4, 3, padding=1)
         self.scales = nn.LayerList([Scale(1.0) for _ in self.strides])
 
         self.vfnet_reg_refine_dconv = DeformConv2d(
@@ -179,7 +179,7 @@ class VFNetHead(ATSSHead, FCOSHead):
             self.dcn_kernel,
             1,
             padding=self.dcn_pad)
-        self.vfnet_reg_refine = nn.Conv2d(self.feat_channels, 4, 3, padding=1)
+        self.vfnet_reg_refine = nn.Conv2D(self.feat_channels, 4, 3, padding=1)
         self.scales_refine = nn.LayerList([Scale(1.0) for _ in self.strides])
 
         self.vfnet_cls_dconv = DeformConv2d(
@@ -188,7 +188,7 @@ class VFNetHead(ATSSHead, FCOSHead):
             self.dcn_kernel,
             1,
             padding=self.dcn_pad)
-        self.vfnet_cls = nn.Conv2d(
+        self.vfnet_cls = nn.Conv2D(
             self.feat_channels, self.cls_out_channels, 3, padding=1)
 
     def forward(self, feats):
@@ -380,7 +380,7 @@ class VFNetHead(ATSSHead, FCOSHead):
 
         # FG cat_id: [0, num_classes - 1], BG cat_id: num_classes
         bg_class_ind = self.num_classes
-        pos_inds = torch.where(
+        pos_inds = paddle.where(
             ((flatten_labels >= 0) & (flatten_labels < bg_class_ind)) > 0)[0]
         num_pos = len(pos_inds)
 
@@ -435,13 +435,13 @@ class VFNetHead(ATSSHead, FCOSHead):
             # build IoU-aware cls_score targets
             if self.use_vfl:
                 pos_ious = iou_targets_rf.clone().detach()
-                cls_iou_targets = torch.zeros_like(flatten_cls_scores)
+                cls_iou_targets = paddle.zeros_like(flatten_cls_scores)
                 cls_iou_targets[pos_inds, pos_labels] = pos_ious
         else:
             loss_bbox = pos_bbox_preds.sum() * 0
             loss_bbox_refine = pos_bbox_preds_refine.sum() * 0
             if self.use_vfl:
-                cls_iou_targets = torch.zeros_like(flatten_cls_scores)
+                cls_iou_targets = paddle.zeros_like(flatten_cls_scores)
 
         if self.use_vfl:
             loss_cls = self.loss_cls(
@@ -602,18 +602,18 @@ class VFNetHead(ATSSHead, FCOSHead):
                            flatten=False):
         """Get points according to feature map sizes."""
         h, w = featmap_size
-        x_range = torch.arange(
+        x_range = paddle.arange(
             0, w * stride, stride, dtype=dtype, device=device)
-        y_range = torch.arange(
+        y_range = paddle.arange(
             0, h * stride, stride, dtype=dtype, device=device)
         y, x = torch.meshgrid(y_range, x_range)
         # to be compatible with anchor points in ATSS
         if self.use_atss:
-            points = torch.stack(
+            points = paddle.stack(
                 (x.reshape(-1), y.reshape(-1)), dim=-1) + \
                      stride * self.anchor_center_offset
         else:
-            points = torch.stack(
+            points = paddle.stack(
                 (x.reshape(-1), y.reshape(-1)), dim=-1) + stride // 2
         return points
 

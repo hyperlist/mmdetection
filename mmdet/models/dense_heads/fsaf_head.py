@@ -31,7 +31,7 @@ class FSAFHead(RetinaHead):
     Example:
         >>> import paddle
         >>> self = FSAFHead(11, 7)
-        >>> x = torch.rand(1, 7, 32, 32)
+        >>> x = paddle.rand(1, 7, 32, 32)
         >>> cls_score, bbox_pred = self.forward_single(x)
         >>> # Each anchor predicts a score for each class except background
         >>> cls_per_anchor = cls_score.shape[1] / self.num_anchors
@@ -101,7 +101,7 @@ class FSAFHead(RetinaHead):
         if not inside_flags.any():
             return (None, ) * 7
         # Assign gt and sample anchors
-        anchors = flat_anchors[inside_flags.type(torch.bool), :]
+        anchors = flat_anchors[inside_flags.type(paddle.bool), :]
         assign_result = self.assigner.assign(
             anchors, gt_bboxes, gt_bboxes_ignore,
             None if self.sampling else gt_labels)
@@ -110,16 +110,16 @@ class FSAFHead(RetinaHead):
                                               gt_bboxes)
 
         num_valid_anchors = anchors.shape[0]
-        bbox_targets = torch.zeros_like(anchors)
-        bbox_weights = torch.zeros_like(anchors)
+        bbox_targets = paddle.zeros_like(anchors)
+        bbox_weights = paddle.zeros_like(anchors)
         labels = anchors.new_full((num_valid_anchors, ),
                                   self.num_classes,
-                                  dtype=torch.long)
+                                  dtype=paddle.long)
         label_weights = anchors.new_zeros((num_valid_anchors, label_channels),
                                           dtype=torch.float)
         pos_gt_inds = anchors.new_full((num_valid_anchors, ),
                                        -1,
-                                       dtype=torch.long)
+                                       dtype=paddle.long)
 
         pos_inds = sampling_result.pos_inds
         neg_inds = sampling_result.neg_inds
@@ -270,7 +270,7 @@ class FSAFHead(RetinaHead):
             labels_list[i] = labels_list[i].flatten()
         num_gts = sum(map(len, gt_labels))  # total number of gt in the batch
         # The unique label index of each gt in the batch
-        label_sequence = torch.arange(num_gts, device=device)
+        label_sequence = paddle.arange(num_gts, device=device)
         # Collect the average loss of each gt in each level
         with torch.no_grad():
             loss_levels, = multi_apply(
@@ -280,10 +280,10 @@ class FSAFHead(RetinaHead):
                 pos_assigned_gt_inds_list,
                 labels_seq=label_sequence)
             # Shape: (fpn_levels, num_gts). Loss of each gt at each fpn level
-            loss_levels = torch.stack(loss_levels, dim=0)
+            loss_levels = paddle.stack(loss_levels, dim=0)
             # Locate the best fpn level for loss back-propagation
             if loss_levels.numel() == 0:  # zero gt
-                argmin = loss_levels.new_empty((num_gts, ), dtype=torch.long)
+                argmin = loss_levels.new_empty((num_gts, ), dtype=paddle.long)
             else:
                 _, argmin = loss_levels.min(dim=0)
 
@@ -407,8 +407,8 @@ class FSAFHead(RetinaHead):
                 - pos_flags (Tensor): Corrected bool tensor indicating the
                   final positive anchors. Shape: (num_anchors, ).
         """
-        loc_weight = torch.ones_like(reg_loss)
-        cls_weight = torch.ones_like(cls_loss)
+        loc_weight = paddle.ones_like(reg_loss)
+        cls_weight = paddle.ones_like(cls_loss)
         pos_flags = assigned_gt_inds >= 0  # positive pixel flag
         pos_indices = torch.nonzero(pos_flags, as_tuple=False).flatten()
 

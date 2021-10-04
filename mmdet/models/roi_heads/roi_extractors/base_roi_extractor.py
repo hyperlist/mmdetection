@@ -80,7 +80,7 @@ class BaseRoIExtractor(BaseModule, metaclass=ABCMeta):
         x2 = cx + new_w * 0.5
         y1 = cy - new_h * 0.5
         y2 = cy + new_h * 0.5
-        new_rois = torch.stack((rois[:, 0], x1, y1, x2, y2), dim=-1)
+        new_rois = paddle.stack((rois[:, 0], x1, y1, x2, y2), dim=-1)
         return new_rois
 
     @abstractmethod

@@ -19,11 +19,11 @@ class PointGenerator:
 
     def grid_points(self, featmap_size, stride=16, device='cuda'):
         feat_h, feat_w = featmap_size
-        shift_x = torch.arange(0., feat_w, device=device) * stride
-        shift_y = torch.arange(0., feat_h, device=device) * stride
+        shift_x = paddle.arange(0., feat_w, device=device) * stride
+        shift_y = paddle.arange(0., feat_h, device=device) * stride
         shift_xx, shift_yy = self._meshgrid(shift_x, shift_y)
         stride = shift_x.new_full((shift_xx.shape[0], ), stride)
-        shifts = torch.stack([shift_xx, shift_yy, stride], dim=-1)
+        shifts = paddle.stack([shift_xx, shift_yy, stride], dim=-1)
         all_points = shifts.to(device)
         return all_points
 
@@ -31,8 +31,8 @@ class PointGenerator:
         feat_h, feat_w = featmap_size
         valid_h, valid_w = valid_size
         assert valid_h <= feat_h and valid_w <= feat_w
-        valid_x = torch.zeros(feat_w, dtype=torch.bool, device=device)
-        valid_y = torch.zeros(feat_h, dtype=torch.bool, device=device)
+        valid_x = paddle.zeros(feat_w, dtype=paddle.bool, device=device)
+        valid_y = paddle.zeros(feat_h, dtype=paddle.bool, device=device)
         valid_x[:valid_w] = 1
         valid_y[:valid_h] = 1
         valid_xx, valid_yy = self._meshgrid(valid_x, valid_y)
@@ -138,17 +138,17 @@ class MlvlPointGenerator:
         """
         feat_h, feat_w = featmap_size
         stride_w, stride_h = self.strides[level_idx]
-        shift_x = (torch.arange(0., feat_w, device=device) +
+        shift_x = (paddle.arange(0., feat_w, device=device) +
                    self.offset) * stride_w
-        shift_y = (torch.arange(0., feat_h, device=device) +
+        shift_y = (paddle.arange(0., feat_h, device=device) +
                    self.offset) * stride_h
         shift_xx, shift_yy = self._meshgrid(shift_x, shift_y)
         if not with_stride:
-            shifts = torch.stack([shift_xx, shift_yy], dim=-1)
+            shifts = paddle.stack([shift_xx, shift_yy], dim=-1)
         else:
             stride_w = shift_xx.new_full((len(shift_xx), ), stride_w)
             stride_h = shift_xx.new_full((len(shift_yy), ), stride_h)
-            shifts = torch.stack([shift_xx, shift_yy, stride_w, stride_h],
+            shifts = paddle.stack([shift_xx, shift_yy, stride_w, stride_h],
                                  dim=-1)
         all_points = shifts.to(device)
         return all_points
@@ -202,8 +202,8 @@ class MlvlPointGenerator:
         feat_h, feat_w = featmap_size
         valid_h, valid_w = valid_size
         assert valid_h <= feat_h and valid_w <= feat_w
-        valid_x = torch.zeros(feat_w, dtype=torch.bool, device=device)
-        valid_y = torch.zeros(feat_h, dtype=torch.bool, device=device)
+        valid_x = paddle.zeros(feat_w, dtype=paddle.bool, device=device)
+        valid_y = paddle.zeros(feat_h, dtype=paddle.bool, device=device)
         valid_x[:valid_w] = 1
         valid_y[:valid_h] = 1
         valid_xx, valid_yy = self._meshgrid(valid_x, valid_y)
@@ -237,6 +237,6 @@ class MlvlPointGenerator:
         x = (prior_idxs % width + self.offset) * self.strides[level_idx][0]
         y = ((prior_idxs // width) % height +
              self.offset) * self.strides[level_idx][1]
-        prioris = torch.stack([x, y], 1).to(dtype)
+        prioris = paddle.stack([x, y], 1).to(dtype)
         prioris = prioris.to(device)
         return prioris

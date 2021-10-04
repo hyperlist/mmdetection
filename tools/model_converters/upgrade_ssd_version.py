@@ -20,7 +20,7 @@ def parse_config(config_strings):
 
 
 def convert(in_file, out_file):
-    checkpoint = torch.load(in_file)
+    checkpoint = paddle.load(in_file)
     in_state_dict = checkpoint.pop('state_dict')
     out_state_dict = OrderedDict()
     meta_info = checkpoint['meta']
@@ -39,10 +39,7 @@ def convert(in_file, out_file):
         out_state_dict[new_key] = value
     checkpoint['state_dict'] = out_state_dict
 
-    if torch.__version__ >= '1.6':
-        torch.save(checkpoint, out_file, _use_new_zipfile_serialization=False)
-    else:
-        torch.save(checkpoint, out_file)
+    paddle.save(checkpoint, out_file)
 
 
 def main():

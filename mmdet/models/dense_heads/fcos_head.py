@@ -51,7 +51,7 @@ class FCOSHead(AnchorFreeHead):
 
     Example:
         >>> self = FCOSHead(11, 7)
-        >>> feats = [torch.rand(1, 7, s, s) for s in [4, 8, 16, 32, 64]]
+        >>> feats = [paddle.rand(1, 7, s, s) for s in [4, 8, 16, 32, 64]]
         >>> cls_score, bbox_pred, centerness = self.forward(feats)
         >>> assert len(cls_score) == len(self.scales)
     """  # noqa: E501
@@ -105,7 +105,7 @@ class FCOSHead(AnchorFreeHead):
     def _init_layers(self):
         """Initialize layers of the head."""
         super()._init_layers()
-        self.conv_centerness = nn.Conv2d(self.feat_channels, 1, 3, padding=1)
+        self.conv_centerness = nn.Conv2D(self.feat_channels, 1, 3, padding=1)
         self.scales = nn.LayerList([Scale(1.0) for _ in self.strides])
 
     def forward(self, feats):
@@ -225,7 +225,7 @@ class FCOSHead(AnchorFreeHead):
         bg_class_ind = self.num_classes
         pos_inds = ((flatten_labels >= 0)
                     & (flatten_labels < bg_class_ind)).nonzero().reshape(-1)
-        num_pos = torch.tensor(
+        num_pos = paddle.to_tensor(
             len(pos_inds), dtype=torch.float, device=bbox_preds[0].device)
         num_pos = max(reduce_mean(num_pos), 1.0)
         loss_cls = self.loss_cls(
@@ -372,8 +372,8 @@ class FCOSHead(AnchorFreeHead):
         device = cls_scores[0].device
         batch_size = cls_scores[0].shape[0]
         # convert to tensor to keep tracing
-        nms_pre_tensor = torch.tensor(
-            cfg.get('nms_pre', -1), device=device, dtype=torch.long)
+        nms_pre_tensor = paddle.to_tensor(
+            cfg.get('nms_pre', -1), device=device, dtype=paddle.long)
         mlvl_bboxes = []
         mlvl_scores = []
         mlvl_centerness = []
@@ -395,7 +395,7 @@ class FCOSHead(AnchorFreeHead):
             if nms_pre > 0:
                 max_scores, _ = (scores * centerness[..., None]).max(-1)
                 _, topk_inds = max_scores.topk(nms_pre)
-                batch_inds = torch.arange(batch_size).view(
+                batch_inds = paddle.arange(batch_size).view(
                     -1, 1).expand_as(topk_inds).long()
                 # Avoid onnx2tensorrt issue in https://github.com/NVIDIA/TensorRT/issues/1134 # noqa: E501
                 if torch.onnx.is_in_onnx_export():
@@ -478,7 +478,7 @@ class FCOSHead(AnchorFreeHead):
                            flatten=False):
         """Get points according to feature map sizes."""
         y, x = super()._get_points_single(featmap_size, stride, dtype, device)
-        points = torch.stack((x.reshape(-1) * stride, y.reshape(-1) * stride),
+        points = paddle.stack((x.reshape(-1) * stride, y.reshape(-1) * stride),
                              dim=-1) + stride // 2
         return points
 
@@ -568,14 +568,14 @@ class FCOSHead(AnchorFreeHead):
         right = gt_bboxes[..., 2] - xs
         top = ys - gt_bboxes[..., 1]
         bottom = gt_bboxes[..., 3] - ys
-        bbox_targets = torch.stack((left, top, right, bottom), -1)
+        bbox_targets = paddle.stack((left, top, right, bottom), -1)
 
         if self.center_sampling:
             # condition1: inside a `center bbox`
             radius = self.center_sample_radius
             center_xs = (gt_bboxes[..., 0] + gt_bboxes[..., 2]) / 2
             center_ys = (gt_bboxes[..., 1] + gt_bboxes[..., 3]) / 2
-            center_gts = torch.zeros_like(gt_bboxes)
+            center_gts = paddle.zeros_like(gt_bboxes)
             stride = center_xs.new_zeros(center_xs.shape)
 
             # project the points on current lvl back to the `original` sizes
@@ -589,20 +589,20 @@ class FCOSHead(AnchorFreeHead):
             y_mins = center_ys - stride
             x_maxs = center_xs + stride
             y_maxs = center_ys + stride
-            center_gts[..., 0] = torch.where(x_mins > gt_bboxes[..., 0],
+            center_gts[..., 0] = paddle.where(x_mins > gt_bboxes[..., 0],
                                              x_mins, gt_bboxes[..., 0])
-            center_gts[..., 1] = torch.where(y_mins > gt_bboxes[..., 1],
+            center_gts[..., 1] = paddle.where(y_mins > gt_bboxes[..., 1],
                                              y_mins, gt_bboxes[..., 1])
-            center_gts[..., 2] = torch.where(x_maxs > gt_bboxes[..., 2],
+            center_gts[..., 2] = paddle.where(x_maxs > gt_bboxes[..., 2],
                                              gt_bboxes[..., 2], x_maxs)
-            center_gts[..., 3] = torch.where(y_maxs > gt_bboxes[..., 3],
+            center_gts[..., 3] = paddle.where(y_maxs > gt_bboxes[..., 3],
                                              gt_bboxes[..., 3], y_maxs)
 
             cb_dist_left = xs - center_gts[..., 0]
             cb_dist_right = center_gts[..., 2] - xs
             cb_dist_top = ys - center_gts[..., 1]
             cb_dist_bottom = center_gts[..., 3] - ys
-            center_bbox = torch.stack(
+            center_bbox = paddle.stack(
                 (cb_dist_left, cb_dist_top, cb_dist_right, cb_dist_bottom), -1)
             inside_gt_bbox_mask = center_bbox.min(-1)[0] > 0
         else:
@@ -646,4 +646,4 @@ class FCOSHead(AnchorFreeHead):
             centerness_targets = (
                 left_right.min(dim=-1)[0] / left_right.max(dim=-1)[0]) * (
                     top_bottom.min(dim=-1)[0] / top_bottom.max(dim=-1)[0])
-        return torch.sqrt(centerness_targets)
+        return paddle.sqrt(centerness_targets)

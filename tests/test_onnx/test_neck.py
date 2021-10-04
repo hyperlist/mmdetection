@@ -41,7 +41,7 @@ def fpn_neck_config(test_step_name):
     out_channels = 8
 
     feats = [
-        torch.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
+        paddle.rand(1, in_channels[i], feat_sizes[i], feat_sizes[i])
         for i in range(len(in_channels))
     ]
 

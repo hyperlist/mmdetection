@@ -82,7 +82,7 @@ class FusedSemanticHead(BaseModule):
             1,
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg)
-        self.conv_logits = nn.Conv2d(conv_out_channels, self.num_classes, 1)
+        self.conv_logits = nn.Conv2D(conv_out_channels, self.num_classes, 1)
         if ignore_label:
             loss_seg['ignore_index'] = ignore_label
         if loss_weight:

@@ -4,7 +4,7 @@ import math
 import numpy as np
 import paddle
 from mmcv.runner import get_dist_info
-from torch.utils.data import Sampler
+from paddle.io import Sampler
 
 
 class GroupSampler(Sampler):

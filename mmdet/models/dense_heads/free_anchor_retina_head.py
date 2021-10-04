@@ -105,7 +105,7 @@ class FreeAnchorRetinaHead(RetinaHead):
 
             with torch.no_grad():
                 if len(gt_bboxes_) == 0:
-                    image_box_prob = torch.zeros(
+                    image_box_prob = paddle.zeros(
                         anchors_.size(0),
                         self.cls_out_channels).type_as(bbox_preds_)
                 else:
@@ -125,8 +125,8 @@ class FreeAnchorRetinaHead(RetinaHead):
 
                     # object_cls_box_prob: P{a_{j} -> b_{i}}, shape: [i, c, j]
                     num_obj = gt_labels_.size(0)
-                    indices = torch.stack([
-                        torch.arange(num_obj).type_as(gt_labels_), gt_labels_
+                    indices = paddle.stack([
+                        paddle.arange(num_obj).type_as(gt_labels_), gt_labels_
                     ],
                                           dim=0)
                     object_cls_box_prob = torch.sparse_coo_tensor(
@@ -145,14 +145,14 @@ class FreeAnchorRetinaHead(RetinaHead):
 
                     indices = torch.nonzero(box_cls_prob, as_tuple=False).t_()
                     if indices.numel() == 0:
-                        image_box_prob = torch.zeros(
+                        image_box_prob = paddle.zeros(
                             anchors_.size(0),
                             self.cls_out_channels).type_as(object_box_prob)
                     else:
-                        nonzero_box_prob = torch.where(
+                        nonzero_box_prob = paddle.where(
                             (gt_labels_.unsqueeze(dim=-1) == indices[0]),
                             object_box_prob[:, indices[1]],
-                            torch.tensor([
+                            paddle.to_tensor([
                                 0
                             ]).type_as(object_box_prob)).max(dim=0).values
 
@@ -199,7 +199,7 @@ class FreeAnchorRetinaHead(RetinaHead):
         positive_loss = paddle.concat(positive_losses).sum() / max(1, num_pos)
 
         # box_prob: P{a_{j} \in A_{+}}
-        box_prob = torch.stack(box_prob, dim=0)
+        box_prob = paddle.stack(box_prob, dim=0)
 
         # negative_loss:
         # \sum_{j}{ FL((1 - P{a_{j} \in A_{+}}) * (1 - P_{j}^{bg})) } / n||B||
@@ -242,7 +242,7 @@ class FreeAnchorRetinaHead(RetinaHead):
         bag_prob = (weight * matched_prob).sum(dim=1)
         # positive_bag_loss = -self.alpha * log(bag_prob)
         return self.alpha * F.binary_cross_entropy(
-            bag_prob, torch.ones_like(bag_prob), reduction='none')
+            bag_prob, paddle.ones_like(bag_prob), reduction='none')
 
     def negative_bag_loss(self, cls_prob, box_prob):
         """Compute negative bag loss.
@@ -267,5 +267,5 @@ class FreeAnchorRetinaHead(RetinaHead):
         # This will cause the neg_prob.log() to be inf without clamp.
         prob = prob.clamp(min=EPS, max=1 - EPS)
         negative_bag_loss = prob**self.gamma * F.binary_cross_entropy(
-            prob, torch.zeros_like(prob), reduction='none')
+            prob, paddle.zeros_like(prob), reduction='none')
         return (1 - self.alpha) * negative_bag_loss

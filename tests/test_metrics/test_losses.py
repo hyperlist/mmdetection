@@ -24,12 +24,12 @@ def test_ce_loss():
     loss_cls = build_loss(loss_cls_cfg)
     fake_pred = torch.Tensor([[100, -100]])
     fake_label = torch.Tensor([1]).long()
-    assert torch.allclose(loss_cls(fake_pred, fake_label), torch.tensor(40.))
+    assert torch.allclose(loss_cls(fake_pred, fake_label), paddle.to_tensor(40.))
 
     loss_cls_cfg = dict(
         type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)
     loss_cls = build_loss(loss_cls_cfg)
-    assert torch.allclose(loss_cls(fake_pred, fake_label), torch.tensor(200.))
+    assert torch.allclose(loss_cls(fake_pred, fake_label), paddle.to_tensor(200.))
 
 
 def test_varifocal_loss():
@@ -68,7 +68,7 @@ def test_varifocal_loss():
     loss_cls = build_loss(loss_cls_cfg)
     fake_pred = torch.Tensor([[100.0, -100.0]])
     fake_target = torch.Tensor([[1.0, 0.0]])
-    assert torch.allclose(loss_cls(fake_pred, fake_target), torch.tensor(0.0))
+    assert torch.allclose(loss_cls(fake_pred, fake_target), paddle.to_tensor(0.0))
 
     # test the loss with weights
     loss_cls = build_loss(loss_cls_cfg)
@@ -76,7 +76,7 @@ def test_varifocal_loss():
     fake_target = torch.Tensor([[1.0, 1.0]])
     fake_weight = torch.Tensor([0.0, 1.0])
     assert torch.allclose(
-        loss_cls(fake_pred, fake_target, fake_weight), torch.tensor(0.0))
+        loss_cls(fake_pred, fake_target, fake_weight), paddle.to_tensor(0.0))
 
 
 def test_kd_loss():
@@ -99,7 +99,7 @@ def test_kd_loss():
     loss_cls = build_loss(loss_cls_cfg)
     fake_pred = torch.Tensor([[100.0, 100.0]])
     fake_target = torch.Tensor([[1.0, 1.0]])
-    assert torch.allclose(loss_cls(fake_pred, fake_target), torch.tensor(0.0))
+    assert torch.allclose(loss_cls(fake_pred, fake_target), paddle.to_tensor(0.0))
 
     # test the loss with weights
     loss_cls = build_loss(loss_cls_cfg)
@@ -107,7 +107,7 @@ def test_kd_loss():
     fake_target = torch.Tensor([[1.0, 0.0], [1.0, 1.0]])
     fake_weight = torch.Tensor([0.0, 1.0])
     assert torch.allclose(
-        loss_cls(fake_pred, fake_target, fake_weight), torch.tensor(0.0))
+        loss_cls(fake_pred, fake_target, fake_weight), paddle.to_tensor(0.0))
 
 
 def test_seesaw_loss():
@@ -138,8 +138,8 @@ def test_seesaw_loss():
     fake_pred = torch.Tensor([[-100, 100, -100, 100]])
     fake_label = torch.Tensor([1]).long()
     loss = loss_cls(fake_pred, fake_label)
-    assert torch.allclose(loss['loss_cls_objectness'], torch.tensor(200.))
-    assert torch.allclose(loss['loss_cls_classes'], torch.tensor(0.))
+    assert torch.allclose(loss['loss_cls_objectness'], paddle.to_tensor(200.))
+    assert torch.allclose(loss['loss_cls_classes'], paddle.to_tensor(0.))
 
     # test the calculation with p and without q
     loss_cls_cfg = dict(
@@ -149,8 +149,8 @@ def test_seesaw_loss():
     fake_label = torch.Tensor([0]).long()
     loss_cls.cum_samples[0] = torch.exp(torch.Tensor([20]))
     loss = loss_cls(fake_pred, fake_label)
-    assert torch.allclose(loss['loss_cls_objectness'], torch.tensor(200.))
-    assert torch.allclose(loss['loss_cls_classes'], torch.tensor(180.))
+    assert torch.allclose(loss['loss_cls_objectness'], paddle.to_tensor(200.))
+    assert torch.allclose(loss['loss_cls_classes'], paddle.to_tensor(180.))
 
     # test the calculation with q and without p
     loss_cls_cfg = dict(
@@ -159,9 +159,9 @@ def test_seesaw_loss():
     fake_pred = torch.Tensor([[-100, 100, -100, 100]])
     fake_label = torch.Tensor([0]).long()
     loss = loss_cls(fake_pred, fake_label)
-    assert torch.allclose(loss['loss_cls_objectness'], torch.tensor(200.))
+    assert torch.allclose(loss['loss_cls_objectness'], paddle.to_tensor(200.))
     assert torch.allclose(loss['loss_cls_classes'],
-                          torch.tensor(200.) + torch.tensor(100.).log())
+                          paddle.to_tensor(200.) + paddle.to_tensor(100.).log())
 
     # test the others
     loss_cls_cfg = dict(
@@ -177,16 +177,16 @@ def test_seesaw_loss():
     loss = loss_cls(fake_pred, fake_label)
     acc = loss_cls.get_accuracy(fake_pred, fake_label)
     act = loss_cls.get_activation(fake_pred)
-    assert torch.allclose(loss, torch.tensor(0.))
-    assert torch.allclose(acc['acc_objectness'], torch.tensor(100.))
-    assert torch.allclose(acc['acc_classes'], torch.tensor(100.))
-    assert torch.allclose(act, torch.tensor([1., 0., 0.]))
+    assert torch.allclose(loss, paddle.to_tensor(0.))
+    assert torch.allclose(acc['acc_objectness'], paddle.to_tensor(100.))
+    assert torch.allclose(acc['acc_classes'], paddle.to_tensor(100.))
+    assert torch.allclose(act, paddle.to_tensor([1., 0., 0.]))
 
 
 def test_accuracy():
     # test for empty pred
-    pred = torch.empty(0, 4)
-    label = torch.empty(0)
+    pred = paddle.empty(0, 4)
+    label = paddle.empty(0)
     accuracy = Accuracy(topk=1)
     acc = accuracy(pred, label)
     assert acc.item() == 0

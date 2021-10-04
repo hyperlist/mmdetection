@@ -77,7 +77,7 @@ class AdaptivePadding(nn.Layer):
         >>> kernel_size = 16
         >>> stride = 16
         >>> dilation = 1
-        >>> input = torch.rand(1, 1, 15, 17)
+        >>> input = paddle.rand(1, 1, 15, 17)
         >>> adap_pad = AdaptivePadding(
         >>>     kernel_size=kernel_size,
         >>>     stride=stride,
@@ -85,7 +85,7 @@ class AdaptivePadding(nn.Layer):
         >>>     padding="corner")
         >>> out = adap_pad(input)
         >>> assert (out.shape[2], out.shape[3]) == (16, 32)
-        >>> input = torch.rand(1, 1, 16, 17)
+        >>> input = paddle.rand(1, 1, 16, 17)
         >>> out = adap_pad(input)
         >>> assert (out.shape[2], out.shape[3]) == (16, 32)
     """
@@ -223,7 +223,7 @@ class PatchEmbed(BaseModule):
                 input_w = input_w + pad_w
                 input_size = (input_h, input_w)
 
-            # https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html
+            # https://pytorch.org/docs/stable/generated/torch.nn.Conv2D.html
             h_out = (input_size[0] + 2 * padding[0] - dilation[0] *
                      (kernel_size[0] - 1) - 1) // stride[0] + 1
             w_out = (input_size[1] + 2 * padding[1] - dilation[1] *
@@ -401,7 +401,7 @@ def inverse_sigmoid(x, eps=1e-5):
     x = x.clamp(min=0, max=1)
     x1 = x.clamp(min=eps)
     x2 = (1 - x).clamp(min=eps)
-    return torch.log(x1 / x2)
+    return paddle.log(x1 / x2)
 
 
 @TRANSFORMER_LAYER.register_module()
@@ -532,7 +532,7 @@ class DetrTransformerDecoder(TransformerLayerSequence):
                     intermediate.append(self.post_norm(query))
                 else:
                     intermediate.append(query)
-        return torch.stack(intermediate)
+        return paddle.stack(intermediate)
 
 
 @TRANSFORMER.register_module()
@@ -607,7 +607,7 @@ class Transformer(BaseModule):
             value=None,
             query_pos=pos_embed,
             query_key_padding_mask=mask)
-        target = torch.zeros_like(query_embed)
+        target = paddle.zeros_like(query_embed)
         # out_dec: [num_layers, num_query, bs, dim]
         out_dec = self.decoder(
             query=target,
@@ -703,7 +703,7 @@ class DeformableDetrTransformerDecoder(TransformerLayerSequence):
                 intermediate_reference_points.append(reference_points)
 
         if self.return_intermediate:
-            return torch.stack(intermediate), torch.stack(
+            return paddle.stack(intermediate), paddle.stack(
                 intermediate_reference_points)
 
         return output, reference_points
@@ -736,7 +736,7 @@ class DeformableDetrTransformer(Transformer):
 
     def init_layers(self):
         """Initialize layers of the DeformableDetrTransformer."""
-        self.level_embeds = nn.Parameter(
+        self.level_embeds = paddle.create_parameter(
             torch.Tensor(self.num_feature_levels, self.embed_dims))
 
         if self.as_two_stage:
@@ -752,7 +752,7 @@ class DeformableDetrTransformer(Transformer):
         """Initialize the transformer weights."""
         for p in self.parameters():
             if p.dim() > 1:
-                nn.init.xavier_uniform_(p)
+                nn.initializer.XavierUniform(p)
         for m in self.modules():
             if isinstance(m, MultiScaleDeformableAttention):
                 m.init_weights()
@@ -805,7 +805,7 @@ class DeformableDetrTransformer(Transformer):
             scale = paddle.concat([valid_W.unsqueeze(-1),
                                valid_H.unsqueeze(-1)], 1).view(N, 1, 1, 2)
             grid = (grid.unsqueeze(0).expand(N, -1, -1, -1) + 0.5) / scale
-            wh = torch.ones_like(grid) * 0.05 * (2.0**lvl)
+            wh = paddle.ones_like(grid) * 0.05 * (2.0**lvl)
             proposal = paddle.concat((grid, wh), -1).view(N, -1, 4)
             proposals.append(proposal)
             _cur += (H * W)
@@ -813,7 +813,7 @@ class DeformableDetrTransformer(Transformer):
         output_proposals_valid = ((output_proposals > 0.01) &
                                   (output_proposals < 0.99)).all(
                                       -1, keepdim=True)
-        output_proposals = torch.log(output_proposals / (1 - output_proposals))
+        output_proposals = paddle.log(output_proposals / (1 - output_proposals))
         output_proposals = output_proposals.masked_fill(
             memory_padding_mask.unsqueeze(-1), float('inf'))
         output_proposals = output_proposals.masked_fill(
@@ -856,7 +856,7 @@ class DeformableDetrTransformer(Transformer):
                 valid_ratios[:, None, lvl, 1] * H)
             ref_x = ref_x.reshape(-1)[None] / (
                 valid_ratios[:, None, lvl, 0] * W)
-            ref = torch.stack((ref_x, ref_y), -1)
+            ref = paddle.stack((ref_x, ref_y), -1)
             reference_points_list.append(ref)
         reference_points = paddle.concat(reference_points_list, 1)
         reference_points = reference_points[:, :, None] * valid_ratios[:, None]
@@ -869,7 +869,7 @@ class DeformableDetrTransformer(Transformer):
         valid_W = torch.sum(~mask[:, 0, :], 1)
         valid_ratio_h = valid_H.float() / H
         valid_ratio_w = valid_W.float() / W
-        valid_ratio = torch.stack([valid_ratio_w, valid_ratio_h], -1)
+        valid_ratio = paddle.stack([valid_ratio_w, valid_ratio_h], -1)
         return valid_ratio
 
     def get_proposal_pos_embed(self,
@@ -878,7 +878,7 @@ class DeformableDetrTransformer(Transformer):
                                temperature=10000):
         """Get the position embedding of proposal."""
         scale = 2 * math.pi
-        dim_t = torch.arange(
+        dim_t = paddle.arange(
             num_pos_feats, dtype=torch.float32, device=proposals.device)
         dim_t = temperature**(2 * (dim_t // 2) / num_pos_feats)
         # N, L, 4
@@ -886,7 +886,7 @@ class DeformableDetrTransformer(Transformer):
         # N, L, 4, 128
         pos = proposals[:, :, :, None] / dim_t
         # N, L, 4, 64, 2
-        pos = torch.stack((pos[:, :, :, 0::2].sin(), pos[:, :, :, 1::2].cos()),
+        pos = paddle.stack((pos[:, :, :, 0::2].sin(), pos[:, :, :, 1::2].cos()),
                           dim=4).flatten(2)
         return pos
 
@@ -968,10 +968,10 @@ class DeformableDetrTransformer(Transformer):
         mask_flatten = paddle.concat(mask_flatten, 1)
         lvl_pos_embed_flatten = paddle.concat(lvl_pos_embed_flatten, 1)
         spatial_shapes = torch.as_tensor(
-            spatial_shapes, dtype=torch.long, device=feat_flatten.device)
+            spatial_shapes, dtype=paddle.long, device=feat_flatten.device)
         level_start_index = paddle.concat((spatial_shapes.new_zeros(
             (1, )), spatial_shapes.prod(1).cumsum(0)[:-1]))
-        valid_ratios = torch.stack(
+        valid_ratios = paddle.stack(
             [self.get_valid_ratio(m) for m in mlvl_masks], 1)
 
         reference_points = \

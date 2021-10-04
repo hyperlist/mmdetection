@@ -133,7 +133,7 @@ class DeformableDETRHead(DETRHead):
         for feat in mlvl_feats:
             mlvl_masks.append(
                 F.interpolate(img_masks[None],
-                              size=feat.shape[-2:]).to(torch.bool).squeeze(0))
+                              size=feat.shape[-2:]).to(paddle.bool).squeeze(0))
             mlvl_positional_encodings.append(
                 self.positional_encoding(mlvl_masks[-1]))
 
@@ -170,8 +170,8 @@ class DeformableDETRHead(DETRHead):
             outputs_classes.append(outputs_class)
             outputs_coords.append(outputs_coord)
 
-        outputs_classes = torch.stack(outputs_classes)
-        outputs_coords = torch.stack(outputs_coords)
+        outputs_classes = paddle.stack(outputs_classes)
+        outputs_coords = paddle.stack(outputs_coords)
         if self.as_two_stage:
             return outputs_classes, outputs_coords, \
                 enc_outputs_class, \
@@ -239,7 +239,7 @@ class DeformableDETRHead(DETRHead):
         # loss of proposal generated from encode feature map.
         if enc_cls_scores is not None:
             binary_labels_list = [
-                torch.zeros_like(gt_labels_list[i])
+                paddle.zeros_like(gt_labels_list[i])
                 for i in range(len(img_metas))
             ]
             enc_loss_cls, enc_losses_bbox, enc_losses_iou = \

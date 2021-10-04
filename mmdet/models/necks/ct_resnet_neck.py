@@ -82,7 +82,7 @@ class CTResNetNeck(BaseModule):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
             # self.use_dcn is False
-            elif not self.use_dcn and isinstance(m, nn.Conv2d):
+            elif not self.use_dcn and isinstance(m, nn.Conv2D):
                 # In order to be consistent with the source code,
                 # reset the Conv2d initialization parameters
                 m.reset_parameters()

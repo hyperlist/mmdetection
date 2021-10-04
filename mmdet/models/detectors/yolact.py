@@ -61,7 +61,7 @@ class YOLACT(SingleStageDetector):
         """
         # convert Bitmap mask or Polygon Mask to Tensor here
         gt_masks = [
-            gt_mask.to_tensor(dtype=torch.uint8, device=img.device)
+            gt_mask.to_tensor(dtype=paddle.uint8, device=img.device)
             for gt_mask in gt_masks
         ]
 
@@ -85,7 +85,7 @@ class YOLACT(SingleStageDetector):
 
         # check NaN and Inf
         for loss_name in losses.keys():
-            assert torch.isfinite(torch.stack(losses[loss_name]))\
+            assert torch.isfinite(paddle.stack(losses[loss_name]))\
                 .all().item(), '{} becomes infinite or NaN!'\
                 .format(loss_name)
 

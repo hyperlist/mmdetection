@@ -55,8 +55,8 @@ class WindowMSA(BaseModule):
         self.init_cfg = init_cfg
 
         # define a parameter table of relative position bias
-        self.relative_position_bias_table = nn.Parameter(
-            torch.zeros((2 * window_size[0] - 1) * (2 * window_size[1] - 1),
+        self.relative_position_bias_table = paddle.create_parameter(
+            paddle.zeros((2 * window_size[0] - 1) * (2 * window_size[1] - 1),
                         num_heads))  # 2*Wh-1 * 2*Ww-1, nH
 
         # About 2x faster than original impl
@@ -118,8 +118,8 @@ class WindowMSA(BaseModule):
 
     @staticmethod
     def double_step_seq(step1, len1, step2, len2):
-        seq1 = torch.arange(0, step1 * len1, step1)
-        seq2 = torch.arange(0, step2 * len2, step2)
+        seq1 = paddle.arange(0, step1 * len1, step1)
+        seq2 = paddle.arange(0, step2 * len2, step2)
         return (seq1[:, None] + seq2[None, :]).reshape(1, -1)
 
 
@@ -195,7 +195,7 @@ class ShiftWindowMSA(BaseModule):
                 dims=(1, 2))
 
             # calculate attention mask for SW-MSA
-            img_mask = torch.zeros((1, H_pad, W_pad, 1), device=query.device)
+            img_mask = paddle.zeros((1, H_pad, W_pad, 1), device=query.device)
             h_slices = (slice(0, -self.window_size),
                         slice(-self.window_size,
                               -self.shift_size), slice(-self.shift_size, None))
@@ -587,8 +587,8 @@ class SwinTransformer(BaseModule):
             patch_row = pretrain_img_size[0] // patch_size
             patch_col = pretrain_img_size[1] // patch_size
             num_patches = patch_row * patch_col
-            self.absolute_pos_embed = nn.Parameter(
-                torch.zeros((1, num_patches, embed_dims)))
+            self.absolute_pos_embed = paddle.create_parameter(
+                paddle.zeros((1, num_patches, embed_dims)))
 
         self.drop_after_pos = nn.Dropout(p=drop_rate)
 

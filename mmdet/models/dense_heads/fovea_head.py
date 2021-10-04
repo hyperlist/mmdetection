@@ -27,7 +27,7 @@ class FeatureAlign(BaseModule):
                          type='Normal', name='conv_adaption', std=0.01))):
         super(FeatureAlign, self).__init__(init_cfg)
         offset_channels = kernel_size * kernel_size * 2
-        self.conv_offset = nn.Conv2d(
+        self.conv_offset = nn.Conv2D(
             4, deform_groups * offset_channels, 1, bias=False)
         self.conv_adaption = DeformConv2d(
             in_channels,
@@ -78,12 +78,12 @@ class FoveaHead(AnchorFreeHead):
     def _init_layers(self):
         # box branch
         super()._init_reg_convs()
-        self.conv_reg = nn.Conv2d(self.feat_channels, 4, 3, padding=1)
+        self.conv_reg = nn.Conv2D(self.feat_channels, 4, 3, padding=1)
 
         # cls branch
         if not self.with_deform:
             super()._init_cls_convs()
-            self.conv_cls = nn.Conv2d(
+            self.conv_cls = nn.Conv2D(
                 self.feat_channels, self.cls_out_channels, 3, padding=1)
         else:
             self.cls_convs = nn.LayerList()
@@ -109,7 +109,7 @@ class FoveaHead(AnchorFreeHead):
                 self.feat_channels,
                 kernel_size=3,
                 deform_groups=self.deform_groups)
-            self.conv_cls = nn.Conv2d(
+            self.conv_cls = nn.Conv2D(
                 int(self.feat_channels * 4),
                 self.cls_out_channels,
                 3,
@@ -176,7 +176,7 @@ class FoveaHead(AnchorFreeHead):
                 pos_weights,
                 avg_factor=num_pos)
         else:
-            loss_bbox = torch.tensor(
+            loss_bbox = paddle.to_tensor(
                 0,
                 dtype=flatten_bbox_preds.dtype,
                 device=flatten_bbox_preds.device)
@@ -210,7 +210,7 @@ class FoveaHead(AnchorFreeHead):
                            featmap_size_list=None,
                            point_list=None):
 
-        gt_areas = torch.sqrt((gt_bboxes_raw[:, 2] - gt_bboxes_raw[:, 0]) *
+        gt_areas = paddle.sqrt((gt_bboxes_raw[:, 2] - gt_bboxes_raw[:, 0]) *
                               (gt_bboxes_raw[:, 3] - gt_bboxes_raw[:, 1]))
         label_list = []
         bbox_target_list = []
@@ -227,7 +227,7 @@ class FoveaHead(AnchorFreeHead):
                            (gt_areas <= upper_bound)).nonzero().flatten()
             if len(hit_indices) == 0:
                 label_list.append(labels)
-                bbox_target_list.append(torch.log(bbox_targets))
+                bbox_target_list.append(paddle.log(bbox_targets))
                 continue
             _, hit_index_order = torch.sort(-gt_areas[hit_indices])
             hit_indices = hit_indices[hit_index_order]
@@ -262,7 +262,7 @@ class FoveaHead(AnchorFreeHead):
                     (gt_y2 - stride * y[py1:py2 + 1, px1:px2 + 1]) / base_len
             bbox_targets = bbox_targets.clamp(min=1. / 16, max=16.)
             label_list.append(labels)
-            bbox_target_list.append(torch.log(bbox_targets))
+            bbox_target_list.append(paddle.log(bbox_targets))
         return label_list, bbox_target_list
 
     def get_bboxes(self,
@@ -332,7 +332,7 @@ class FoveaHead(AnchorFreeHead):
                 clamp(min=0, max=img_shape[1] - 1)
             y2 = (stride * y + base_len * bbox_pred[:, 3]). \
                 clamp(min=0, max=img_shape[0] - 1)
-            bboxes = torch.stack([x1, y1, x2, y2], -1)
+            bboxes = paddle.stack([x1, y1, x2, y2], -1)
             det_bboxes.append(bboxes)
             det_scores.append(scores)
         det_bboxes = paddle.concat(det_bboxes)

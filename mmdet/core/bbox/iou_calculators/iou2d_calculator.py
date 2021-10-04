@@ -182,7 +182,7 @@ def bbox_overlaps(bboxes1, bboxes2, mode='iou', is_aligned=False, eps=1e-6):
         >>> assert overlaps.shape == (3, )
 
     Example:
-        >>> empty = torch.empty(0, 4)
+        >>> empty = paddle.empty(0, 4)
         >>> nonempty = torch.FloatTensor([[0, 0, 10, 9]])
         >>> assert tuple(bbox_overlaps(empty, nonempty).shape) == (0, 1)
         >>> assert tuple(bbox_overlaps(nonempty, empty).shape) == (1, 0)

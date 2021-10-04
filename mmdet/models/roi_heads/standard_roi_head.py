@@ -154,15 +154,15 @@ class StandardRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
             device = bbox_feats.device
             for res in sampling_results:
                 pos_inds.append(
-                    torch.ones(
+                    paddle.ones(
                         res.pos_bboxes.shape[0],
                         device=device,
-                        dtype=torch.uint8))
+                        dtype=paddle.uint8))
                 pos_inds.append(
-                    torch.zeros(
+                    paddle.zeros(
                         res.neg_bboxes.shape[0],
                         device=device,
-                        dtype=torch.uint8))
+                        dtype=paddle.uint8))
             pos_inds = paddle.concat(pos_inds)
 
             mask_results = self._mask_forward(
@@ -328,7 +328,7 @@ class StandardRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
         # if det_bboxes is rescaled to the original image size, we need to
         # rescale it back to the testing scale to obtain RoIs.
         det_bboxes = det_bboxes[..., :4]
-        batch_index = torch.arange(
+        batch_index = paddle.arange(
             det_bboxes.size(0), device=det_bboxes.device).float().view(
                 -1, 1, 1).expand(det_bboxes.size(0), det_bboxes.size(1), 1)
         mask_rois = paddle.concat([batch_index, det_bboxes], dim=-1)
@@ -369,7 +369,7 @@ class StandardRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
 
         rois = proposals
 
-        batch_index = torch.arange(
+        batch_index = paddle.arange(
             rois.size(0), device=rois.device).float().view(-1, 1, 1).expand(
                 rois.size(0), rois.size(1), 1)
 

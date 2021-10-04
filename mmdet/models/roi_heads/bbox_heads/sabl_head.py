@@ -123,12 +123,12 @@ class SABLHead(BaseModule):
         self.side_num = int(np.ceil(self.num_buckets / 2))
 
         if self.reg_feat_up_ratio > 1:
-            self.upsample_x = nn.ConvTranspose1d(
+            self.upsample_x = nn.Conv1DTranspose(
                 reg_in_channels,
                 reg_in_channels,
                 self.reg_feat_up_ratio,
                 stride=self.reg_feat_up_ratio)
-            self.upsample_y = nn.ConvTranspose1d(
+            self.upsample_y = nn.Conv1DTranspose(
                 reg_in_channels,
                 reg_in_channels,
                 self.reg_feat_up_ratio,
@@ -166,8 +166,8 @@ class SABLHead(BaseModule):
                 act_cfg=dict(type='ReLU'))
             self.reg_post_conv_ys.append(reg_post_conv_y)
 
-        self.reg_conv_att_x = nn.Conv2d(reg_in_channels, 1, 1)
-        self.reg_conv_att_y = nn.Conv2d(reg_in_channels, 1, 1)
+        self.reg_conv_att_x = nn.Conv2D(reg_in_channels, 1, 1)
+        self.reg_conv_att_y = nn.Conv2D(reg_in_channels, 1, 1)
 
         self.fc_cls = nn.Linear(self.cls_out_channels, self.num_classes + 1)
         self.relu = nn.ReLU(inplace=True)
@@ -399,7 +399,7 @@ class SABLHead(BaseModule):
         num_samples = num_pos + num_neg
         labels = pos_gt_bboxes.new_full((num_samples, ),
                                         self.num_classes,
-                                        dtype=torch.long)
+                                        dtype=paddle.long)
         label_weights = pos_proposals.new_zeros(num_samples)
         bucket_cls_targets = pos_proposals.new_zeros(num_samples,
                                                      4 * self.side_num)
@@ -496,7 +496,7 @@ class SABLHead(BaseModule):
             if isinstance(scale_factor, float):
                 bboxes /= scale_factor
             else:
-                bboxes /= torch.from_numpy(scale_factor).to(bboxes.device)
+                bboxes /= paddle.to_tensor(scale_factor).to(bboxes.device)
 
         if cfg is None:
             return bboxes, scores
@@ -553,7 +553,7 @@ class SABLHead(BaseModule):
             keep_inds = pos_is_gts_.new_ones(num_rois)
             keep_inds[:len(pos_is_gts_)] = pos_keep
 
-            bboxes_list.append(bboxes[keep_inds.type(torch.bool)])
+            bboxes_list.append(bboxes[keep_inds.type(paddle.bool)])
 
         return bboxes_list
 

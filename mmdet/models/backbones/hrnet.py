@@ -266,7 +266,7 @@ class HRNet(BaseModule):
         >>>         num_channels=(32, 64, 128, 256)))
         >>> self = HRNet(extra, in_channels=1)
         >>> self.eval()
-        >>> inputs = torch.rand(1, 1, 32, 32)
+        >>> inputs = paddle.rand(1, 1, 32, 32)
         >>> level_outputs = self.forward(inputs)
         >>> for level_out in level_outputs:
         ...     print(tuple(level_out.shape))

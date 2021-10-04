@@ -12,10 +12,10 @@ def calc_region(bbox, ratio, stride, featmap_size=None):
     center of the box to every edge."""
     # project bbox on the feature
     f_bbox = bbox / stride
-    x1 = torch.round((1 - ratio) * f_bbox[0] + ratio * f_bbox[2])
-    y1 = torch.round((1 - ratio) * f_bbox[1] + ratio * f_bbox[3])
-    x2 = torch.round(ratio * f_bbox[0] + (1 - ratio) * f_bbox[2])
-    y2 = torch.round(ratio * f_bbox[1] + (1 - ratio) * f_bbox[3])
+    x1 = paddle.round((1 - ratio) * f_bbox[0] + ratio * f_bbox[2])
+    y1 = paddle.round((1 - ratio) * f_bbox[1] + ratio * f_bbox[3])
+    x2 = paddle.round(ratio * f_bbox[0] + (1 - ratio) * f_bbox[2])
+    y2 = paddle.round(ratio * f_bbox[1] + (1 - ratio) * f_bbox[3])
     if featmap_size is not None:
         x1 = x1.clamp(min=0, max=featmap_size[1])
         y1 = y1.clamp(min=0, max=featmap_size[0])
@@ -112,13 +112,13 @@ class RegionAssigner(BaseAssigner):
             # No ground truth or boxes, return empty assignment
             max_overlaps = gt_bboxes.new_zeros((num_bboxes, ))
             assigned_gt_inds = gt_bboxes.new_zeros((num_bboxes, ),
-                                                   dtype=torch.long)
+                                                   dtype=paddle.long)
             if gt_labels is None:
                 assigned_labels = None
             else:
                 assigned_labels = gt_bboxes.new_full((num_bboxes, ),
                                                      -1,
-                                                     dtype=torch.long)
+                                                     dtype=paddle.long)
             return AssignResult(
                 num_gts,
                 assigned_gt_inds,
@@ -129,7 +129,7 @@ class RegionAssigner(BaseAssigner):
         r1 = (1 - self.center_ratio) / 2
         r2 = (1 - self.ignore_ratio) / 2
 
-        scale = torch.sqrt((gt_bboxes[:, 2] - gt_bboxes[:, 0]) *
+        scale = paddle.sqrt((gt_bboxes[:, 2] - gt_bboxes[:, 0]) *
                            (gt_bboxes[:, 3] - gt_bboxes[:, 1]))
         min_anchor_size = scale.new_full(
             (1, ), float(anchor_scale * anchor_strides[0]))
@@ -145,8 +145,8 @@ class RegionAssigner(BaseAssigner):
             assert h * w == mlvl_anchors[lvl].shape[0]
             assigned_gt_inds = gt_bboxes.new_full((h * w, ),
                                                   0,
-                                                  dtype=torch.long)
-            ignore_flags = torch.zeros_like(assigned_gt_inds)
+                                                  dtype=paddle.long)
+            ignore_flags = paddle.zeros_like(assigned_gt_inds)
             mlvl_assigned_gt_inds.append(assigned_gt_inds)
             mlvl_ignore_flags.append(ignore_flags)
 
@@ -211,7 +211,7 @@ class RegionAssigner(BaseAssigner):
         flat_assigned_gt_inds[outside_flags] = -1
 
         if gt_labels is not None:
-            assigned_labels = torch.zeros_like(flat_assigned_gt_inds)
+            assigned_labels = paddle.zeros_like(flat_assigned_gt_inds)
             pos_flags = assigned_gt_inds > 0
             assigned_labels[pos_flags] = gt_labels[
                 flat_assigned_gt_inds[pos_flags] - 1]

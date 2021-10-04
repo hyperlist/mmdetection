@@ -284,7 +284,7 @@ class Res2Net(ResNet):
         >>> import paddle
         >>> self = Res2Net(depth=50, scales=4, base_width=26)
         >>> self.eval()
-        >>> inputs = torch.rand(1, 3, 32, 32)
+        >>> inputs = paddle.rand(1, 3, 32, 32)
         >>> level_outputs = self.forward(inputs)
         >>> for level_out in level_outputs:
         ...     print(tuple(level_out.shape))

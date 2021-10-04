@@ -146,7 +146,7 @@ def preprocess_example_input(input_config):
         to_rgb = normalize_cfg.get('to_rgb', True)
         one_img = mmcv.imnormalize(one_img, mean, std, to_rgb=to_rgb)
     one_img = one_img.transpose(2, 0, 1)
-    one_img = torch.from_numpy(one_img).unsqueeze(0).float().requires_grad_(
+    one_img = paddle.to_tensor(one_img).unsqueeze(0).float().requires_grad_(
         True)
     (_, C, H, W) = input_shape
     one_meta = {

@@ -67,12 +67,12 @@ class RetinaSepBNHead(AnchorHead):
             for j in range(1, self.num_ins):
                 self.cls_convs[j][i].conv = self.cls_convs[0][i].conv
                 self.reg_convs[j][i].conv = self.reg_convs[0][i].conv
-        self.retina_cls = nn.Conv2d(
+        self.retina_cls = nn.Conv2D(
             self.feat_channels,
             self.num_anchors * self.cls_out_channels,
             3,
             padding=1)
-        self.retina_reg = nn.Conv2d(
+        self.retina_reg = nn.Conv2D(
             self.feat_channels, self.num_anchors * 4, 3, padding=1)
 
     def init_weights(self):

@@ -165,5 +165,5 @@ class NASFCOS_FPN(BaseModule):
                 self.extra_downsamples.modules()
         ]:
             for module in modules:
-                if isinstance(module, nn.Conv2d):
+                if isinstance(module, nn.Conv2D):
                     caffe2_xavier_init(module)

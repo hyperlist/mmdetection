@@ -344,17 +344,17 @@ class BitmapMasks(BaseInstanceMasks):
 
         # convert bboxes to tensor
         if isinstance(bboxes, np.ndarray):
-            bboxes = torch.from_numpy(bboxes).to(device=device)
+            bboxes = paddle.to_tensor(bboxes).to(device=device)
         if isinstance(inds, np.ndarray):
-            inds = torch.from_numpy(inds).to(device=device)
+            inds = paddle.to_tensor(inds).to(device=device)
 
         num_bbox = bboxes.shape[0]
-        fake_inds = torch.arange(
+        fake_inds = paddle.arange(
             num_bbox, device=device).to(dtype=bboxes.dtype)[:, None]
         rois = paddle.concat([fake_inds, bboxes], dim=1)  # Nx5
         rois = rois.to(device=device)
         if num_bbox > 0:
-            gt_masks_th = torch.from_numpy(self.masks).to(device).index_select(
+            gt_masks_th = paddle.to_tensor(self.masks).to(device).index_select(
                 0, inds).to(dtype=rois.dtype)
             targets = roi_align(gt_masks_th[:, None, :, :], rois, out_shape,
                                 1.0, 0, 'avg', True).squeeze(1)
@@ -506,7 +506,7 @@ class BitmapMasks(BaseInstanceMasks):
 
     def to_tensor(self, dtype, device):
         """See :func:`BaseInstanceMasks.to_tensor`."""
-        return torch.tensor(self.masks, dtype=dtype, device=device)
+        return paddle.to_tensor(self.masks, dtype=dtype, device=device)
 
     @classmethod
     def random(cls,
@@ -910,11 +910,11 @@ class PolygonMasks(BaseInstanceMasks):
     def to_tensor(self, dtype, device):
         """See :func:`BaseInstanceMasks.to_tensor`."""
         if len(self.masks) == 0:
-            return torch.empty((0, self.height, self.width),
+            return paddle.empty((0, self.height, self.width),
                                dtype=dtype,
                                device=device)
         ndarray_masks = self.to_ndarray()
-        return torch.tensor(ndarray_masks, dtype=dtype, device=device)
+        return paddle.to_tensor(ndarray_masks, dtype=dtype, device=device)
 
     @classmethod
     def random(cls,

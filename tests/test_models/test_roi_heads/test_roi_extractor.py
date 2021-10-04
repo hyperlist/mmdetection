@@ -30,13 +30,13 @@ def test_groie():
     groie = GenericRoIExtractor(**cfg)
 
     feats = (
-        torch.rand((1, 256, 200, 336)),
-        torch.rand((1, 256, 100, 168)),
-        torch.rand((1, 256, 50, 84)),
-        torch.rand((1, 256, 25, 42)),
+        paddle.rand((1, 256, 200, 336)),
+        paddle.rand((1, 256, 100, 168)),
+        paddle.rand((1, 256, 50, 84)),
+        paddle.rand((1, 256, 25, 42)),
     )
 
-    rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
+    rois = paddle.to_tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
 
     res = groie(feats, rois)
     assert res.shape == torch.Size([1, 256, 7, 7])
@@ -50,13 +50,13 @@ def test_groie():
     groie = GenericRoIExtractor(**cfg)
 
     feats = (
-        torch.rand((1, 256, 200, 336)),
-        torch.rand((1, 256, 100, 168)),
-        torch.rand((1, 256, 50, 84)),
-        torch.rand((1, 256, 25, 42)),
+        paddle.rand((1, 256, 200, 336)),
+        paddle.rand((1, 256, 100, 168)),
+        paddle.rand((1, 256, 50, 84)),
+        paddle.rand((1, 256, 25, 42)),
     )
 
-    rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
+    rois = paddle.to_tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
 
     res = groie(feats, rois)
     assert res.shape == torch.Size([1, 256, 7, 7])
@@ -71,13 +71,13 @@ def test_groie():
     groie = GenericRoIExtractor(**cfg)
 
     feats = (
-        torch.rand((1, 256, 200, 336)),
-        torch.rand((1, 256, 100, 168)),
-        torch.rand((1, 256, 50, 84)),
-        torch.rand((1, 256, 25, 42)),
+        paddle.rand((1, 256, 200, 336)),
+        paddle.rand((1, 256, 100, 168)),
+        paddle.rand((1, 256, 50, 84)),
+        paddle.rand((1, 256, 25, 42)),
     )
 
-    rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
+    rois = paddle.to_tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
 
     res = groie(feats, rois)
     assert res.shape == torch.Size([1, 1024, 7, 7])
@@ -101,13 +101,13 @@ def test_groie():
     groie = GenericRoIExtractor(**cfg)
 
     feats = (
-        torch.rand((1, 256, 200, 336)),
-        torch.rand((1, 256, 100, 168)),
-        torch.rand((1, 256, 50, 84)),
-        torch.rand((1, 256, 25, 42)),
+        paddle.rand((1, 256, 200, 336)),
+        paddle.rand((1, 256, 100, 168)),
+        paddle.rand((1, 256, 50, 84)),
+        paddle.rand((1, 256, 25, 42)),
     )
 
-    rois = torch.tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
+    rois = paddle.to_tensor([[0.0000, 587.8285, 52.1405, 886.2484, 341.5644]])
 
     # out_channels does not sum of feat channels
     with pytest.raises(AssertionError):

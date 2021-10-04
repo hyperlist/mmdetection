@@ -35,11 +35,11 @@ def unmap(data, count, inds, fill=0):
     count)"""
     if data.dim() == 1:
         ret = data.new_full((count, ), fill)
-        ret[inds.type(torch.bool)] = data
+        ret[inds.type(paddle.bool)] = data
     else:
         new_size = (count, ) + data.size()[1:]
         ret = data.new_full(new_size, fill)
-        ret[inds.type(torch.bool), :] = data
+        ret[inds.type(paddle.bool), :] = data
     return ret
 
 
@@ -99,8 +99,8 @@ def center_of_mass(mask, esp=1e-6):
             - center_w (Tensor): the center point of the width.
     """
     h, w = mask.shape
-    grid_h = torch.arange(h, device=mask.device)[:, None]
-    grid_w = torch.arange(w, device=mask.device)
+    grid_h = paddle.arange(h, device=mask.device)[:, None]
+    grid_w = paddle.arange(w, device=mask.device)
     normalizer = mask.sum().float().clamp(min=esp)
     center_h = (mask * grid_h).sum() / normalizer
     center_w = (mask * grid_w).sum() / normalizer

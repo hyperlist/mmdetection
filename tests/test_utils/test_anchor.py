@@ -290,7 +290,7 @@ def test_strides():
     self = AnchorGenerator([10], [1.], [1.], [10])
     anchors = self.grid_anchors([(2, 2)], device='cpu')
 
-    expected_anchors = torch.tensor([[-5., -5., 5., 5.], [5., -5., 15., 5.],
+    expected_anchors = paddle.to_tensor([[-5., -5., 5., 5.], [5., -5., 15., 5.],
                                      [-5., 5., 5., 15.], [5., 5., 15., 15.]])
 
     assert torch.equal(anchors[0], expected_anchors)
@@ -299,7 +299,7 @@ def test_strides():
     self = AnchorGenerator([(10, 20)], [1.], [1.], [10])
     anchors = self.grid_anchors([(2, 2)], device='cpu')
 
-    expected_anchors = torch.tensor([[-5., -5., 5., 5.], [5., -5., 15., 5.],
+    expected_anchors = paddle.to_tensor([[-5., -5., 5., 5.], [5., -5., 15., 5.],
                                      [-5., 15., 5., 25.], [5., 15., 15., 25.]])
 
     assert torch.equal(anchors[0], expected_anchors)

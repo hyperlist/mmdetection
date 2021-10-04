@@ -18,12 +18,12 @@ def test_corner_head_loss():
 
     # Corner head expects a multiple levels of features per image
     feat = [
-        torch.rand(1, 1, s // 4, s // 4) for _ in range(self.num_feat_levels)
+        paddle.rand(1, 1, s // 4, s // 4) for _ in range(self.num_feat_levels)
     ]
     tl_heats, br_heats, tl_embs, br_embs, tl_offs, br_offs = self.forward(feat)
 
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
 
     gt_bboxes_ignore = None
@@ -112,7 +112,7 @@ def test_corner_head_encode_and_decode_heatmap():
     self = CornerHead(num_classes=4, in_channels=1, corner_emb_channels=1)
 
     feat = [
-        torch.rand(1, 1, s // 4, s // 4) for _ in range(self.num_feat_levels)
+        paddle.rand(1, 1, s // 4, s // 4) for _ in range(self.num_feat_levels)
     ]
 
     targets = self.get_targets(
@@ -128,8 +128,8 @@ def test_corner_head_encode_and_decode_heatmap():
     gt_br_offset = targets['bottomright_offset']
     embedding = targets['corner_embedding']
     [top, left], [bottom, right] = embedding[0][0]
-    gt_tl_embedding_heatmap = torch.zeros([1, 1, s // 4, s // 4])
-    gt_br_embedding_heatmap = torch.zeros([1, 1, s // 4, s // 4])
+    gt_tl_embedding_heatmap = paddle.zeros([1, 1, s // 4, s // 4])
+    gt_br_embedding_heatmap = paddle.zeros([1, 1, s // 4, s // 4])
     gt_tl_embedding_heatmap[0, 0, top, left] = 1
     gt_br_embedding_heatmap[0, 0, bottom, right] = 1
 
@@ -154,8 +154,8 @@ def test_corner_head_encode_and_decode_heatmap():
     scores = scores[idx].view(-1)
     clses = clses[idx].view(-1)
 
-    valid_bboxes = bboxes[torch.where(scores > 0.05)]
-    valid_labels = clses[torch.where(scores > 0.05)]
+    valid_bboxes = bboxes[paddle.where(scores > 0.05)]
+    valid_labels = clses[paddle.where(scores > 0.05)]
     max_coordinate = valid_bboxes.max()
     offsets = valid_labels.to(valid_bboxes) * (max_coordinate + 1)
     gt_offsets = gt_labels[0].to(gt_bboxes[0]) * (max_coordinate + 1)

@@ -34,7 +34,7 @@ class ASPP(BaseModule):
         for dilation in dilations:
             kernel_size = 3 if dilation > 1 else 1
             padding = dilation if dilation > 1 else 0
-            conv = nn.Conv2d(
+            conv = nn.Conv2D(
                 in_channels,
                 out_channels,
                 kernel_size=kernel_size,
@@ -94,7 +94,7 @@ class RFP(FPN):
             self.rfp_modules.append(rfp_module)
         self.rfp_aspp = ASPP(self.out_channels, aspp_out_channels,
                              aspp_dilations)
-        self.rfp_weight = nn.Conv2d(
+        self.rfp_weight = nn.Conv2D(
             self.out_channels,
             1,
             kernel_size=1,
@@ -108,7 +108,7 @@ class RFP(FPN):
         # keys in the pretrained checkpoint.
         for convs in [self.lateral_convs, self.fpn_convs]:
             for m in convs.modules():
-                if isinstance(m, nn.Conv2d):
+                if isinstance(m, nn.Conv2D):
                     xavier_init(m, distribution='uniform')
         for rfp_idx in range(self.rfp_steps - 1):
             self.rfp_modules[rfp_idx].init_weights()

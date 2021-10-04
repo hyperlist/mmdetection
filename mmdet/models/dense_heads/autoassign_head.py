@@ -37,8 +37,8 @@ class CenterPrior(nn.Layer):
                  num_classes=80,
                  strides=(8, 16, 32, 64, 128)):
         super(CenterPrior, self).__init__()
-        self.mean = nn.Parameter(torch.zeros(num_classes, 2))
-        self.sigma = nn.Parameter(torch.ones(num_classes, 2))
+        self.mean = paddle.create_parameter(paddle.zeros(num_classes, 2))
+        self.sigma = paddle.create_parameter(paddle.ones(num_classes, 2))
         self.strides = strides
         self.force_topk = force_topk
         self.topk = topk
@@ -86,7 +86,7 @@ class CenterPrior(nn.Layer):
                 (slvl_points.size(0), len(gt_bboxes), 2))
             gt_center_x = ((gt_bboxes[:, 0] + gt_bboxes[:, 2]) / 2)
             gt_center_y = ((gt_bboxes[:, 1] + gt_bboxes[:, 3]) / 2)
-            gt_center = torch.stack((gt_center_x, gt_center_y), dim=1)
+            gt_center = paddle.stack((gt_center_x, gt_center_y), dim=1)
             gt_center = gt_center[None]
             # instance_center has shape (1, num_gt, 2)
             instance_center = self.mean[labels][None]
@@ -113,9 +113,9 @@ class CenterPrior(nn.Layer):
                     torch.scatter(temp_mask,
                                   dim=0,
                                   index=topk_center_index,
-                                  src=torch.ones_like(
+                                  src=paddle.ones_like(
                                     topk_center_index,
-                                    dtype=torch.bool))
+                                    dtype=paddle.bool))
 
         center_prior_weights[~inside_gt_bbox_mask] = 0
         return center_prior_weights, inside_gt_bbox_mask
@@ -184,7 +184,7 @@ class AutoAssignHead(FCOSHead):
         y, x = super(FCOSHead,
                      self)._get_points_single(featmap_size, stride, dtype,
                                               device)
-        points = torch.stack((x.reshape(-1) * stride, y.reshape(-1) * stride),
+        points = paddle.stack((x.reshape(-1) * stride, y.reshape(-1) * stride),
                              dim=-1)
         return points
 
@@ -252,7 +252,7 @@ class AutoAssignHead(FCOSHead):
         reweighted_p_pos = (p_pos * p_pos_weight).sum(0)
         pos_loss = F.binary_cross_entropy(
             reweighted_p_pos,
-            torch.ones_like(reweighted_p_pos),
+            paddle.ones_like(reweighted_p_pos),
             reduction='none')
         pos_loss = pos_loss.sum() * self.pos_loss_weight
         return pos_loss,
@@ -283,7 +283,7 @@ class AutoAssignHead(FCOSHead):
         """
         num_gts = len(gt_labels)
         joint_conf = (cls_score * objectness)
-        p_neg_weight = torch.ones_like(joint_conf)
+        p_neg_weight = paddle.ones_like(joint_conf)
         if num_gts > 0:
             # the order of dinmension would affect the value of
             # p_neg_weight, we strictly follow the original
@@ -308,7 +308,7 @@ class AutoAssignHead(FCOSHead):
         logits = (joint_conf * p_neg_weight)
         neg_loss = (
             logits**2 * F.binary_cross_entropy(
-                logits, torch.zeros_like(logits), reduction='none'))
+                logits, paddle.zeros_like(logits), reduction='none'))
         neg_loss = neg_loss.sum() * self.neg_loss_weight
         return neg_loss,
 
@@ -429,7 +429,7 @@ class AutoAssignHead(FCOSHead):
             else:
                 center_loss.append(center_prior_weight_list[i].sum() * 0)
 
-        center_loss = torch.stack(center_loss).mean() * self.center_loss_weight
+        center_loss = paddle.stack(center_loss).mean() * self.center_loss_weight
 
         # avoid dead lock in DDP
         if all_num_gt == 0:
@@ -501,11 +501,11 @@ class AutoAssignHead(FCOSHead):
         right = gt_bboxes[..., 2] - xs
         top = ys - gt_bboxes[..., 1]
         bottom = gt_bboxes[..., 3] - ys
-        bbox_targets = torch.stack((left, top, right, bottom), -1)
+        bbox_targets = paddle.stack((left, top, right, bottom), -1)
         if num_gts:
             inside_gt_bbox_mask = bbox_targets.min(-1)[0] > 0
         else:
             inside_gt_bbox_mask = bbox_targets.new_zeros((num_points, num_gts),
-                                                         dtype=torch.bool)
+                                                         dtype=paddle.bool)
 
         return inside_gt_bbox_mask, bbox_targets

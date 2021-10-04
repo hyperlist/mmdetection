@@ -39,13 +39,13 @@ def test_pisa_retinanet_head_loss():
 
     # Anchor head expects a multiple levels of features per image
     feat = [
-        torch.rand(1, 1, s // (2**(i + 2)), s // (2**(i + 2)))
+        paddle.rand(1, 1, s // (2**(i + 2)), s // (2**(i + 2)))
         for i in range(len(self.anchor_generator.strides))
     ]
     cls_scores, bbox_preds = self.forward(feat)
 
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
 
     gt_bboxes_ignore = None
@@ -113,13 +113,13 @@ def test_pisa_ssd_head_loss():
 
     # Anchor head expects a multiple levels of features per image
     feat = [
-        torch.rand(1, 1, s // (2**(i + 2)), s // (2**(i + 2)))
+        paddle.rand(1, 1, s // (2**(i + 2)), s // (2**(i + 2)))
         for i in range(len(self.anchor_generator.strides))
     ]
     cls_scores, bbox_preds = self.forward(feat)
 
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
 
     gt_bboxes_ignore = None
@@ -205,7 +205,7 @@ def test_pisa_roi_head_loss():
 
     # Anchor head expects a multiple levels of features per image
     feat = [
-        torch.rand(1, 1, s // (2**(i + 2)), s // (2**(i + 2)))
+        paddle.rand(1, 1, s // (2**(i + 2)), s // (2**(i + 2)))
         for i in range(1)
     ]
 
@@ -214,7 +214,7 @@ def test_pisa_roi_head_loss():
     ]
 
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
     gt_bboxes_ignore = None
 

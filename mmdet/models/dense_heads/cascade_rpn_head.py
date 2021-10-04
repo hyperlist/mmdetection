@@ -68,7 +68,7 @@ class AdaptiveConv(BaseModule):
                 groups=groups,
                 bias=bias)
         else:
-            self.conv = nn.Conv2d(
+            self.conv = nn.Conv2D(
                 in_channels,
                 out_channels,
                 kernel_size,
@@ -154,10 +154,10 @@ class StageCascadeRPNHead(RPNHead):
         self.rpn_conv = AdaptiveConv(self.in_channels, self.feat_channels,
                                      **self.adapt_cfg)
         if self.with_cls:
-            self.rpn_cls = nn.Conv2d(self.feat_channels,
+            self.rpn_cls = nn.Conv2D(self.feat_channels,
                                      self.num_anchors * self.cls_out_channels,
                                      1)
-        self.rpn_reg = nn.Conv2d(self.feat_channels, self.num_anchors * 4, 1)
+        self.rpn_reg = nn.Conv2D(self.feat_channels, self.num_anchors * 4, 1)
         self.relu = nn.ReLU(inplace=True)
 
     def forward_single(self, x, offset):
@@ -202,9 +202,9 @@ class StageCascadeRPNHead(RPNHead):
                                               gt_bboxes)
 
         num_anchors = flat_anchors.shape[0]
-        bbox_targets = torch.zeros_like(flat_anchors)
-        bbox_weights = torch.zeros_like(flat_anchors)
-        labels = flat_anchors.new_zeros(num_anchors, dtype=torch.long)
+        bbox_targets = paddle.zeros_like(flat_anchors)
+        bbox_weights = paddle.zeros_like(flat_anchors)
+        labels = flat_anchors.new_zeros(num_anchors, dtype=paddle.long)
         label_weights = flat_anchors.new_zeros(num_anchors, dtype=torch.float)
 
         pos_inds = sampling_result.pos_inds
@@ -342,7 +342,7 @@ class StageCascadeRPNHead(RPNHead):
             # currently support kernel_size=3 and dilation=1
             assert ks == 3 and dilation == 1
             pad = (ks - 1) // 2
-            idx = torch.arange(-pad, pad + 1, dtype=dtype, device=device)
+            idx = paddle.arange(-pad, pad + 1, dtype=dtype, device=device)
             yy, xx = torch.meshgrid(idx, idx)  # return order matters
             xx = xx.reshape(-1)
             yy = yy.reshape(-1)
@@ -364,8 +364,8 @@ class StageCascadeRPNHead(RPNHead):
             x = x / stride
             y = y / stride
             # compute predefine centers
-            xx = torch.arange(0, feat_w, device=anchors.device)
-            yy = torch.arange(0, feat_h, device=anchors.device)
+            xx = paddle.arange(0, feat_w, device=anchors.device)
+            yy = paddle.arange(0, feat_h, device=anchors.device)
             yy, xx = torch.meshgrid(yy, xx)
             xx = xx.reshape(-1).type_as(x)
             yy = yy.reshape(-1).type_as(y)
@@ -395,7 +395,7 @@ class StageCascadeRPNHead(RPNHead):
                 offset_y = s_offset_y + c_offset_y[:, None]
 
                 # offset order (y0, x0, y1, x2, .., y8, x8, y9, x9)
-                offset = torch.stack([offset_y, offset_x], dim=-1)
+                offset = paddle.stack([offset_y, offset_x], dim=-1)
                 offset = offset.reshape(offset.size(0), -1)  # [NA, 2*ks**2]
                 mlvl_offset.append(offset)
             offset_list.append(paddle.concat(mlvl_offset))  # [totalNA, 2*ks**2]
@@ -619,7 +619,7 @@ class StageCascadeRPNHead(RPNHead):
             mlvl_bbox_preds.append(rpn_bbox_pred)
             mlvl_valid_anchors.append(anchors)
             level_ids.append(
-                scores.new_full((scores.size(0), ), idx, dtype=torch.long))
+                scores.new_full((scores.size(0), ), idx, dtype=paddle.long))
 
         scores = paddle.concat(mlvl_scores)
         anchors = paddle.concat(mlvl_valid_anchors)

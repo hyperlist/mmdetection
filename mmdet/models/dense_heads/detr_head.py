@@ -95,7 +95,7 @@ class DETRHead(AnchorFreeHead):
             assert isinstance(bg_cls_weight, float), 'Expected ' \
                 'bg_cls_weight to have type float. Found ' \
                 f'{type(bg_cls_weight)}.'
-            class_weight = torch.ones(num_classes + 1) * class_weight
+            class_weight = paddle.ones(num_classes + 1) * class_weight
             # set background class as the last indice
             class_weight[num_classes] = bg_cls_weight
             loss_cls.update({'class_weight': class_weight})
@@ -252,7 +252,7 @@ class DETRHead(AnchorFreeHead):
         x = self.input_proj(x)
         # interpolate masks to have the same spatial shape with x
         masks = F.interpolate(
-            masks.unsqueeze(1), size=x.shape[-2:]).to(torch.bool).squeeze(1)
+            masks.unsqueeze(1), size=x.shape[-2:]).to(paddle.bool).squeeze(1)
         # position encoding
         pos_embed = self.positional_encoding(masks)  # [bs, embed_dim, h, w]
         # outs_dec: [nb_dec, bs, num_query, embed_dim]
@@ -522,13 +522,13 @@ class DETRHead(AnchorFreeHead):
         # label targets
         labels = gt_bboxes.new_full((num_bboxes, ),
                                     self.num_classes,
-                                    dtype=torch.long)
+                                    dtype=paddle.long)
         labels[pos_inds] = gt_labels[sampling_result.pos_assigned_gt_inds]
         label_weights = gt_bboxes.new_ones(num_bboxes)
 
         # bbox targets
-        bbox_targets = torch.zeros_like(bbox_pred)
-        bbox_weights = torch.zeros_like(bbox_pred)
+        bbox_targets = paddle.zeros_like(bbox_pred)
+        bbox_weights = paddle.zeros_like(bbox_pred)
         bbox_weights[pos_inds] = 1.0
         img_h, img_w, _ = img_meta['img_shape']
 
@@ -762,7 +762,7 @@ class DETRHead(AnchorFreeHead):
         x = self.input_proj(x)
         # interpolate masks to have the same spatial shape with x
         masks = F.interpolate(
-            masks.unsqueeze(1), size=x.shape[-2:]).to(torch.bool).squeeze(1)
+            masks.unsqueeze(1), size=x.shape[-2:]).to(paddle.bool).squeeze(1)
         pos_embed = self.positional_encoding(masks)
         outs_dec, _ = self.transformer(x, masks, self.query_embedding.weight,
                                        pos_embed)
@@ -803,7 +803,7 @@ class DETRHead(AnchorFreeHead):
         max_per_img = self.test_cfg.get('max_per_img', self.num_query)
         batch_size = cls_scores.size(0)
         # `batch_index_offset` is used for the gather of concatenated tensor
-        batch_index_offset = torch.arange(batch_size).to(
+        batch_index_offset = paddle.arange(batch_size).to(
             cls_scores.device) * max_per_img
         batch_index_offset = batch_index_offset.unsqueeze(1).expand(
             batch_size, max_per_img)

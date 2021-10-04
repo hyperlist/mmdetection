@@ -45,11 +45,11 @@ class GHMC(nn.Layer):
         super(GHMC, self).__init__()
         self.bins = bins
         self.momentum = momentum
-        edges = torch.arange(bins + 1).float() / bins
+        edges = paddle.arange(bins + 1).float() / bins
         self.register_buffer('edges', edges)
         self.edges[-1] += 1e-6
         if momentum > 0:
-            acc_sum = torch.zeros(bins)
+            acc_sum = paddle.zeros(bins)
             self.register_buffer('acc_sum', acc_sum)
         self.use_sigmoid = use_sigmoid
         if not self.use_sigmoid:
@@ -88,10 +88,10 @@ class GHMC(nn.Layer):
         target, label_weight = target.float(), label_weight.float()
         edges = self.edges
         mmt = self.momentum
-        weights = torch.zeros_like(pred)
+        weights = paddle.zeros_like(pred)
 
         # gradient length
-        g = torch.abs(pred.sigmoid().detach() - target)
+        g = paddle.abs(pred.sigmoid().detach() - target)
 
         valid = label_weight > 0
         tot = max(valid.float().sum().item(), 1.0)
@@ -144,12 +144,12 @@ class GHMR(nn.Layer):
         super(GHMR, self).__init__()
         self.mu = mu
         self.bins = bins
-        edges = torch.arange(bins + 1).float() / bins
+        edges = paddle.arange(bins + 1).float() / bins
         self.register_buffer('edges', edges)
         self.edges[-1] = 1e3
         self.momentum = momentum
         if momentum > 0:
-            acc_sum = torch.zeros(bins)
+            acc_sum = paddle.zeros(bins)
             self.register_buffer('acc_sum', acc_sum)
         self.loss_weight = loss_weight
         self.reduction = reduction
@@ -186,11 +186,11 @@ class GHMR(nn.Layer):
 
         # ASL1 loss
         diff = pred - target
-        loss = torch.sqrt(diff * diff + mu * mu) - mu
+        loss = paddle.sqrt(diff * diff + mu * mu) - mu
 
         # gradient length
-        g = torch.abs(diff / torch.sqrt(mu * mu + diff * diff)).detach()
-        weights = torch.zeros_like(g)
+        g = paddle.abs(diff / paddle.sqrt(mu * mu + diff * diff)).detach()
+        weights = paddle.zeros_like(g)
 
         valid = label_weight > 0
         tot = max(label_weight.float().sum().item(), 1.0)

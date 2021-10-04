@@ -73,8 +73,8 @@ class SCNetRoIHead(CascadeRoIHead):
     def _fuse_glbctx(self, roi_feats, glbctx_feat, rois):
         """Fuse global context feats with roi feats."""
         assert roi_feats.size(0) == rois.size(0)
-        img_inds = torch.unique(rois[:, 0].cpu(), sorted=True).long()
-        fused_feats = torch.zeros_like(roi_feats)
+        img_inds = paddle.unique(rois[:, 0].cpu(), sorted=True).long()
+        fused_feats = paddle.zeros_like(roi_feats)
         for img_id in img_inds:
             inds = (rois[:, 0] == img_id.item())
             fused_feats[inds] = roi_feats[inds] + glbctx_feat[img_id]
@@ -84,7 +84,7 @@ class SCNetRoIHead(CascadeRoIHead):
         """Get features from pos rois."""
         num_rois = [res.bboxes.size(0) for res in sampling_results]
         num_pos_rois = [res.pos_bboxes.size(0) for res in sampling_results]
-        inds = torch.zeros(sum(num_rois), dtype=torch.bool)
+        inds = paddle.zeros(sum(num_rois), dtype=paddle.bool)
         start = 0
         for i in range(len(num_rois)):
             start = 0 if i == 0 else start + num_rois[i - 1]
@@ -433,7 +433,7 @@ class SCNetRoIHead(CascadeRoIHead):
             else:
                 if rescale and not isinstance(scale_factors[0], float):
                     scale_factors = [
-                        torch.from_numpy(scale_factor).to(det_bboxes[0].device)
+                        paddle.to_tensor(scale_factor).to(det_bboxes[0].device)
                         for scale_factor in scale_factors
                     ]
                 _bboxes = [

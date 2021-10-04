@@ -231,8 +231,8 @@ class CornerHead(BaseDenseHead, BBoxTestMixin):
         bias_init = bias_init_with_prob(0.1)
         for i in range(self.num_feat_levels):
             # The initialization of parameters are different between
-            # nn.Conv2d and ConvModule. Our experiments show that
-            # using the original initialization of nn.Conv2d increases
+            # nn.Conv2D and ConvModule. Our experiments show that
+            # using the original initialization of nn.Conv2D increases
             # the final mAP by about 0.2%
             self.tl_heat[i][-1].conv.reset_parameters()
             self.tl_heat[i][-1].conv.bias.data.fill_(bias_init)
@@ -804,7 +804,7 @@ class CornerHead(BaseDenseHead, BBoxTestMixin):
         if len(out_bboxes) > 0:
             # use `sort` to replace with `argsort` here
             _, idx = torch.sort(out_bboxes[:, -1], descending=True)
-            max_per_img = out_bboxes.new_tensor(cfg.max_per_img).to(torch.long)
+            max_per_img = out_bboxes.new_tensor(cfg.max_per_img).to(paddle.long)
             nms_after = max_per_img
             if torch.onnx.is_in_onnx_export():
                 # Always keep topk op for dynamic input in onnx
@@ -949,12 +949,12 @@ class CornerHead(BaseDenseHead, BBoxTestMixin):
         br_ys -= y_off
 
         zeros = tl_xs.new_zeros(*tl_xs.size())
-        tl_xs = torch.where(tl_xs > 0.0, tl_xs, zeros)
-        tl_ys = torch.where(tl_ys > 0.0, tl_ys, zeros)
-        br_xs = torch.where(br_xs > 0.0, br_xs, zeros)
-        br_ys = torch.where(br_ys > 0.0, br_ys, zeros)
+        tl_xs = paddle.where(tl_xs > 0.0, tl_xs, zeros)
+        tl_ys = paddle.where(tl_ys > 0.0, tl_ys, zeros)
+        br_xs = paddle.where(br_xs > 0.0, br_xs, zeros)
+        br_ys = paddle.where(br_ys > 0.0, br_ys, zeros)
 
-        bboxes = torch.stack((tl_xs, tl_ys, br_xs, br_ys), dim=3)
+        bboxes = paddle.stack((tl_xs, tl_ys, br_xs, br_ys), dim=3)
         area_bboxes = ((br_xs - tl_xs) * (br_ys - tl_ys)).abs()
 
         if with_centripetal_shift:
@@ -968,13 +968,13 @@ class CornerHead(BaseDenseHead, BBoxTestMixin):
             br_ctxs *= br_ctxs.gt(0.0).type_as(br_ctxs)
             br_ctys *= br_ctys.gt(0.0).type_as(br_ctys)
 
-            ct_bboxes = torch.stack((tl_ctxs, tl_ctys, br_ctxs, br_ctys),
+            ct_bboxes = paddle.stack((tl_ctxs, tl_ctys, br_ctxs, br_ctys),
                                     dim=3)
             area_ct_bboxes = ((br_ctxs - tl_ctxs) * (br_ctys - tl_ctys)).abs()
 
-            rcentral = torch.zeros_like(ct_bboxes)
+            rcentral = paddle.zeros_like(ct_bboxes)
             # magic nums from paper section 4.1
-            mu = torch.ones_like(area_bboxes) / 2.4
+            mu = paddle.ones_like(area_bboxes) / 2.4
             mu[area_bboxes > 3500] = 1 / 2.1  # large bbox have smaller mu
 
             bboxes_center_x = (bboxes[..., 0] + bboxes[..., 2]) / 2
@@ -1005,7 +1005,7 @@ class CornerHead(BaseDenseHead, BBoxTestMixin):
             tl_emb = tl_emb.view(batch, k, 1)
             br_emb = transpose_and_gather_feat(br_emb, br_inds)
             br_emb = br_emb.view(batch, 1, k)
-            dists = torch.abs(tl_emb - br_emb)
+            dists = paddle.abs(tl_emb - br_emb)
 
         tl_scores = tl_scores.view(batch, k, 1).repeat(1, 1, k)
         br_scores = br_scores.view(batch, 1, k).repeat(1, k, 1)
@@ -1024,15 +1024,15 @@ class CornerHead(BaseDenseHead, BBoxTestMixin):
         width_inds = (br_xs <= tl_xs)
         height_inds = (br_ys <= tl_ys)
 
-        # No use `scores[cls_inds]`, instead we use `torch.where` here.
+        # No use `scores[cls_inds]`, instead we use `paddle.where` here.
         # Since only 1-D indices with type 'tensor(bool)' are supported
         # when exporting to ONNX, any other bool indices with more dimensions
         # (e.g. 2-D bool tensor) as input parameter in node is invalid
-        negative_scores = -1 * torch.ones_like(scores)
-        scores = torch.where(cls_inds, negative_scores, scores)
-        scores = torch.where(width_inds, negative_scores, scores)
-        scores = torch.where(height_inds, negative_scores, scores)
-        scores = torch.where(dist_inds, negative_scores, scores)
+        negative_scores = -1 * paddle.ones_like(scores)
+        scores = paddle.where(cls_inds, negative_scores, scores)
+        scores = paddle.where(width_inds, negative_scores, scores)
+        scores = paddle.where(height_inds, negative_scores, scores)
+        scores = paddle.where(dist_inds, negative_scores, scores)
 
         if with_centripetal_shift:
             scores[tl_ctx_inds] = -1

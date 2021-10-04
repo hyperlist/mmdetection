@@ -74,7 +74,7 @@ class ATSSAssigner(BaseAssigner):
         # assign 0 by default
         assigned_gt_inds = overlaps.new_full((num_bboxes, ),
                                              0,
-                                             dtype=torch.long)
+                                             dtype=paddle.long)
 
         if num_gt == 0 or num_bboxes == 0:
             # No ground truth or boxes, return empty assignment
@@ -87,18 +87,18 @@ class ATSSAssigner(BaseAssigner):
             else:
                 assigned_labels = overlaps.new_full((num_bboxes, ),
                                                     -1,
-                                                    dtype=torch.long)
+                                                    dtype=paddle.long)
             return AssignResult(
                 num_gt, assigned_gt_inds, max_overlaps, labels=assigned_labels)
 
         # compute center distance between all bbox and gt
         gt_cx = (gt_bboxes[:, 0] + gt_bboxes[:, 2]) / 2.0
         gt_cy = (gt_bboxes[:, 1] + gt_bboxes[:, 3]) / 2.0
-        gt_points = torch.stack((gt_cx, gt_cy), dim=1)
+        gt_points = paddle.stack((gt_cx, gt_cy), dim=1)
 
         bboxes_cx = (bboxes[:, 0] + bboxes[:, 2]) / 2.0
         bboxes_cy = (bboxes[:, 1] + bboxes[:, 3]) / 2.0
-        bboxes_points = torch.stack((bboxes_cx, bboxes_cy), dim=1)
+        bboxes_points = paddle.stack((bboxes_cx, bboxes_cy), dim=1)
 
         distances = (bboxes_points[:, None, :] -
                      gt_points[None, :, :]).pow(2).sum(-1).sqrt()
@@ -129,7 +129,7 @@ class ATSSAssigner(BaseAssigner):
 
         # get corresponding iou for the these candidates, and compute the
         # mean and std, set mean + std as the iou threshold
-        candidate_overlaps = overlaps[candidate_idxs, torch.arange(num_gt)]
+        candidate_overlaps = overlaps[candidate_idxs, paddle.arange(num_gt)]
         overlaps_mean_per_gt = candidate_overlaps.mean(0)
         overlaps_std_per_gt = candidate_overlaps.std(0)
         overlaps_thr_per_gt = overlaps_mean_per_gt + overlaps_std_per_gt
@@ -151,12 +151,12 @@ class ATSSAssigner(BaseAssigner):
         t_ = ep_bboxes_cy[candidate_idxs].view(-1, num_gt) - gt_bboxes[:, 1]
         r_ = gt_bboxes[:, 2] - ep_bboxes_cx[candidate_idxs].view(-1, num_gt)
         b_ = gt_bboxes[:, 3] - ep_bboxes_cy[candidate_idxs].view(-1, num_gt)
-        is_in_gts = torch.stack([l_, t_, r_, b_], dim=1).min(dim=1)[0] > 0.01
+        is_in_gts = paddle.stack([l_, t_, r_, b_], dim=1).min(dim=1)[0] > 0.01
         is_pos = is_pos & is_in_gts
 
         # if an anchor box is assigned to multiple gts,
         # the one with the highest IoU will be selected.
-        overlaps_inf = torch.full_like(overlaps,
+        overlaps_inf = paddle.full_like(overlaps,
                                        -INF).t().contiguous().view(-1)
         index = candidate_idxs.view(-1)[is_pos.view(-1)]
         overlaps_inf[index] = overlaps.t().contiguous().view(-1)[index]

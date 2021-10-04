@@ -28,13 +28,13 @@ def test_yolox_head_loss():
     assert isinstance(self.multi_level_cls_convs[0][0], ConvModule)
 
     feat = [
-        torch.rand(1, 1, s // feat_size, s // feat_size)
+        paddle.rand(1, 1, s // feat_size, s // feat_size)
         for feat_size in [4, 8, 16]
     ]
     cls_scores, bbox_preds, objectnesses = self.forward(feat)
 
     # Test that empty ground truth encourages the network to predict background
-    gt_bboxes = [torch.empty((0, 4))]
+    gt_bboxes = [paddle.empty((0, 4))]
     gt_labels = [torch.LongTensor([])]
     empty_gt_losses = self.loss(cls_scores, bbox_preds, objectnesses,
                                 gt_bboxes, gt_labels, img_metas)

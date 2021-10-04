@@ -116,7 +116,7 @@ class L2Norm(nn.Layer):
         """
         super(L2Norm, self).__init__()
         self.n_dims = n_dims
-        self.weight = nn.Parameter(torch.Tensor(self.n_dims))
+        self.weight = paddle.create_parameter(torch.Tensor(self.n_dims))
         self.eps = eps
         self.scale = scale
 

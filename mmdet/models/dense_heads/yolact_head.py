@@ -100,14 +100,14 @@ class YOLACTHead(AnchorHead):
                     padding=1,
                     conv_cfg=self.conv_cfg,
                     norm_cfg=self.norm_cfg))
-        self.conv_cls = nn.Conv2d(
+        self.conv_cls = nn.Conv2D(
             self.feat_channels,
             self.num_anchors * self.cls_out_channels,
             3,
             padding=1)
-        self.conv_reg = nn.Conv2d(
+        self.conv_reg = nn.Conv2D(
             self.feat_channels, self.num_anchors * 4, 3, padding=1)
-        self.conv_coeff = nn.Conv2d(
+        self.conv_coeff = nn.Conv2D(
             self.feat_channels,
             self.num_anchors * self.num_protos,
             3,
@@ -493,7 +493,7 @@ class YOLACTSegmHead(BaseModule):
 
     def _init_layers(self):
         """Initialize layers of the head."""
-        self.segm_conv = nn.Conv2d(
+        self.segm_conv = nn.Conv2D(
             self.in_channels, self.num_classes, kernel_size=1)
 
     def forward(self, x):
@@ -533,8 +533,8 @@ class YOLACTSegmHead(BaseModule):
                                             cur_gt_labels)
             if segm_targets is None:
                 loss = self.loss_segm(cur_segm_pred,
-                                      torch.zeros_like(cur_segm_pred),
-                                      torch.zeros_like(cur_segm_pred))
+                                      paddle.zeros_like(cur_segm_pred),
+                                      paddle.zeros_like(cur_segm_pred))
             else:
                 loss = self.loss_segm(
                     cur_segm_pred,
@@ -566,7 +566,7 @@ class YOLACTSegmHead(BaseModule):
                 mode='bilinear',
                 align_corners=False).squeeze(0)
             downsampled_masks = downsampled_masks.gt(0.5).float()
-            segm_targets = torch.zeros_like(segm_pred, requires_grad=False)
+            segm_targets = paddle.zeros_like(segm_pred, requires_grad=False)
             for obj_idx in range(downsampled_masks.size(0)):
                 segm_targets[gt_labels[obj_idx] - 1] = torch.max(
                     segm_targets[gt_labels[obj_idx] - 1],
@@ -638,7 +638,7 @@ class YOLACTProtonet(BaseModule):
         for num_channels, kernel_size in zip(self.proto_channels,
                                              self.proto_kernel_sizes):
             if kernel_size > 0:
-                layer = nn.Conv2d(
+                layer = nn.Conv2D(
                     in_channels,
                     num_channels,
                     kernel_size,
@@ -789,8 +789,8 @@ class YOLACTProtonet(BaseModule):
                 loss = cur_mask_pred.sum() * 0.
             elif mask_targets is None:
                 loss = F.binary_cross_entropy(cur_mask_pred,
-                                              torch.zeros_like(cur_mask_pred),
-                                              torch.zeros_like(cur_mask_pred))
+                                              paddle.zeros_like(cur_mask_pred),
+                                              paddle.zeros_like(cur_mask_pred))
             else:
                 cur_mask_pred = torch.clamp(cur_mask_pred, 0, 1)
                 loss = F.binary_cross_entropy(
@@ -891,10 +891,10 @@ class YOLACTProtonet(BaseModule):
         y1, y2 = self.sanitize_coordinates(
             boxes[:, 1], boxes[:, 3], h, padding, cast=False)
 
-        rows = torch.arange(
+        rows = paddle.arange(
             w, device=masks.device, dtype=x1.dtype).view(1, -1,
                                                          1).expand(h, w, n)
-        cols = torch.arange(
+        cols = paddle.arange(
             h, device=masks.device, dtype=x1.dtype).view(-1, 1,
                                                          1).expand(h, w, n)
 
@@ -979,7 +979,7 @@ class YOLACTProtonet(BaseModule):
             # rescale it back to the testing scale to obtain RoIs.
             if rescale and not isinstance(scale_factors[0], float):
                 scale_factors = [
-                    torch.from_numpy(scale_factor).to(det_bboxes[0].device)
+                    paddle.to_tensor(scale_factor).to(det_bboxes[0].device)
                     for scale_factor in scale_factors
                 ]
             _bboxes = [

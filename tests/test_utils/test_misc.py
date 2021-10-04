@@ -39,7 +39,7 @@ def test_mask2ndarray():
     output_mask = mask2ndarray(raw_masks)
     assert np.allclose(raw_masks, output_mask)
 
-    raw_masks = torch.ones((3, 28, 28))
+    raw_masks = paddle.ones((3, 28, 28))
     output_mask = mask2ndarray(raw_masks)
     assert np.allclose(raw_masks, output_mask)
 
@@ -82,22 +82,22 @@ def test_distance2bbox():
             batch_distance,
             max_shape=[(120, 100), (120, 100), (32, 32)])
 
-    rois = torch.zeros((0, 4))
-    deltas = torch.zeros((0, 4))
+    rois = paddle.zeros((0, 4))
+    deltas = paddle.zeros((0, 4))
     out = distance2bbox(rois, deltas, max_shape=(120, 100))
     assert rois.shape == out.shape
 
-    rois = torch.zeros((2, 0, 4))
-    deltas = torch.zeros((2, 0, 4))
+    rois = paddle.zeros((2, 0, 4))
+    deltas = paddle.zeros((2, 0, 4))
     out = distance2bbox(rois, deltas, max_shape=(120, 100))
     assert rois.shape == out.shape
 
 
 @pytest.mark.parametrize('mask', [
-    torch.ones((28, 28)),
-    torch.zeros((28, 28)),
-    torch.rand(28, 28) > 0.5,
-    torch.tensor([[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]])
+    paddle.ones((28, 28)),
+    paddle.zeros((28, 28)),
+    paddle.rand(28, 28) > 0.5,
+    paddle.to_tensor([[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]])
 ])
 def test_center_of_mass(mask):
     center_h, center_w = center_of_mass(mask)

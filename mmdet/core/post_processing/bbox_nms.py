@@ -42,7 +42,7 @@ def multiclass_nms(multi_bboxes,
 
     scores = multi_scores[:, :-1]
 
-    labels = torch.arange(num_classes, dtype=torch.long, device=scores.device)
+    labels = paddle.arange(num_classes, dtype=paddle.long, device=scores.device)
     labels = labels.view(1, -1).expand_as(scores)
 
     bboxes = bboxes.reshape(-1, 4)
@@ -149,7 +149,7 @@ def fast_nms(multi_bboxes,
     keep *= scores > score_thr
 
     # Assign each kept detection to its corresponding class
-    classes = torch.arange(
+    classes = paddle.arange(
         num_classes, device=boxes.device)[:, None].expand_as(keep)
     classes = classes[keep]
 

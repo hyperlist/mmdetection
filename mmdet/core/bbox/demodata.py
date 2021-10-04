@@ -38,5 +38,5 @@ def random_boxes(num=1, scale=1, rng=None):
     tlbr[:, 2] = br_x * scale
     tlbr[:, 3] = br_y * scale
 
-    boxes = torch.from_numpy(tlbr)
+    boxes = paddle.to_tensor(tlbr)
     return boxes

@@ -12,7 +12,6 @@ import pytest
 import paddle
 import paddle.nn as nn
 from mmcv.runner import EpochBasedRunner
-from torch.utils.data import DataLoader
 
 from mmdet.core.evaluation import DistEvalHook, EvalHook
 from mmdet.datasets import DATASETS, CocoDataset, CustomDataset, build_dataset
@@ -223,7 +222,7 @@ def test_dataset_evaluation():
 @pytest.mark.parametrize('EvalHookParam', (EvalHook, DistEvalHook))
 def test_evaluation_hook(EvalHookParam):
     # create dummy data
-    dataloader = DataLoader(torch.ones((5, 2)))
+    dataloader = paddle.io.DataLoaderpaddle.ones((5, 2)))
 
     # 0.1. dataloader is not a DataLoader object
     with pytest.raises(TypeError):

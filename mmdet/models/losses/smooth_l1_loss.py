@@ -26,8 +26,8 @@ def smooth_l1_loss(pred, target, beta=1.0):
         return pred.sum() * 0
 
     assert pred.size() == target.size()
-    diff = torch.abs(pred - target)
-    loss = torch.where(diff < beta, 0.5 * diff * diff / beta,
+    diff = paddle.abs(pred - target)
+    loss = paddle.where(diff < beta, 0.5 * diff * diff / beta,
                        diff - 0.5 * beta)
     return loss
 
@@ -48,7 +48,7 @@ def l1_loss(pred, target):
         return pred.sum() * 0
 
     assert pred.size() == target.size()
-    loss = torch.abs(pred - target)
+    loss = paddle.abs(pred - target)
     return loss
 
 

@@ -58,7 +58,7 @@ def seesaw_ce_loss(cls_score,
     if q > 0:
         scores = F.softmax(cls_score.detach(), dim=1)
         self_scores = scores[
-            torch.arange(0, len(scores)).to(scores.device).long(),
+            paddle.arange(0, len(scores)).to(scores.device).long(),
             labels.long()]
         score_matrix = scores / self_scores[:, None].clamp(min=eps)
         index = (score_matrix > 1.0).float()
@@ -126,7 +126,7 @@ class SeesawLoss(nn.Layer):
         # cumulative samples for each category
         self.register_buffer(
             'cum_samples',
-            torch.zeros(self.num_classes + 1, dtype=torch.float))
+            paddle.zeros(self.num_classes + 1, dtype=torch.float))
 
         # custom output channels of the classifier
         self.custom_cls_channels = True

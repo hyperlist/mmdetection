@@ -153,6 +153,6 @@ class IoUBalancedNegSampler(RandomSampler):
                 if len(extra_inds) > num_extra:
                     extra_inds = self.random_choice(extra_inds, num_extra)
                 sampled_inds = np.concatenate((sampled_inds, extra_inds))
-            sampled_inds = torch.from_numpy(sampled_inds).long().to(
+            sampled_inds = paddle.to_tensor(sampled_inds).long().to(
                 assign_result.gt_inds.device)
             return sampled_inds

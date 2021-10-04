@@ -210,7 +210,7 @@ class FPN_CARAFE(BaseModule):
         """Initialize the weights of module."""
         super(FPN_CARAFE, self).init_weights()
         for m in self.modules():
-            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
+            if isinstance(m, (nn.Conv2D, nn.ConvTranspose2d)):
                 xavier_init(m, distribution='uniform')
         for m in self.modules():
             if isinstance(m, CARAFEPack):
