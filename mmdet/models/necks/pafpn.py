@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import auto_fp16
 
@@ -71,8 +71,8 @@ class PAFPN(FPN):
             act_cfg,
             init_cfg=init_cfg)
         # add extra bottom up pathway
-        self.downsample_convs = nn.ModuleList()
-        self.pafpn_convs = nn.ModuleList()
+        self.downsample_convs = nn.LayerList()
+        self.pafpn_convs = nn.LayerList()
         for i in range(self.start_level + 1, self.backbone_end_level):
             d_conv = ConvModule(
                 out_channels,

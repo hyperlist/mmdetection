@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle.nn as nn
+
 
 from ..builder import LOSSES
 from .utils import weighted_loss
@@ -37,7 +37,7 @@ def knowledge_distillation_kl_div_loss(pred,
 
 
 @LOSSES.register_module()
-class KnowledgeDistillationKLDivLoss(nn.Module):
+class KnowledgeDistillationKLDivLoss(nn.Layer):
     """Loss function for knowledge distilling using KL divergence.
 
     Args:

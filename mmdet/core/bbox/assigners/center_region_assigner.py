@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from ..builder import BBOX_ASSIGNERS
 from ..iou_calculators import build_iou_calculator
@@ -324,7 +324,7 @@ class CenterRegionAssigner(BaseAssigner):
         is_bbox_in_gt_core[inds_of_match, argmax_priority] = 0
         # Concat the shadowed indices due to overlapping with that out side of
         #   effective scale. shape: (total_num_ignore, 2)
-        shadowed_gt_inds = torch.cat(
+        shadowed_gt_inds = paddle.concat(
             (shadowed_gt_inds, torch.nonzero(
                 is_bbox_in_gt_core, as_tuple=False)),
             dim=0)

@@ -5,7 +5,7 @@ from functools import partial
 import mmcv
 import numpy as np
 import pytest
-import torch
+import paddle
 from mmcv.cnn import Scale
 
 from mmdet import digit_version

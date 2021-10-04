@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.runner import BaseModule
 
 from mmdet.models.builder import HEADS
@@ -79,7 +79,7 @@ class EmbeddingRPNHead(BaseModule):
         for meta in img_metas:
             h, w, _ = meta['img_shape']
             imgs_whwh.append(imgs[0].new_tensor([[w, h, w, h]]))
-        imgs_whwh = torch.cat(imgs_whwh, dim=0)
+        imgs_whwh = paddle.concat(imgs_whwh, dim=0)
         imgs_whwh = imgs_whwh[:, None, :]
 
         # imgs_whwh has shape (batch_size, 1, 4)

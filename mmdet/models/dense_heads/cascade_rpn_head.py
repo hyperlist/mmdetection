@@ -3,8 +3,8 @@ from __future__ import division
 import copy
 import warnings
 
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv import ConfigDict
 from mmcv.ops import DeformConv2d, batched_nms
 from mmcv.runner import BaseModule, ModuleList
@@ -197,7 +197,7 @@ class StageCascadeRPNHead(RPNHead):
             gt_bboxes_ignore=gt_bboxes_ignore,
             gt_labels=None,
             allowed_border=self.train_cfg.allowed_border)
-        flat_anchors = torch.cat(anchors)
+        flat_anchors = paddle.concat(anchors)
         sampling_result = self.sampler.sample(assign_result, flat_anchors,
                                               gt_bboxes)
 
@@ -398,7 +398,7 @@ class StageCascadeRPNHead(RPNHead):
                 offset = torch.stack([offset_y, offset_x], dim=-1)
                 offset = offset.reshape(offset.size(0), -1)  # [NA, 2*ks**2]
                 mlvl_offset.append(offset)
-            offset_list.append(torch.cat(mlvl_offset))  # [totalNA, 2*ks**2]
+            offset_list.append(paddle.concat(mlvl_offset))  # [totalNA, 2*ks**2]
         offset_list = images_to_levels(offset_list, num_level_anchors)
         return offset_list
 
@@ -484,7 +484,7 @@ class StageCascadeRPNHead(RPNHead):
         mlvl_anchor_list = list(zip(*anchor_list))
         # concat mlvl_anchor_list
         mlvl_anchor_list = [
-            torch.cat(anchors, dim=0) for anchors in mlvl_anchor_list
+            paddle.concat(anchors, dim=0) for anchors in mlvl_anchor_list
         ]
 
         losses = multi_apply(
@@ -621,12 +621,12 @@ class StageCascadeRPNHead(RPNHead):
             level_ids.append(
                 scores.new_full((scores.size(0), ), idx, dtype=torch.long))
 
-        scores = torch.cat(mlvl_scores)
-        anchors = torch.cat(mlvl_valid_anchors)
-        rpn_bbox_pred = torch.cat(mlvl_bbox_preds)
+        scores = paddle.concat(mlvl_scores)
+        anchors = paddle.concat(mlvl_valid_anchors)
+        rpn_bbox_pred = paddle.concat(mlvl_bbox_preds)
         proposals = self.bbox_coder.decode(
             anchors, rpn_bbox_pred, max_shape=img_shape)
-        ids = torch.cat(level_ids)
+        ids = paddle.concat(level_ids)
 
         # Skip nonzero op while exporting to ONNX
         if cfg.min_bbox_size >= 0 and (not torch.onnx.is_in_onnx_export()):

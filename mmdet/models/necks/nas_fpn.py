@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.ops.merge_cells import GlobalPoolingCell, SumCell
 from mmcv.runner import BaseModule, ModuleList
@@ -62,7 +62,7 @@ class NASFPN(BaseModule):
         self.add_extra_convs = add_extra_convs
 
         # add lateral connections
-        self.lateral_convs = nn.ModuleList()
+        self.lateral_convs = nn.LayerList()
         for i in range(self.start_level, self.backbone_end_level):
             l_conv = ConvModule(
                 in_channels[i],
@@ -74,12 +74,12 @@ class NASFPN(BaseModule):
 
         # add extra downsample layers (stride-2 pooling or conv)
         extra_levels = num_outs - self.backbone_end_level + self.start_level
-        self.extra_downsamples = nn.ModuleList()
+        self.extra_downsamples = nn.LayerList()
         for i in range(extra_levels):
             extra_conv = ConvModule(
                 out_channels, out_channels, 1, norm_cfg=norm_cfg, act_cfg=None)
             self.extra_downsamples.append(
-                nn.Sequential(extra_conv, nn.MaxPool2d(2, 2)))
+                nn.Sequential(extra_conv, nn.MaxPool2D(2, 2)))
 
         # add NAS FPN connections
         self.fpn_stages = ModuleList()

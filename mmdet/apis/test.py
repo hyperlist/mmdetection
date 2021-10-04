@@ -6,8 +6,8 @@ import tempfile
 import time
 
 import mmcv
-import torch
-import torch.distributed as dist
+import paddle
+import paddle.distributed as dist
 from mmcv.image import tensor2imgs
 from mmcv.runner import get_dist_info
 
@@ -77,7 +77,7 @@ def multi_gpu_test(model, data_loader, tmpdir=None, gpu_collect=False):
     and collects them by the rank 0 worker.
 
     Args:
-        model (nn.Module): Model to be tested.
+        model (nn.Layer): Model to be tested.
         data_loader (nn.Dataloader): Pytorch data loader.
         tmpdir (str): Path of directory to save the temporary results from
             different gpus under cpu mode.

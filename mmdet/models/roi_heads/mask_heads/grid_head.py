@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 
@@ -117,11 +117,11 @@ class GridHead(BaseModule):
         # total edges in the grid
         self.num_edges = sum([len(p) for p in self.neighbor_points])
 
-        self.forder_trans = nn.ModuleList()  # first-order feature transition
-        self.sorder_trans = nn.ModuleList()  # second-order feature transition
+        self.forder_trans = nn.LayerList()  # first-order feature transition
+        self.sorder_trans = nn.LayerList()  # second-order feature transition
         for neighbors in self.neighbor_points:
-            fo_trans = nn.ModuleList()
-            so_trans = nn.ModuleList()
+            fo_trans = nn.LayerList()
+            so_trans = nn.LayerList()
             for _ in range(len(neighbors)):
                 # each transition module consists of a 5x5 depth-wise conv and
                 # 1x1 conv.
@@ -174,7 +174,7 @@ class GridHead(BaseModule):
                 x_so[i] = x_so[i] + self.sorder_trans[i][j](x_fo[point_idx])
 
         # predicted heatmap with fused features
-        x2 = torch.cat(x_so, dim=1)
+        x2 = paddle.concat(x_so, dim=1)
         x2 = self.deconv1(x2)
         x2 = F.relu(self.norm1(x2), inplace=True)
         heatmap = self.deconv2(x2)
@@ -223,9 +223,9 @@ class GridHead(BaseModule):
 
     def get_targets(self, sampling_results, rcnn_train_cfg):
         # mix all samples (across images) together.
-        pos_bboxes = torch.cat([res.pos_bboxes for res in sampling_results],
+        pos_bboxes = paddle.concat([res.pos_bboxes for res in sampling_results],
                                dim=0).cpu()
-        pos_gt_bboxes = torch.cat(
+        pos_gt_bboxes = paddle.concat(
             [res.pos_gt_bboxes for res in sampling_results], dim=0).cpu()
         assert pos_bboxes.shape == pos_gt_bboxes.shape
 
@@ -285,7 +285,7 @@ class GridHead(BaseModule):
         for i in range(self.grid_points):
             sub_x1, sub_y1, sub_x2, sub_y2 = self.sub_regions[i]
             sub_targets.append(targets[:, [i], sub_y1:sub_y2, sub_x1:sub_x2])
-        sub_targets = torch.cat(sub_targets, dim=1)
+        sub_targets = paddle.concat(sub_targets, dim=1)
         sub_targets = sub_targets.to(sampling_results[0].pos_bboxes.device)
         return sub_targets
 
@@ -355,7 +355,7 @@ class GridHead(BaseModule):
             dim=1, keepdim=True) / (
                 pred_scores[:, y2_inds].sum(dim=1, keepdim=True))
 
-        bbox_res = torch.cat(
+        bbox_res = paddle.concat(
             [bboxes_x1, bboxes_y1, bboxes_x2, bboxes_y2, cls_scores], dim=1)
         bbox_res[:, [0, 2]].clamp_(min=0, max=img_metas[0]['img_shape'][1])
         bbox_res[:, [1, 3]].clamp_(min=0, max=img_metas[0]['img_shape'][0])

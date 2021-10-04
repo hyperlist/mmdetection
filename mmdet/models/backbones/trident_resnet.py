@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.utils.checkpoint as cp
+import paddle
+import paddle.nn as nn
+
+import paddle.utils.checkpoint as cp
 from mmcv.cnn import build_conv_layer, build_norm_layer
 from mmcv.runner import BaseModule
 from torch.nn.modules.utils import _pair
@@ -175,7 +175,7 @@ class TridentBottleneck(Bottleneck):
 
         out = [self.relu(b) for b in out]
         if self.concat_output:
-            out = torch.cat(out, dim=0)
+            out = paddle.concat(out, dim=0)
         return out
 
 

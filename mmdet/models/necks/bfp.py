@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn.functional as F
+
 from mmcv.cnn import ConvModule
 from mmcv.cnn.bricks import NonLocal2d
 from mmcv.runner import BaseModule

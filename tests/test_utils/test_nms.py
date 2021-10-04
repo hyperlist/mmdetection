@@ -1,5 +1,5 @@
 import pytest
-import torch
+import paddle
 
 from mmdet.core.post_processing import mask_matrix_nms
 

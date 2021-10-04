@@ -1,9 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.ops import batched_nms
 from mmcv.runner import force_fp32
@@ -225,12 +225,12 @@ class RPNHead(AnchorHead):
             level_ids.append(
                 scores.new_full((scores.size(0), ), idx, dtype=torch.long))
 
-        scores = torch.cat(mlvl_scores)
-        anchors = torch.cat(mlvl_valid_anchors)
-        rpn_bbox_pred = torch.cat(mlvl_bbox_preds)
+        scores = paddle.concat(mlvl_scores)
+        anchors = paddle.concat(mlvl_valid_anchors)
+        rpn_bbox_pred = paddle.concat(mlvl_bbox_preds)
         proposals = self.bbox_coder.decode(
             anchors, rpn_bbox_pred, max_shape=img_shape)
-        ids = torch.cat(level_ids)
+        ids = paddle.concat(level_ids)
 
         if cfg.min_bbox_size >= 0:
             w = proposals[:, 2] - proposals[:, 0]
@@ -324,9 +324,9 @@ class RPNHead(AnchorHead):
             mlvl_bbox_preds.append(rpn_bbox_pred)
             mlvl_valid_anchors.append(anchors)
 
-        batch_mlvl_scores = torch.cat(mlvl_scores, dim=1)
-        batch_mlvl_anchors = torch.cat(mlvl_valid_anchors, dim=1)
-        batch_mlvl_rpn_bbox_pred = torch.cat(mlvl_bbox_preds, dim=1)
+        batch_mlvl_scores = paddle.concat(mlvl_scores, dim=1)
+        batch_mlvl_anchors = paddle.concat(mlvl_valid_anchors, dim=1)
+        batch_mlvl_rpn_bbox_pred = paddle.concat(mlvl_bbox_preds, dim=1)
         batch_mlvl_proposals = self.bbox_coder.decode(
             batch_mlvl_anchors, batch_mlvl_rpn_bbox_pred, max_shape=img_shapes)
 

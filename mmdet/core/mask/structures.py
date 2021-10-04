@@ -5,7 +5,7 @@ import cv2
 import mmcv
 import numpy as np
 import pycocotools.mask as maskUtils
-import torch
+import paddle
 from mmcv.ops.roi_align import roi_align
 
 
@@ -351,7 +351,7 @@ class BitmapMasks(BaseInstanceMasks):
         num_bbox = bboxes.shape[0]
         fake_inds = torch.arange(
             num_bbox, device=device).to(dtype=bboxes.dtype)[:, None]
-        rois = torch.cat([fake_inds, bboxes], dim=1)  # Nx5
+        rois = paddle.concat([fake_inds, bboxes], dim=1)  # Nx5
         rois = rois.to(device=device)
         if num_bbox > 0:
             gt_masks_th = torch.from_numpy(self.masks).to(device).index_select(

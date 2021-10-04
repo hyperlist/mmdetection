@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
 from mmcv.runner import BaseModule
 
@@ -62,7 +62,7 @@ class SSDNeck(BaseModule):
                     override=dict(name='l2_norm'))
             ]
 
-        self.extra_layers = nn.ModuleList()
+        self.extra_layers = nn.LayerList()
         extra_layer_channels = out_channels[len(in_channels):]
         second_conv = DepthwiseSeparableConvModule if \
             use_depthwise else ConvModule
@@ -103,7 +103,7 @@ class SSDNeck(BaseModule):
         return tuple(outs)
 
 
-class L2Norm(nn.Module):
+class L2Norm(nn.Layer):
 
     def __init__(self, n_dims, scale=20., eps=1e-10):
         """L2 normalization layer.

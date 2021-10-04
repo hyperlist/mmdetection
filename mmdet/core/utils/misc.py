@@ -2,7 +2,7 @@
 from functools import partial
 
 import numpy as np
-import torch
+import paddle
 from six.moves import map, zip
 
 from ..mask.structures import BitmapMasks, PolygonMasks
@@ -123,6 +123,6 @@ def generate_coordinate(featmap_sizes, device='cuda'):
     y, x = torch.meshgrid(y_range, x_range)
     y = y.expand([featmap_sizes[0], 1, -1, -1])
     x = x.expand([featmap_sizes[0], 1, -1, -1])
-    coord_feat = torch.cat([x, y], 1)
+    coord_feat = paddle.concat([x, y], 1)
 
     return coord_feat

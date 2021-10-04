@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import numpy as np
 import pytest
-import torch
+import paddle
 from mmcv import Config
 
 
@@ -96,7 +96,7 @@ def test_vid_fgfa_style_forward(cfg_file):
 
     # Test forward test with frame_stride=1 and frame_range=[-1,0]
     with torch.no_grad():
-        imgs = torch.cat([imgs, imgs.clone()], dim=0)
+        imgs = paddle.concat([imgs, imgs.clone()], dim=0)
         img_list = [g[None, :] for g in imgs]
         img_metas.extend(copy.deepcopy(img_metas))
         for i in range(len(img_metas)):
@@ -137,7 +137,7 @@ def test_tracktor_forward(cfg_file):
     imgs = mm_inputs.pop('imgs')
     img_metas = mm_inputs.pop('img_metas')
     with torch.no_grad():
-        imgs = torch.cat([imgs, imgs.clone()], dim=0)
+        imgs = paddle.concat([imgs, imgs.clone()], dim=0)
         img_list = [g[None, :] for g in imgs]
         img2_metas = copy.deepcopy(img_metas)
         img2_metas[0]['frame_id'] = 1

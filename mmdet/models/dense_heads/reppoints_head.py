@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.ops import DeformConv2d
 
@@ -125,8 +125,8 @@ class RepPointsHead(AnchorFreeHead):
     def _init_layers(self):
         """Initialize layers of the head."""
         self.relu = nn.ReLU(inplace=True)
-        self.cls_convs = nn.ModuleList()
-        self.reg_convs = nn.ModuleList()
+        self.cls_convs = nn.LayerList()
+        self.reg_convs = nn.LayerList()
         for i in range(self.stacked_convs):
             chn = self.in_channels if i == 0 else self.feat_channels
             self.cls_convs.append(
@@ -186,7 +186,7 @@ class RepPointsHead(AnchorFreeHead):
             bbox_right = pts_x.max(dim=1, keepdim=True)[0]
             bbox_up = pts_y.min(dim=1, keepdim=True)[0]
             bbox_bottom = pts_y.max(dim=1, keepdim=True)[0]
-            bbox = torch.cat([bbox_left, bbox_up, bbox_right, bbox_bottom],
+            bbox = paddle.concat([bbox_left, bbox_up, bbox_right, bbox_bottom],
                              dim=1)
         elif self.transform_method == 'partial_minmax':
             pts_y = pts_y[:, :4, ...]
@@ -195,7 +195,7 @@ class RepPointsHead(AnchorFreeHead):
             bbox_right = pts_x.max(dim=1, keepdim=True)[0]
             bbox_up = pts_y.min(dim=1, keepdim=True)[0]
             bbox_bottom = pts_y.max(dim=1, keepdim=True)[0]
-            bbox = torch.cat([bbox_left, bbox_up, bbox_right, bbox_bottom],
+            bbox = paddle.concat([bbox_left, bbox_up, bbox_right, bbox_bottom],
                              dim=1)
         elif self.transform_method == 'moment':
             pts_y_mean = pts_y.mean(dim=1, keepdim=True)
@@ -208,7 +208,7 @@ class RepPointsHead(AnchorFreeHead):
             moment_height_transfer = moment_transfer[1]
             half_width = pts_x_std * torch.exp(moment_width_transfer)
             half_height = pts_y_std * torch.exp(moment_height_transfer)
-            bbox = torch.cat([
+            bbox = paddle.concat([
                 pts_x_mean - half_width, pts_y_mean - half_height,
                 pts_x_mean + half_width, pts_y_mean + half_height
             ],
@@ -246,7 +246,7 @@ class RepPointsHead(AnchorFreeHead):
         grid_y = grid_y.view(b, -1, h, w)
         grid_yx = torch.stack([grid_y, grid_x], dim=2)
         grid_yx = grid_yx.view(b, -1, h, w)
-        regressed_bbox = torch.cat([
+        regressed_bbox = paddle.concat([
             grid_left, grid_top, grid_left + grid_width, grid_top + grid_height
         ], 1)
         return grid_yx, regressed_bbox
@@ -336,7 +336,7 @@ class RepPointsHead(AnchorFreeHead):
                 scale = self.point_base_scale * self.point_strides[i_lvl] * 0.5
                 bbox_shift = torch.Tensor([-scale, -scale, scale,
                                            scale]).view(1, 4).type_as(point[0])
-                bbox_center = torch.cat(
+                bbox_center = paddle.concat(
                     [point[i_lvl][:, :2], point[i_lvl][:, :2]], dim=1)
                 bbox.append(bbox_center + bbox_shift)
             bbox_list.append(bbox)
@@ -483,8 +483,8 @@ class RepPointsHead(AnchorFreeHead):
         # concat all level points and flags to a single tensor
         for i in range(num_imgs):
             assert len(proposals_list[i]) == len(valid_flag_list[i])
-            proposals_list[i] = torch.cat(proposals_list[i])
-            valid_flag_list[i] = torch.cat(valid_flag_list[i])
+            proposals_list[i] = paddle.concat(proposals_list[i])
+            valid_flag_list[i] = paddle.concat(valid_flag_list[i])
 
         # compute targets for each image
         if gt_bboxes_ignore_list is None:
@@ -607,7 +607,7 @@ class RepPointsHead(AnchorFreeHead):
                 bbox_preds_init = self.points2bbox(
                     pts_preds_init[i_lvl].detach())
                 bbox_shift = bbox_preds_init * self.point_strides[i_lvl]
-                bbox_center = torch.cat(
+                bbox_center = paddle.concat(
                     [center[i_lvl][:, :2], center[i_lvl][:, :2]], dim=1)
                 bbox.append(bbox_center +
                             bbox_shift[i_img].permute(1, 2, 0).reshape(-1, 4))
@@ -722,7 +722,7 @@ class RepPointsHead(AnchorFreeHead):
                 points = points[topk_inds, :]
                 bbox_pred = bbox_pred[topk_inds, :]
                 scores = scores[topk_inds, :]
-            bbox_pos_center = torch.cat([points[:, :2], points[:, :2]], dim=1)
+            bbox_pos_center = paddle.concat([points[:, :2], points[:, :2]], dim=1)
             bboxes = bbox_pred * self.point_strides[i_lvl] + bbox_pos_center
             x1 = bboxes[:, 0].clamp(min=0, max=img_shape[1])
             y1 = bboxes[:, 1].clamp(min=0, max=img_shape[0])
@@ -731,16 +731,16 @@ class RepPointsHead(AnchorFreeHead):
             bboxes = torch.stack([x1, y1, x2, y2], dim=-1)
             mlvl_bboxes.append(bboxes)
             mlvl_scores.append(scores)
-        mlvl_bboxes = torch.cat(mlvl_bboxes)
+        mlvl_bboxes = paddle.concat(mlvl_bboxes)
         if rescale:
             mlvl_bboxes /= mlvl_bboxes.new_tensor(scale_factor)
-        mlvl_scores = torch.cat(mlvl_scores)
+        mlvl_scores = paddle.concat(mlvl_scores)
         if self.use_sigmoid_cls:
             # Add a dummy background class to the backend when using sigmoid
             # remind that we set FG labels to [0, num_class-1] since mmdet v2.0
             # BG cat_id: num_class
             padding = mlvl_scores.new_zeros(mlvl_scores.shape[0], 1)
-            mlvl_scores = torch.cat([mlvl_scores, padding], dim=1)
+            mlvl_scores = paddle.concat([mlvl_scores, padding], dim=1)
         if with_nms:
             det_bboxes, det_labels = multiclass_nms(mlvl_bboxes, mlvl_scores,
                                                     cfg.score_thr, cfg.nms,

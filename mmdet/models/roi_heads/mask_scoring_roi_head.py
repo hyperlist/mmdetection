@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.core import bbox2roi
 from ..builder import HEADS, build_head
@@ -22,7 +22,7 @@ class MaskScoringRoIHead(StandardRoIHead):
                             img_metas):
         """Run forward function and calculate loss for Mask head in
         training."""
-        pos_labels = torch.cat([res.pos_gt_labels for res in sampling_results])
+        pos_labels = paddle.concat([res.pos_gt_labels for res in sampling_results])
         mask_results = super(MaskScoringRoIHead,
                              self)._mask_forward_train(x, sampling_results,
                                                        bbox_feats, gt_masks,
@@ -79,7 +79,7 @@ class MaskScoringRoIHead(StandardRoIHead):
             ]
             mask_rois = bbox2roi(_bboxes)
             mask_results = self._mask_forward(x, mask_rois)
-            concat_det_labels = torch.cat(det_labels)
+            concat_det_labels = paddle.concat(det_labels)
             # get mask scores with mask iou head
             mask_feats = mask_results['mask_feats']
             mask_pred = mask_results['mask_pred']

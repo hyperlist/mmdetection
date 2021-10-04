@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 import mmcv
 import numpy as np
 import pytest
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.runner import EpochBasedRunner
 from torch.utils.data import DataLoader
 
@@ -309,7 +309,7 @@ def test_evaluation_hook(EvalHookParam):
 
 def _build_demo_runner():
 
-    class Model(nn.Module):
+    class Model(nn.Layer):
 
         def __init__(self):
             super().__init__()

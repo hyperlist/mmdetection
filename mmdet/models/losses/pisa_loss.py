@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch
+import paddle
 
 from mmdet.core import bbox_overlaps
 
@@ -55,7 +55,7 @@ def isr_p(cls_score,
         gts.append(gt_i + last_max_gt)
         if len(gt_i) != 0:
             last_max_gt = gt_i.max() + 1
-    gts = torch.cat(gts)
+    gts = paddle.concat(gts)
     assert len(gts) == num_pos
 
     cls_score = cls_score.detach()

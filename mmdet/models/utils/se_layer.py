@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 
@@ -35,7 +35,7 @@ class SELayer(BaseModule):
             act_cfg = (act_cfg, act_cfg)
         assert len(act_cfg) == 2
         assert mmcv.is_tuple_of(act_cfg, dict)
-        self.global_avgpool = nn.AdaptiveAvgPool2d(1)
+        self.global_avgpool = nn.AdaptiveAvgPool2D(1)
         self.conv1 = ConvModule(
             in_channels=channels,
             out_channels=int(channels / ratio),

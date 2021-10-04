@@ -45,7 +45,7 @@ class Bottleneck(_Bottleneck):
             kernel_size=1,
             stride=self.conv1_stride,
             bias=False)
-        self.add_module(self.norm1_name, norm1)
+        self.add_sublayer(self.norm1_name, norm1)
         fallback_on_stride = False
         self.with_modulated_dcn = False
         if self.with_dcn:
@@ -85,14 +85,14 @@ class Bottleneck(_Bottleneck):
                 groups=groups,
                 bias=False)
 
-        self.add_module(self.norm2_name, norm2)
+        self.add_sublayer(self.norm2_name, norm2)
         self.conv3 = build_conv_layer(
             self.conv_cfg,
             width,
             self.planes * self.expansion,
             kernel_size=1,
             bias=False)
-        self.add_module(self.norm3_name, norm3)
+        self.add_sublayer(self.norm3_name, norm3)
 
 
 @BACKBONES.register_module()

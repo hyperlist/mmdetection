@@ -1,9 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import Linear, bias_init_with_prob, constant_init
 from mmcv.runner import force_fp32
 
@@ -59,7 +59,7 @@ class DeformableDETRHead(DETRHead):
         reg_branch = nn.Sequential(*reg_branch)
 
         def _get_clones(module, N):
-            return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
+            return nn.LayerList([copy.deepcopy(module) for i in range(N)])
 
         # last reg_branch is used to generate proposal from
         # encode feature map when as_two_stage is True.
@@ -71,9 +71,9 @@ class DeformableDETRHead(DETRHead):
             self.reg_branches = _get_clones(reg_branch, num_pred)
         else:
 
-            self.cls_branches = nn.ModuleList(
+            self.cls_branches = nn.LayerList(
                 [fc_cls for _ in range(num_pred)])
-            self.reg_branches = nn.ModuleList(
+            self.reg_branches = nn.LayerList(
                 [reg_branch for _ in range(num_pred)])
 
         if not self.as_two_stage:

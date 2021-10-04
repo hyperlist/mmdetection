@@ -3,9 +3,9 @@
 
 import warnings
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import (ConvModule, bias_init_with_prob, constant_init, is_norm,
                       normal_init)
 from mmcv.runner import force_fp32
@@ -132,8 +132,8 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
         return 5 + self.num_classes
 
     def _init_layers(self):
-        self.convs_bridge = nn.ModuleList()
-        self.convs_pred = nn.ModuleList()
+        self.convs_bridge = nn.LayerList()
+        self.convs_pred = nn.LayerList()
         for i in range(self.num_levels):
             conv_bridge = ConvModule(
                 self.in_channels[i],
@@ -235,12 +235,12 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
             flatten_strides.append(
                 pred.new_tensor(stride).expand(pred.size(1)))
 
-        flatten_preds = torch.cat(flatten_preds, dim=1)
+        flatten_preds = paddle.concat(flatten_preds, dim=1)
         flatten_bbox_preds = flatten_preds[..., :4]
         flatten_objectness = flatten_preds[..., 4].sigmoid()
         flatten_cls_scores = flatten_preds[..., 5:].sigmoid()
-        flatten_anchors = torch.cat(mlvl_anchors)
-        flatten_strides = torch.cat(flatten_strides)
+        flatten_anchors = paddle.concat(mlvl_anchors)
+        flatten_strides = paddle.concat(flatten_strides)
         flatten_bboxes = self.bbox_coder.decode(flatten_anchors,
                                                 flatten_bbox_preds,
                                                 flatten_strides.unsqueeze(-1))
@@ -254,7 +254,7 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
 
         padding = flatten_bboxes.new_zeros(num_imgs, flatten_bboxes.shape[1],
                                            1)
-        flatten_cls_scores = torch.cat([flatten_cls_scores, padding], dim=-1)
+        flatten_cls_scores = paddle.concat([flatten_cls_scores, padding], dim=-1)
 
         det_results = []
         for (bboxes, scores, objectness) in zip(flatten_bboxes,
@@ -435,10 +435,10 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
             anchor_strides.append(
                 torch.tensor(self.featmap_strides[i],
                              device=gt_bboxes.device).repeat(len(anchors[i])))
-        concat_anchors = torch.cat(anchors)
-        concat_responsible_flags = torch.cat(responsible_flags)
+        concat_anchors = paddle.concat(anchors)
+        concat_responsible_flags = paddle.concat(responsible_flags)
 
-        anchor_strides = torch.cat(anchor_strides)
+        anchor_strides = paddle.concat(anchor_strides)
         assert len(anchor_strides) == len(concat_anchors) == \
                len(concat_responsible_flags)
         assign_result = self.assigner.assign(concat_anchors,
@@ -526,7 +526,7 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
             # would create constant tensor when exporting to onnx
             pred_map_conf = torch.sigmoid(pred_map[..., :2])
             pred_map_rest = pred_map[..., 2:]
-            pred_map = torch.cat([pred_map_conf, pred_map_rest], dim=-1)
+            pred_map = paddle.concat([pred_map_conf, pred_map_rest], dim=-1)
             pred_map_boxes = pred_map[..., :4]
             multi_lvl_anchor = multi_lvl_anchors[i]
             multi_lvl_anchor = multi_lvl_anchor.expand_as(pred_map_boxes)
@@ -562,9 +562,9 @@ class YOLOV3Head(BaseDenseHead, BBoxTestMixin):
             multi_lvl_conf_scores.append(conf_pred)
 
         # Merge the results of different scales together
-        batch_mlvl_bboxes = torch.cat(multi_lvl_bboxes, dim=1)
-        batch_mlvl_scores = torch.cat(multi_lvl_cls_scores, dim=1)
-        batch_mlvl_conf_scores = torch.cat(multi_lvl_conf_scores, dim=1)
+        batch_mlvl_bboxes = paddle.concat(multi_lvl_bboxes, dim=1)
+        batch_mlvl_scores = paddle.concat(multi_lvl_cls_scores, dim=1)
+        batch_mlvl_conf_scores = paddle.concat(multi_lvl_conf_scores, dim=1)
 
         # Replace multiclass_nms with ONNX::NonMaxSuppression in deployment
         from mmdet.core.export import add_dummy_nms_for_onnx

@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import pytest
-import torch
+import paddle
 
 from mmdet.models.backbones.hrnet import HRModule, HRNet
 from mmdet.models.backbones.resnet import BasicBlock, Bottleneck

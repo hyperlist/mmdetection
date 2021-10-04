@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.runner import BaseModule, auto_fp16
 
 from mmdet.models.backbones import ResNet
@@ -46,7 +46,7 @@ class ResLayer(BaseModule):
             with_cp=with_cp,
             norm_cfg=self.norm_cfg,
             dcn=dcn)
-        self.add_module(f'layer{stage + 1}', res_layer)
+        self.add_sublayer(f'layer{stage + 1}', res_layer)
 
         assert not (init_cfg and pretrained), \
             'init_cfg and pretrained cannot be specified at the same time'

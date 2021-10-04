@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import bias_init_with_prob, normal_init
 from mmcv.runner import force_fp32
 
@@ -15,7 +15,7 @@ from mmdet.models.dense_heads.paa_head import levels_to_images
 EPS = 1e-12
 
 
-class CenterPrior(nn.Module):
+class CenterPrior(nn.Layer):
     """Center Weighting module to adjust the category-specific prior
     distributions.
 
@@ -98,7 +98,7 @@ class CenterPrior(nn.Module):
             center_prior = torch.exp(-distance /
                                      (2 * instance_sigma**2)).prod(dim=-1)
             center_prior_list.append(center_prior)
-        center_prior_weights = torch.cat(center_prior_list, dim=0)
+        center_prior_weights = paddle.concat(center_prior_list, dim=0)
 
         if self.force_topk:
             gt_inds_no_points_inside = torch.nonzero(
@@ -363,7 +363,7 @@ class AutoAssignHead(FCOSHead):
             temp_inside_gt_bbox_mask_list.append(inside_gt_bbox_mask)
         inside_gt_bbox_mask_list = temp_inside_gt_bbox_mask_list
 
-        mlvl_points = torch.cat(all_level_points, dim=0)
+        mlvl_points = paddle.concat(all_level_points, dim=0)
         bbox_preds = levels_to_images(bbox_preds)
         cls_scores = levels_to_images(cls_scores)
         objectnesses = levels_to_images(objectnesses)
@@ -466,7 +466,7 @@ class AutoAssignHead(FCOSHead):
                   (num_points, num_gt, 4).
         """
 
-        concat_points = torch.cat(points, dim=0)
+        concat_points = paddle.concat(points, dim=0)
         # the number of points per img, per lvl
         inside_gt_bbox_mask_list, bbox_targets_list = multi_apply(
             self._get_target_single, gt_bboxes_list, points=concat_points)

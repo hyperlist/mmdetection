@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.runner import force_fp32
 
 from mmdet.core import (anchor_inside_flags, build_anchor_generator,
@@ -326,8 +326,8 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
         concat_valid_flag_list = []
         for i in range(num_imgs):
             assert len(anchor_list[i]) == len(valid_flag_list[i])
-            concat_anchor_list.append(torch.cat(anchor_list[i]))
-            concat_valid_flag_list.append(torch.cat(valid_flag_list[i]))
+            concat_anchor_list.append(paddle.concat(anchor_list[i]))
+            concat_valid_flag_list.append(paddle.concat(valid_flag_list[i]))
 
         # compute targets for each image
         if gt_bboxes_ignore_list is None:
@@ -474,7 +474,7 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
         # concat all level anchors and flags to a single tensor
         concat_anchor_list = []
         for i in range(len(anchor_list)):
-            concat_anchor_list.append(torch.cat(anchor_list[i]))
+            concat_anchor_list.append(paddle.concat(anchor_list[i]))
         all_anchor_list = images_to_levels(concat_anchor_list,
                                            num_level_anchors)
 
@@ -678,11 +678,11 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
             mlvl_bboxes.append(bboxes)
             mlvl_scores.append(scores)
 
-        batch_mlvl_bboxes = torch.cat(mlvl_bboxes, dim=1)
+        batch_mlvl_bboxes = paddle.concat(mlvl_bboxes, dim=1)
         if rescale:
             batch_mlvl_bboxes /= batch_mlvl_bboxes.new_tensor(
                 scale_factors).unsqueeze(1)
-        batch_mlvl_scores = torch.cat(mlvl_scores, dim=1)
+        batch_mlvl_scores = paddle.concat(mlvl_scores, dim=1)
 
         # Replace multiclass_nms with ONNX::NonMaxSuppression in deployment
         if torch.onnx.is_in_onnx_export() and with_nms:
@@ -707,7 +707,7 @@ class AnchorHead(BaseDenseHead, BBoxTestMixin):
             padding = batch_mlvl_scores.new_zeros(batch_size,
                                                   batch_mlvl_scores.shape[1],
                                                   1)
-            batch_mlvl_scores = torch.cat([batch_mlvl_scores, padding], dim=-1)
+            batch_mlvl_scores = paddle.concat([batch_mlvl_scores, padding], dim=-1)
 
         if with_nms:
             det_results = []

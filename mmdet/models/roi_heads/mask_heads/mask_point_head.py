@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 # Modified from https://github.com/facebookresearch/detectron2/tree/master/projects/PointRend/point_head/point_head.py  # noqa
 
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.ops import point_sample, rel_roi_point_to_rel_img_point
 from mmcv.runner import BaseModule
@@ -64,7 +64,7 @@ class MaskPointHead(BaseModule):
         self.loss_point = build_loss(loss_point)
 
         fc_in_channels = in_channels + num_classes
-        self.fcs = nn.ModuleList()
+        self.fcs = nn.LayerList()
         for _ in range(num_fcs):
             fc = ConvModule(
                 fc_in_channels,
@@ -97,11 +97,11 @@ class MaskPointHead(BaseModule):
                 shape (num_rois, num_class, num_points).
         """
 
-        x = torch.cat([fine_grained_feats, coarse_feats], dim=1)
+        x = paddle.concat([fine_grained_feats, coarse_feats], dim=1)
         for fc in self.fcs:
             x = fc(x)
             if self.coarse_pred_each_layer:
-                x = torch.cat((x, coarse_feats), dim=1)
+                x = paddle.concat((x, coarse_feats), dim=1)
         return self.fc_logits(x)
 
     def get_targets(self, rois, rel_roi_points, sampling_results, gt_masks,
@@ -140,7 +140,7 @@ class MaskPointHead(BaseModule):
         point_targets = list(point_targets)
 
         if len(point_targets) > 0:
-            point_targets = torch.cat(point_targets)
+            point_targets = paddle.concat(point_targets)
 
         return point_targets
 
@@ -262,7 +262,7 @@ class MaskPointHead(BaseModule):
         if num_random_points > 0:
             rand_roi_coords = torch.rand(
                 batch_size, num_random_points, 2, device=mask_pred.device)
-            point_coords = torch.cat((point_coords, rand_roi_coords), dim=1)
+            point_coords = paddle.concat((point_coords, rand_roi_coords), dim=1)
         return point_coords
 
     def get_roi_rel_points_test(self, mask_pred, pred_label, cfg):

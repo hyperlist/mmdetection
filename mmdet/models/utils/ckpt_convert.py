@@ -6,7 +6,7 @@
 
 from collections import OrderedDict
 
-import torch
+import paddle
 
 
 def pvt_convert(ckpt):
@@ -51,7 +51,7 @@ def pvt_convert(ckpt):
             if 'attn.q.' in new_k:
                 sub_item_k = k.replace('q.', 'kv.')
                 new_k = new_k.replace('q.', 'attn.in_proj_')
-                new_v = torch.cat([v, ckpt[sub_item_k]], dim=0)
+                new_v = paddle.concat([v, ckpt[sub_item_k]], dim=0)
             elif 'attn.kv.' in new_k:
                 continue
             elif 'attn.proj.' in new_k:

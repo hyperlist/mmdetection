@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch.nn as nn
+import paddle.nn as nn
 
 from ..builder import LOSSES
 from .utils import weighted_loss
@@ -30,7 +30,7 @@ def gaussian_focal_loss(pred, gaussian_target, alpha=2.0, gamma=4.0):
 
 
 @LOSSES.register_module()
-class GaussianFocalLoss(nn.Module):
+class GaussianFocalLoss(nn.Layer):
     """GaussianFocalLoss is a variant of focal loss.
 
     More details can be found in the `paper

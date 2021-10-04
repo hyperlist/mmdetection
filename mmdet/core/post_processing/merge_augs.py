@@ -3,7 +3,7 @@ import copy
 import warnings
 
 import numpy as np
-import torch
+import paddle
 from mmcv import ConfigDict
 from mmcv.ops import nms
 
@@ -69,7 +69,7 @@ def merge_aug_proposals(aug_proposals, img_metas, cfg):
                                               scale_factor, flip,
                                               flip_direction)
         recovered_proposals.append(_proposals)
-    aug_proposals = torch.cat(recovered_proposals, dim=0)
+    aug_proposals = paddle.concat(recovered_proposals, dim=0)
     merged_proposals, _ = nms(aug_proposals[:, :4].contiguous(),
                               aug_proposals[:, -1].contiguous(),
                               cfg.nms.iou_threshold)

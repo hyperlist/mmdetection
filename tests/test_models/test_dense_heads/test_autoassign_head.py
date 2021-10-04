@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch
+import paddle
 
 from mmdet.models.dense_heads.autoassign_head import AutoAssignHead
 from mmdet.models.dense_heads.paa_head import levels_to_images

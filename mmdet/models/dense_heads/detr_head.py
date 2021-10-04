@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import Conv2d, Linear, build_activation_layer
 from mmcv.cnn.bricks.transformer import FFN, build_positional_encoding
 from mmcv.runner import force_fp32
@@ -367,10 +367,10 @@ class DETRHead(AnchorFreeHead):
                                            img_metas, gt_bboxes_ignore_list)
         (labels_list, label_weights_list, bbox_targets_list, bbox_weights_list,
          num_total_pos, num_total_neg) = cls_reg_targets
-        labels = torch.cat(labels_list, 0)
-        label_weights = torch.cat(label_weights_list, 0)
-        bbox_targets = torch.cat(bbox_targets_list, 0)
-        bbox_weights = torch.cat(bbox_weights_list, 0)
+        labels = paddle.concat(labels_list, 0)
+        label_weights = paddle.concat(label_weights_list, 0)
+        bbox_targets = paddle.concat(bbox_targets_list, 0)
+        bbox_weights = paddle.concat(bbox_weights_list, 0)
 
         # classification loss
         cls_scores = cls_scores.reshape(-1, self.cls_out_channels)
@@ -398,7 +398,7 @@ class DETRHead(AnchorFreeHead):
                                            img_h]).unsqueeze(0).repeat(
                                                bbox_pred.size(0), 1)
             factors.append(factor)
-        factors = torch.cat(factors, 0)
+        factors = paddle.concat(factors, 0)
 
         # DETR regress the relative position of boxes (cxcywh) in the image,
         # thus the learning target is normalized by the image size. So here
@@ -678,7 +678,7 @@ class DETRHead(AnchorFreeHead):
         det_bboxes[:, 1::2].clamp_(min=0, max=img_shape[0])
         if rescale:
             det_bboxes /= det_bboxes.new_tensor(scale_factor)
-        det_bboxes = torch.cat((det_bboxes, scores.unsqueeze(1)), -1)
+        det_bboxes = paddle.concat((det_bboxes, scores.unsqueeze(1)), -1)
 
         return det_bboxes, det_labels
 
@@ -838,7 +838,7 @@ class DETRHead(AnchorFreeHead):
         x1, y1, x2, y2 = det_bboxes.split((1, 1, 1, 1), dim=-1)
         from mmdet.core.export import dynamic_clip_for_onnx
         x1, y1, x2, y2 = dynamic_clip_for_onnx(x1, y1, x2, y2, img_shape)
-        det_bboxes = torch.cat([x1, y1, x2, y2], dim=-1)
-        det_bboxes = torch.cat((det_bboxes, scores.unsqueeze(-1)), -1)
+        det_bboxes = paddle.concat([x1, y1, x2, y2], dim=-1)
+        det_bboxes = paddle.concat((det_bboxes, scores.unsqueeze(-1)), -1)
 
         return det_bboxes, det_labels

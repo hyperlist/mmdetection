@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.core import bbox2result
 from mmdet.models.builder import DETECTORS
@@ -41,8 +41,8 @@ class CenterNet(SingleStageDetector):
             recovered_bboxes.append(single_result[0][0])
             aug_labels.append(single_result[0][1])
 
-        bboxes = torch.cat(recovered_bboxes, dim=0).contiguous()
-        labels = torch.cat(aug_labels).contiguous()
+        bboxes = paddle.concat(recovered_bboxes, dim=0).contiguous()
+        labels = paddle.concat(aug_labels).contiguous()
         if with_nms:
             out_bboxes, out_labels = self.bbox_head._bboxes_nms(
                 bboxes, labels, self.bbox_head.test_cfg)
@@ -77,7 +77,7 @@ class CenterNet(SingleStageDetector):
         aug_results = []
         for ind, flip_ind in zip(img_inds[0::2], img_inds[1::2]):
             flip_direction = img_metas[flip_ind][0]['flip_direction']
-            img_pair = torch.cat([imgs[ind], imgs[flip_ind]])
+            img_pair = paddle.concat([imgs[ind], imgs[flip_ind]])
             x = self.extract_feat(img_pair)
             center_heatmap_preds, wh_preds, offset_preds = self.bbox_head(x)
             assert len(center_heatmap_preds) == len(wh_preds) == len(

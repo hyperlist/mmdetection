@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 
 def mask_matrix_nms(masks,

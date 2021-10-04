@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 
 from ..builder import BBOX_SAMPLERS
 from .random_sampler import RandomSampler

@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 
@@ -28,7 +28,7 @@ class ChannelMapper(BaseModule):
             of in_channels.
         init_cfg (dict or list[dict], optional): Initialization config dict.
     Example:
-        >>> import torch
+        >>> import paddle
         >>> in_channels = [2, 3, 5, 7]
         >>> scales = [340, 170, 84, 43]
         >>> inputs = [torch.rand(1, c, s, s)
@@ -58,7 +58,7 @@ class ChannelMapper(BaseModule):
         self.extra_convs = None
         if num_outs is None:
             num_outs = len(in_channels)
-        self.convs = nn.ModuleList()
+        self.convs = nn.LayerList()
         for in_channel in in_channels:
             self.convs.append(
                 ConvModule(
@@ -70,7 +70,7 @@ class ChannelMapper(BaseModule):
                     norm_cfg=norm_cfg,
                     act_cfg=act_cfg))
         if num_outs > len(in_channels):
-            self.extra_convs = nn.ModuleList()
+            self.extra_convs = nn.LayerList()
             for i in range(len(in_channels), num_outs):
                 if i == len(in_channels):
                     in_channel = in_channels[-1]

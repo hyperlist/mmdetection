@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch
+import paddle
 from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
 
 from mmdet.models.dense_heads import YOLOXHead

@@ -1,10 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import math
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.utils.checkpoint as cp
+import paddle
+import paddle.nn as nn
+
+import paddle.utils.checkpoint as cp
 from mmcv.cnn import build_conv_layer, build_norm_layer
 from mmcv.runner import BaseModule
 
@@ -14,7 +14,7 @@ from .resnet import Bottleneck as _Bottleneck
 from .resnet import ResNetV1d
 
 
-class RSoftmax(nn.Module):
+class RSoftmax(nn.Layer):
     """Radix Softmax module in ``SplitAttentionConv2d``.
 
     Args:
@@ -101,25 +101,25 @@ class SplitAttentionConv2d(BaseModule):
         # To be consistent with original implementation, starting from 0
         self.norm0_name, norm0 = build_norm_layer(
             norm_cfg, channels * radix, postfix=0)
-        self.add_module(self.norm0_name, norm0)
+        self.add_sublayer(self.norm0_name, norm0)
         self.relu = nn.ReLU(inplace=True)
         self.fc1 = build_conv_layer(
             None, channels, inter_channels, 1, groups=self.groups)
         self.norm1_name, norm1 = build_norm_layer(
             norm_cfg, inter_channels, postfix=1)
-        self.add_module(self.norm1_name, norm1)
+        self.add_sublayer(self.norm1_name, norm1)
         self.fc2 = build_conv_layer(
             None, inter_channels, channels * radix, 1, groups=self.groups)
         self.rsoftmax = RSoftmax(radix, groups)
 
     @property
     def norm0(self):
-        """nn.Module: the normalization layer named "norm0" """
+        """nn.Layer: the normalization layer named "norm0" """
         return getattr(self, self.norm0_name)
 
     @property
     def norm1(self):
-        """nn.Module: the normalization layer named "norm1" """
+        """nn.Layer: the normalization layer named "norm1" """
         return getattr(self, self.norm1_name)
 
     def forward(self, x):
@@ -203,7 +203,7 @@ class Bottleneck(_Bottleneck):
             kernel_size=1,
             stride=self.conv1_stride,
             bias=False)
-        self.add_module(self.norm1_name, norm1)
+        self.add_sublayer(self.norm1_name, norm1)
         self.with_modulated_dcn = False
         self.conv2 = SplitAttentionConv2d(
             width,
@@ -229,7 +229,7 @@ class Bottleneck(_Bottleneck):
             self.planes * self.expansion,
             kernel_size=1,
             bias=False)
-        self.add_module(self.norm3_name, norm3)
+        self.add_sublayer(self.norm3_name, norm3)
 
     def forward(self, x):
 

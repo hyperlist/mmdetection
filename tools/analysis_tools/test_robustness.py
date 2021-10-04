@@ -5,7 +5,7 @@ import os
 import os.path as osp
 
 import mmcv
-import torch
+import paddle
 from mmcv import DictAction
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,

@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 # Copyright (c) 2019 Western Digital Corporation or its affiliates.
 
-import torch
-import torch.nn.functional as F
+import paddle
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 
@@ -112,9 +112,9 @@ class YOLOV3Neck(BaseModule):
         for i in range(1, self.num_scales):
             in_c, out_c = self.in_channels[i], self.out_channels[i]
             inter_c = out_channels[i - 1]
-            self.add_module(f'conv{i}', ConvModule(inter_c, out_c, 1, **cfg))
+            self.add_sublayer(f'conv{i}', ConvModule(inter_c, out_c, 1, **cfg))
             # in_c + out_c : High-lvl feats will be cat with low-lvl feats
-            self.add_module(f'detect{i+1}',
+            self.add_sublayer(f'detect{i+1}',
                             DetectionBlock(in_c + out_c, out_c, **cfg))
 
     def forward(self, feats):
@@ -131,7 +131,7 @@ class YOLOV3Neck(BaseModule):
 
             # Cat with low-lvl feats
             tmp = F.interpolate(tmp, scale_factor=2)
-            tmp = torch.cat((tmp, x), 1)
+            tmp = paddle.concat((tmp, x), 1)
 
             detect = getattr(self, f'detect{i+2}')
             out = detect(tmp)

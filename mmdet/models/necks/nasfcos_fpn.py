@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule, caffe2_xavier_init
 from mmcv.ops.merge_cells import ConcatCell
 from mmcv.runner import BaseModule
@@ -64,7 +64,7 @@ class NASFCOS_FPN(BaseModule):
         self.end_level = end_level
         self.add_extra_convs = add_extra_convs
 
-        self.adapt_convs = nn.ModuleList()
+        self.adapt_convs = nn.LayerList()
         for i in range(self.start_level, self.backbone_end_level):
             adapt_conv = ConvModule(
                 in_channels[i],
@@ -105,7 +105,7 @@ class NASFCOS_FPN(BaseModule):
         self.fpn['c42'] = build_concat_cell(True, True)
         self.fpn['c36'] = build_concat_cell(True, True)
         self.fpn['c61'] = build_concat_cell(True, True)  # f9
-        self.extra_downsamples = nn.ModuleList()
+        self.extra_downsamples = nn.LayerList()
         for i in range(extra_levels):
             extra_act_cfg = None if i == 0 \
                 else dict(type='ReLU', inplace=False)

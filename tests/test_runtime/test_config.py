@@ -114,7 +114,7 @@ def _check_roi_head(config, head):
 
 
 def _check_roi_extractor(config, roi_extractor, prev_roi_extractor=None):
-    import torch.nn as nn
+    import paddle.nn as nn
     # Separate roi_extractor and prev_roi_extractor checks for flexibility
     if isinstance(roi_extractor, nn.ModuleList):
         roi_extractor = roi_extractor[0]
@@ -142,7 +142,7 @@ def _check_roi_extractor(config, roi_extractor, prev_roi_extractor=None):
 
 
 def _check_mask_head(mask_cfg, mask_head):
-    import torch.nn as nn
+    import paddle.nn as nn
     if isinstance(mask_cfg, list):
         for single_mask_cfg, single_mask_head in zip(mask_cfg, mask_head):
             _check_mask_head(single_mask_cfg, single_mask_head)
@@ -165,7 +165,7 @@ def _check_mask_head(mask_cfg, mask_head):
 
 
 def _check_bbox_head(bbox_cfg, bbox_head):
-    import torch.nn as nn
+    import paddle.nn as nn
     if isinstance(bbox_cfg, list):
         for single_bbox_cfg, single_bbox_head in zip(bbox_cfg, bbox_head):
             _check_bbox_head(single_bbox_cfg, single_bbox_head)

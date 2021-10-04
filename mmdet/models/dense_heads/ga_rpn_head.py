@@ -2,9 +2,9 @@
 import copy
 import warnings
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv import ConfigDict
 from mmcv.ops import nms
 
@@ -163,7 +163,7 @@ class GARPNHead(GuidedAnchorHead):
             proposals, _ = nms(proposals, scores, cfg.nms.iou_threshold)
             proposals = proposals[:cfg.nms_post, :]
             mlvl_proposals.append(proposals)
-        proposals = torch.cat(mlvl_proposals, 0)
+        proposals = paddle.concat(mlvl_proposals, 0)
         if cfg.get('nms_across_levels', False):
             # NMS across multi levels
             proposals, _ = nms(proposals[:, :4], proposals[:, -1],

@@ -3,7 +3,7 @@ from functools import partial
 
 import mmcv
 import numpy as np
-import torch
+import paddle
 from mmcv.runner import load_checkpoint
 
 
@@ -71,7 +71,7 @@ def build_model_from_cfg(config_path, checkpoint_path, cfg_options=None):
         checkpoint_path (str): Path to the corresponding checkpoint
 
     Returns:
-        torch.nn.Module: the built model
+        torch.nn.Layer: the built model
     """
     from mmdet.models import build_detector
 

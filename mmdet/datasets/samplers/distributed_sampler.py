@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import math
 
-import torch
+import paddle
 from torch.utils.data import DistributedSampler as _DistributedSampler
 
 

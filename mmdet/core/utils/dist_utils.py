@@ -4,8 +4,8 @@ import pickle
 import warnings
 from collections import OrderedDict
 
-import torch
-import torch.distributed as dist
+import paddle
+import paddle.distributed as dist
 from mmcv.runner import OptimizerHook, get_dist_info
 from torch._utils import (_flatten_dense_tensors, _take_tensors,
                           _unflatten_dense_tensors)
@@ -133,10 +133,10 @@ def all_reduce_dict(py_dict, op='sum', group=None, to_float=True):
     tensor_numels = [py_dict[k].numel() for k in py_key]
 
     if to_float:
-        flatten_tensor = torch.cat(
+        flatten_tensor = paddle.concat(
             [py_dict[k].flatten().float() for k in py_key])
     else:
-        flatten_tensor = torch.cat([py_dict[k].flatten() for k in py_key])
+        flatten_tensor = paddle.concat([py_dict[k].flatten() for k in py_key])
 
     dist.all_reduce(flatten_tensor, op=dist.ReduceOp.SUM)
     if op == 'mean':

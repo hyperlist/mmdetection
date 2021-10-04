@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 
 from mmdet.models.utils import interpolate_as
 

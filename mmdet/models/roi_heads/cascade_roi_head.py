@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.runner import ModuleList
 
 from mmdet.core import (bbox2result, bbox2roi, bbox_mapping, build_assigner,
@@ -76,7 +76,7 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
             mask_roi_extractor (dict): Config of mask roi extractor.
             mask_head (dict): Config of mask in mask head.
         """
-        self.mask_head = nn.ModuleList()
+        self.mask_head = nn.LayerList()
         if not isinstance(mask_head, list):
             mask_head = [mask_head for _ in range(self.num_stages)]
         assert len(mask_head) == self.num_stages
@@ -181,7 +181,7 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
 
         mask_targets = self.mask_head[stage].get_targets(
             sampling_results, gt_masks, rcnn_train_cfg)
-        pos_labels = torch.cat([res.pos_gt_labels for res in sampling_results])
+        pos_labels = paddle.concat([res.pos_gt_labels for res in sampling_results])
         loss_mask = self.mask_head[stage].loss(mask_results['mask_pred'],
                                                mask_targets, pos_labels)
 
@@ -369,7 +369,7 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
                         refined_rois = self.bbox_head[i].regress_by_class(
                             rois[j], bbox_label, bbox_pred[j], img_metas[j])
                         refine_rois_list.append(refined_rois)
-                rois = torch.cat(refine_rois_list)
+                rois = paddle.concat(refine_rois_list)
 
         # average scores of each image by stages
         cls_score = [
@@ -571,7 +571,7 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
         rois = rois.view(-1, 4)
 
         # add dummy batch index
-        rois = torch.cat([rois.new_zeros(rois.shape[0], 1), rois], dim=-1)
+        rois = paddle.concat([rois.new_zeros(rois.shape[0], 1), rois], dim=-1)
 
         max_shape = img_metas[0]['img_shape_for_onnx']
         ms_scores = []
@@ -595,7 +595,7 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
                     rois[..., 1:], bbox_pred, max_shape=max_shape)
                 rois = new_rois.reshape(-1, new_rois.shape[-1])
                 # add dummy batch index
-                rois = torch.cat([rois.new_zeros(rois.shape[0], 1), rois],
+                rois = paddle.concat([rois.new_zeros(rois.shape[0], 1), rois],
                                  dim=-1)
 
         cls_score = sum(ms_scores) / float(len(ms_scores))
@@ -612,7 +612,7 @@ class CascadeRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
                 device=det_bboxes.device).float().view(-1, 1, 1).expand(
                     det_bboxes.size(0), det_bboxes.size(1), 1)
             rois = det_bboxes[..., :4]
-            mask_rois = torch.cat([batch_index, rois], dim=-1)
+            mask_rois = paddle.concat([batch_index, rois], dim=-1)
             mask_rois = mask_rois.view(-1, 5)
             aug_masks = []
             for i in range(self.num_stages):

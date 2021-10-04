@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import math
 
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn.bricks.transformer import POSITIONAL_ENCODING
 from mmcv.runner import BaseModule
 
@@ -89,7 +89,7 @@ class SinePositionalEncoding(BaseModule):
         pos_y = torch.stack(
             (pos_y[:, :, :, 0::2].sin(), pos_y[:, :, :, 1::2].cos()),
             dim=4).view(B, H, W, -1)
-        pos = torch.cat((pos_y, pos_x), dim=3).permute(0, 3, 1, 2)
+        pos = paddle.concat((pos_y, pos_x), dim=3).permute(0, 3, 1, 2)
         return pos
 
     def __repr__(self):
@@ -147,7 +147,7 @@ class LearnedPositionalEncoding(BaseModule):
         y = torch.arange(h, device=mask.device)
         x_embed = self.col_embed(x)
         y_embed = self.row_embed(y)
-        pos = torch.cat(
+        pos = paddle.concat(
             (x_embed.unsqueeze(0).repeat(h, 1, 1), y_embed.unsqueeze(1).repeat(
                 1, w, 1)),
             dim=-1).permute(2, 0,

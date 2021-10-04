@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from ..builder import BBOX_ASSIGNERS
 from ..iou_calculators import build_iou_calculator
@@ -88,7 +88,7 @@ class UniformAssigner(BaseAssigner):
         # self.match_times x n
         index1 = torch.topk(C1, k=self.match_times, dim=0, largest=False)[1]
         # (self.match_times*2) x n
-        indexes = torch.cat((index, index1),
+        indexes = paddle.concat((index, index1),
                             dim=1).reshape(-1).to(bbox_pred.device)
 
         pred_overlaps = self.iou_calculator(bbox_pred, gt_bboxes)

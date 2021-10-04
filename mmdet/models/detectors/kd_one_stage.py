@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch
+import paddle
 from mmcv.runner import load_checkpoint
 
 from .. import build_detector
@@ -91,7 +91,7 @@ class KnowledgeDistillationSingleStageDetector(SingleStageDetector):
         """Set attribute, i.e. self.name = value
 
         This reloading prevent the teacher model from being registered as a
-        nn.Module. The teacher module is registered as a plain object, so that
+        nn.Layer. The teacher module is registered as a plain object, so that
         the teacher parameters will not show up when calling
         ``self.parameters``, ``self.modules``, ``self.children`` methods.
         """

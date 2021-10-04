@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn.functional as F
+import paddle
+
 
 from mmdet.core import bbox_overlaps
 from ..builder import HEADS
@@ -80,7 +80,7 @@ class FreeAnchorRetinaHead(RetinaHead):
         assert len(featmap_sizes) == len(self.anchor_generator.base_anchors)
 
         anchor_list, _ = self.get_anchors(featmap_sizes, img_metas)
-        anchors = [torch.cat(anchor) for anchor in anchor_list]
+        anchors = [paddle.concat(anchor) for anchor in anchor_list]
 
         # concatenate each level
         cls_scores = [
@@ -92,8 +92,8 @@ class FreeAnchorRetinaHead(RetinaHead):
             bbox_pred.permute(0, 2, 3, 1).reshape(bbox_pred.size(0), -1, 4)
             for bbox_pred in bbox_preds
         ]
-        cls_scores = torch.cat(cls_scores, dim=1)
-        bbox_preds = torch.cat(bbox_preds, dim=1)
+        cls_scores = paddle.concat(cls_scores, dim=1)
+        bbox_preds = paddle.concat(bbox_preds, dim=1)
 
         cls_prob = torch.sigmoid(cls_scores)
         box_prob = []
@@ -196,7 +196,7 @@ class FreeAnchorRetinaHead(RetinaHead):
             num_pos += len(gt_bboxes_)
             positive_losses.append(
                 self.positive_bag_loss(matched_cls_prob, matched_box_prob))
-        positive_loss = torch.cat(positive_losses).sum() / max(1, num_pos)
+        positive_loss = paddle.concat(positive_losses).sum() / max(1, num_pos)
 
         # box_prob: P{a_{j} \in A_{+}}
         box_prob = torch.stack(box_prob, dim=0)

@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import VGG
 from mmcv.runner import BaseModule
 
@@ -64,17 +64,17 @@ class SSDVGG(VGG, BaseModule):
             ceil_mode=ceil_mode,
             out_indices=out_indices)
 
-        self.features.add_module(
+        self.features.add_sublayer(
             str(len(self.features)),
-            nn.MaxPool2d(kernel_size=3, stride=1, padding=1))
-        self.features.add_module(
+            nn.MaxPool2D(kernel_size=3, stride=1, padding=1))
+        self.features.add_sublayer(
             str(len(self.features)),
             nn.Conv2d(512, 1024, kernel_size=3, padding=6, dilation=6))
-        self.features.add_module(
+        self.features.add_sublayer(
             str(len(self.features)), nn.ReLU(inplace=True))
-        self.features.add_module(
+        self.features.add_sublayer(
             str(len(self.features)), nn.Conv2d(1024, 1024, kernel_size=1))
-        self.features.add_module(
+        self.features.add_sublayer(
             str(len(self.features)), nn.ReLU(inplace=True))
         self.out_feature_indices = out_feature_indices
 

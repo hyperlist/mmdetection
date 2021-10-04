@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 
 from mmdet.core import bbox2result, bbox2roi
 from ..builder import HEADS, build_head, build_roi_extractor
@@ -40,7 +40,7 @@ class GridRoIHead(StandardRoIHead):
             # xywh to xyxy
             new_x1y1 = (new_cxcy - new_wh / 2)
             new_x2y2 = (new_cxcy + new_wh / 2)
-            new_bboxes = torch.cat([new_x1y1, new_x2y2], dim=1)
+            new_bboxes = paddle.concat([new_x1y1, new_x2y2], dim=1)
             # clip bboxes
             max_shape = img_meta['img_shape']
             if max_shape is not None:

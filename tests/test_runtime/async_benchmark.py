@@ -5,7 +5,7 @@ import shutil
 import urllib
 
 import mmcv
-import torch
+import paddle
 
 from mmdet.apis import (async_inference_detector, inference_detector,
                         init_detector)

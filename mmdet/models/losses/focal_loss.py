@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.ops import sigmoid_focal_loss as _sigmoid_focal_loss
 
 from ..builder import LOSSES
@@ -104,7 +104,7 @@ def sigmoid_focal_loss(pred,
 
 
 @LOSSES.register_module()
-class FocalLoss(nn.Module):
+class FocalLoss(nn.Layer):
 
     def __init__(self,
                  use_sigmoid=True,

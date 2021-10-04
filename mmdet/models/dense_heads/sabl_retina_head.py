@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.runner import force_fp32
 
@@ -152,8 +152,8 @@ class SABLRetinaHead(BaseDenseHead, BBoxTestMixin):
 
     def _init_layers(self):
         self.relu = nn.ReLU(inplace=True)
-        self.cls_convs = nn.ModuleList()
-        self.reg_convs = nn.ModuleList()
+        self.cls_convs = nn.LayerList()
+        self.reg_convs = nn.LayerList()
         for i in range(self.stacked_convs):
             chn = self.in_channels if i == 0 else self.feat_channels
             self.cls_convs.append(
@@ -273,9 +273,9 @@ class SABLRetinaHead(BaseDenseHead, BBoxTestMixin):
         square_flat_list = []
         for i in range(num_imgs):
             assert len(square_list[i]) == len(inside_flag_list[i])
-            inside_flag_flat_list.append(torch.cat(inside_flag_list[i]))
-            approx_flat_list.append(torch.cat(approx_list[i]))
-            square_flat_list.append(torch.cat(square_list[i]))
+            inside_flag_flat_list.append(paddle.concat(inside_flag_list[i]))
+            approx_flat_list.append(paddle.concat(approx_list[i]))
+            square_flat_list.append(paddle.concat(square_list[i]))
 
         # compute targets for each image
         if gt_bboxes_ignore_list is None:
@@ -605,14 +605,14 @@ class SABLRetinaHead(BaseDenseHead, BBoxTestMixin):
             mlvl_bboxes.append(bboxes)
             mlvl_scores.append(scores)
             mlvl_confids.append(confids)
-        mlvl_bboxes = torch.cat(mlvl_bboxes)
+        mlvl_bboxes = paddle.concat(mlvl_bboxes)
         if rescale:
             mlvl_bboxes /= mlvl_bboxes.new_tensor(scale_factor)
-        mlvl_scores = torch.cat(mlvl_scores)
-        mlvl_confids = torch.cat(mlvl_confids)
+        mlvl_scores = paddle.concat(mlvl_scores)
+        mlvl_confids = paddle.concat(mlvl_confids)
         if self.use_sigmoid_cls:
             padding = mlvl_scores.new_zeros(mlvl_scores.shape[0], 1)
-            mlvl_scores = torch.cat([mlvl_scores, padding], dim=1)
+            mlvl_scores = paddle.concat([mlvl_scores, padding], dim=1)
         det_bboxes, det_labels = multiclass_nms(
             mlvl_bboxes,
             mlvl_scores,

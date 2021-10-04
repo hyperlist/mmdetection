@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 from mmcv.runner import force_fp32
 
 from mmdet.core import (anchor_inside_flags, images_to_levels, multi_apply,
@@ -29,7 +29,7 @@ class FSAFHead(RetinaHead):
         **kwargs: Same as its base class in :class:`RetinaHead`
 
     Example:
-        >>> import torch
+        >>> import paddle
         >>> self = FSAFHead(11, 7)
         >>> x = torch.rand(1, 7, 32, 32)
         >>> cls_score, bbox_pred = self.forward_single(x)
@@ -243,7 +243,7 @@ class FSAFHead(RetinaHead):
         # concat all level anchors and flags to a single tensor
         concat_anchor_list = []
         for i in range(len(anchor_list)):
-            concat_anchor_list.append(torch.cat(anchor_list[i]))
+            concat_anchor_list.append(paddle.concat(anchor_list[i]))
         all_anchor_list = images_to_levels(concat_anchor_list,
                                            num_level_anchors)
         losses_cls, losses_bbox = multi_apply(
@@ -297,7 +297,7 @@ class FSAFHead(RetinaHead):
             labels_list,
             list(range(len(losses_cls))),
             min_levels=argmin)
-        num_pos = torch.cat(pos_inds, 0).sum().float()
+        num_pos = paddle.concat(pos_inds, 0).sum().float()
         pos_recall = self.calculate_pos_recall(cls_scores, labels_list,
                                                pos_inds)
 
@@ -339,8 +339,8 @@ class FSAFHead(RetinaHead):
                 label.reshape(-1)[pos]
                 for label, pos in zip(labels_list, pos_inds)
             ]
-            scores = torch.cat(scores, dim=0)
-            labels = torch.cat(labels, dim=0)
+            scores = paddle.concat(scores, dim=0)
+            labels = paddle.concat(labels, dim=0)
             if self.use_sigmoid_cls:
                 scores = scores.sigmoid()
             else:

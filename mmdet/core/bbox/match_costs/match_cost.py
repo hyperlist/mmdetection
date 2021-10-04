@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.core.bbox.iou_calculators import bbox_overlaps
 from mmdet.core.bbox.transforms import bbox_cxcywh_to_xyxy, bbox_xyxy_to_cxcywh
@@ -16,7 +16,7 @@ class BBoxL1Cost:
 
      Examples:
          >>> from mmdet.core.bbox.match_costs.match_cost import BBoxL1Cost
-         >>> import torch
+         >>> import paddle
          >>> self = BBoxL1Cost()
          >>> bbox_pred = torch.rand(1, 4)
          >>> gt_bboxes= torch.FloatTensor([[0, 0, 2, 4], [1, 2, 3, 4]])
@@ -62,7 +62,7 @@ class FocalLossCost:
 
      Examples:
          >>> from mmdet.core.bbox.match_costs.match_cost import FocalLossCost
-         >>> import torch
+         >>> import paddle
          >>> self = FocalLossCost()
          >>> cls_pred = torch.rand(4, 3)
          >>> gt_labels = torch.tensor([0, 1, 2])
@@ -109,7 +109,7 @@ class ClassificationCost:
      Examples:
          >>> from mmdet.core.bbox.match_costs.match_cost import \
          ... ClassificationCost
-         >>> import torch
+         >>> import paddle
          >>> self = ClassificationCost()
          >>> cls_pred = torch.rand(4, 3)
          >>> gt_labels = torch.tensor([0, 1, 2])
@@ -153,7 +153,7 @@ class IoUCost:
 
      Examples:
          >>> from mmdet.core.bbox.match_costs.match_cost import IoUCost
-         >>> import torch
+         >>> import paddle
          >>> self = IoUCost()
          >>> bboxes = torch.FloatTensor([[1,1, 2, 2], [2, 2, 3, 4]])
          >>> gt_bboxes = torch.FloatTensor([[0, 0, 2, 4], [1, 2, 3, 4]])

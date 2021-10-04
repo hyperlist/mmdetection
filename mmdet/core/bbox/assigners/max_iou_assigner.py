@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from ..builder import BBOX_ASSIGNERS
 from ..iou_calculators import build_iou_calculator

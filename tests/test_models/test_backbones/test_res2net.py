@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import pytest
-import torch
+import paddle
 
 from mmdet.models.backbones import Res2Net
 from mmdet.models.backbones.res2net import Bottle2neck

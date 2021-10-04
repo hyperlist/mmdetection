@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 
-import torch
+import paddle
 
 from ..builder import DETECTORS
 from .single_stage import SingleStageDetector

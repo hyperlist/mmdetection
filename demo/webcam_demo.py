@@ -2,7 +2,7 @@
 import argparse
 
 import cv2
-import torch
+import paddle
 
 from mmdet.apis import inference_detector, init_detector
 

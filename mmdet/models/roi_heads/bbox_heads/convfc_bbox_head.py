@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 
 from mmdet.models.builder import HEADS
@@ -119,7 +119,7 @@ class ConvFCBBoxHead(BBoxHead):
         """
         last_layer_dim = in_channels
         # add branch specific conv layers
-        branch_convs = nn.ModuleList()
+        branch_convs = nn.LayerList()
         if num_branch_convs > 0:
             for i in range(num_branch_convs):
                 conv_in_channels = (
@@ -134,7 +134,7 @@ class ConvFCBBoxHead(BBoxHead):
                         norm_cfg=self.norm_cfg))
             last_layer_dim = self.conv_out_channels
         # add branch specific fc layers
-        branch_fcs = nn.ModuleList()
+        branch_fcs = nn.LayerList()
         if num_branch_fcs > 0:
             # for shared branch, only consider self.with_avg_pool
             # for separated branches, also consider self.num_shared_fcs

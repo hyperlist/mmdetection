@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule, auto_fp16, force_fp32
 
@@ -54,7 +54,7 @@ class FusedSemanticHead(BaseModule):
         self.norm_cfg = norm_cfg
         self.fp16_enabled = False
 
-        self.lateral_convs = nn.ModuleList()
+        self.lateral_convs = nn.LayerList()
         for i in range(self.num_ins):
             self.lateral_convs.append(
                 ConvModule(
@@ -65,7 +65,7 @@ class FusedSemanticHead(BaseModule):
                     norm_cfg=self.norm_cfg,
                     inplace=False))
 
-        self.convs = nn.ModuleList()
+        self.convs = nn.LayerList()
         for i in range(self.num_convs):
             in_channels = self.in_channels if i == 0 else conv_out_channels
             self.convs.append(

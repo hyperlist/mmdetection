@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import pytest
-import torch
+import paddle
 from mmcv.cnn import is_norm
 from torch.nn.modules import GroupNorm
 

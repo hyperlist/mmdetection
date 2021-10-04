@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.core.bbox.assigners import MaxIoUAssigner
 from mmdet.core.bbox.samplers import (OHEMSampler, RandomSampler,

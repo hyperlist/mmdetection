@@ -6,7 +6,7 @@ import os
 import time
 from typing import List
 
-import torch
+import paddle
 
 logger = logging.getLogger(__name__)
 

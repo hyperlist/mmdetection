@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle.nn as nn
+
 
 from ..builder import LOSSES
 from .utils import weight_reduce_loss
@@ -57,7 +57,7 @@ def varifocal_loss(pred,
 
 
 @LOSSES.register_module()
-class VarifocalLoss(nn.Module):
+class VarifocalLoss(nn.Layer):
 
     def __init__(self,
                  use_sigmoid=True,

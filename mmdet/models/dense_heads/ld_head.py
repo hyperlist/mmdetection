@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 from mmcv.runner import force_fp32
 
 from mmdet.core import (bbox2distance, bbox_overlaps, distance2bbox,

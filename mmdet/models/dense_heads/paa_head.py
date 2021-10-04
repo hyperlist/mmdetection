@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 from mmcv.runner import force_fp32
 
 from mmdet.core import multi_apply, multiclass_nms
@@ -39,7 +39,7 @@ def levels_to_images(mlvl_tensor):
         t = t.view(batch_size, -1, channels).contiguous()
         for img in range(batch_size):
             batch_list[img].append(t[img])
-    return [torch.cat(item, 0) for item in batch_list]
+    return [paddle.concat(item, 0) for item in batch_list]
 
 
 @HEADS.register_module()
@@ -157,14 +157,14 @@ class PAAHead(ATSSHead):
                     anchor_list)
             num_pos = sum(num_pos)
         # convert all tensor list to a flatten tensor
-        cls_scores = torch.cat(cls_scores, 0).view(-1, cls_scores[0].size(-1))
-        bbox_preds = torch.cat(bbox_preds, 0).view(-1, bbox_preds[0].size(-1))
-        iou_preds = torch.cat(iou_preds, 0).view(-1, iou_preds[0].size(-1))
-        labels = torch.cat(reassign_labels, 0).view(-1)
-        flatten_anchors = torch.cat(
-            [torch.cat(item, 0) for item in anchor_list])
-        labels_weight = torch.cat(reassign_label_weight, 0).view(-1)
-        bboxes_target = torch.cat(bboxes_target,
+        cls_scores = paddle.concat(cls_scores, 0).view(-1, cls_scores[0].size(-1))
+        bbox_preds = paddle.concat(bbox_preds, 0).view(-1, bbox_preds[0].size(-1))
+        iou_preds = paddle.concat(iou_preds, 0).view(-1, iou_preds[0].size(-1))
+        labels = paddle.concat(reassign_labels, 0).view(-1)
+        flatten_anchors = paddle.concat(
+            [paddle.concat(item, 0) for item in anchor_list])
+        labels_weight = paddle.concat(reassign_label_weight, 0).view(-1)
+        bboxes_target = paddle.concat(bboxes_target,
                                   0).view(-1, bboxes_target[0].size(-1))
 
         pos_inds_flatten = ((labels >= 0)
@@ -226,7 +226,7 @@ class PAAHead(ATSSHead):
         """
         if not len(pos_inds):
             return cls_score.new([]),
-        anchors_all_level = torch.cat(anchors, 0)
+        anchors_all_level = paddle.concat(anchors, 0)
         pos_scores = cls_score[pos_inds]
         pos_bbox_pred = bbox_pred[pos_inds]
         pos_label = label[pos_inds]
@@ -315,8 +315,8 @@ class PAAHead(ATSSHead):
                     min(level_gt_mask.sum(), self.topk), largest=False)
                 pos_inds_gmm.append(pos_inds[level_gt_mask][topk_inds])
                 pos_loss_gmm.append(value)
-            pos_inds_gmm = torch.cat(pos_inds_gmm)
-            pos_loss_gmm = torch.cat(pos_loss_gmm)
+            pos_inds_gmm = paddle.concat(pos_inds_gmm)
+            pos_loss_gmm = paddle.concat(pos_loss_gmm)
             # fix gmm need at least two sample
             if len(pos_inds_gmm) < 2:
                 continue
@@ -354,8 +354,8 @@ class PAAHead(ATSSHead):
             pos_inds_after_paa.append(pos_inds_temp)
             ignore_inds_after_paa.append(ignore_inds_temp)
 
-        pos_inds_after_paa = torch.cat(pos_inds_after_paa)
-        ignore_inds_after_paa = torch.cat(ignore_inds_after_paa)
+        pos_inds_after_paa = paddle.concat(pos_inds_after_paa)
+        ignore_inds_after_paa = paddle.concat(ignore_inds_after_paa)
         reassign_mask = (pos_inds.unsqueeze(1) != pos_inds_after_paa).all(1)
         reassign_ids = pos_inds[reassign_mask]
         label[reassign_ids] = self.num_classes
@@ -457,8 +457,8 @@ class PAAHead(ATSSHead):
         concat_valid_flag_list = []
         for i in range(num_imgs):
             assert len(anchor_list[i]) == len(valid_flag_list[i])
-            concat_anchor_list.append(torch.cat(anchor_list[i]))
-            concat_valid_flag_list.append(torch.cat(valid_flag_list[i]))
+            concat_anchor_list.append(paddle.concat(anchor_list[i]))
+            concat_valid_flag_list.append(paddle.concat(valid_flag_list[i]))
 
         # compute targets for each image
         if gt_bboxes_ignore_list is None:
@@ -573,18 +573,18 @@ class PAAHead(ATSSHead):
             mlvl_scores.append(scores)
             mlvl_iou_preds.append(iou_preds)
 
-        batch_mlvl_bboxes = torch.cat(mlvl_bboxes, dim=1)
+        batch_mlvl_bboxes = paddle.concat(mlvl_bboxes, dim=1)
         if rescale:
             batch_mlvl_bboxes /= batch_mlvl_bboxes.new_tensor(
                 scale_factors).unsqueeze(1)
-        batch_mlvl_scores = torch.cat(mlvl_scores, dim=1)
+        batch_mlvl_scores = paddle.concat(mlvl_scores, dim=1)
         # Add a dummy background class to the backend when using sigmoid
         # remind that we set FG labels to [0, num_class-1] since mmdet v2.0
         # BG cat_id: num_class
         padding = batch_mlvl_scores.new_zeros(batch_size,
                                               batch_mlvl_scores.shape[1], 1)
-        batch_mlvl_scores = torch.cat([batch_mlvl_scores, padding], dim=-1)
-        batch_mlvl_iou_preds = torch.cat(mlvl_iou_preds, dim=1)
+        batch_mlvl_scores = paddle.concat([batch_mlvl_scores, padding], dim=-1)
+        batch_mlvl_iou_preds = paddle.concat(mlvl_iou_preds, dim=1)
         batch_mlvl_nms_scores = (batch_mlvl_scores *
                                  batch_mlvl_iou_preds[..., None]).sqrt()
 
@@ -666,9 +666,9 @@ class PAAHead(ATSSHead):
                         pis, dim=0)
                 voted_score = det_cls_bboxes[det_ind][-1:][None, :]
                 det_bboxes_voted.append(
-                    torch.cat((voted_box[None, :], voted_score), dim=1))
+                    paddle.concat((voted_box[None, :], voted_score), dim=1))
                 det_labels_voted.append(cls)
 
-        det_bboxes_voted = torch.cat(det_bboxes_voted, dim=0)
+        det_bboxes_voted = paddle.concat(det_bboxes_voted, dim=0)
         det_labels_voted = det_labels.new_tensor(det_labels_voted)
         return det_bboxes_voted, det_labels_voted

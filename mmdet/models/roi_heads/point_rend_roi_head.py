@@ -4,8 +4,8 @@ import os
 import warnings
 
 import numpy as np
-import torch
-import torch.nn.functional as F
+import paddle
+
 from mmcv.ops import point_sample, rel_roi_point_to_rel_img_point
 
 from mmdet.core import bbox2roi, bbox_mapping, merge_aug_masks
@@ -46,7 +46,7 @@ class PointRendRoIHead(StandardRoIHead):
                                   gt_masks, img_metas):
         """Run forward function and calculate loss for point head in
         training."""
-        pos_labels = torch.cat([res.pos_gt_labels for res in sampling_results])
+        pos_labels = paddle.concat([res.pos_gt_labels for res in sampling_results])
         rel_roi_points = self.point_head.get_roi_rel_points_train(
             mask_pred, pos_labels, cfg=self.train_cfg)
         rois = bbox2roi([res.pos_bboxes for res in sampling_results])
@@ -98,8 +98,8 @@ class PointRendRoIHead(StandardRoIHead):
                     point_feat = point_sample(feat, rel_img_points)
                     point_feat = point_feat.squeeze(0).transpose(0, 1)
                     point_feats.append(point_feat)
-            fine_grained_feats.append(torch.cat(point_feats, dim=0))
-        return torch.cat(fine_grained_feats, dim=1)
+            fine_grained_feats.append(paddle.concat(point_feats, dim=0))
+        return paddle.concat(fine_grained_feats, dim=1)
 
     def _mask_point_forward_test(self, x, rois, label_pred, mask_pred,
                                  img_metas):
@@ -279,7 +279,7 @@ class PointRendRoIHead(StandardRoIHead):
             point_feats = point_feats.transpose(1, 2).reshape(
                 num_rois, channels, num_points)
             fine_grained_feats.append(point_feats)
-        return torch.cat(fine_grained_feats, dim=1)
+        return paddle.concat(fine_grained_feats, dim=1)
 
     def _mask_point_onnx_export(self, x, rois, label_pred, mask_pred):
         """Export mask refining process with point head to onnx.
@@ -373,7 +373,7 @@ class PointRendRoIHead(StandardRoIHead):
         batch_index = torch.arange(
             det_bboxes.size(0), device=det_bboxes.device).float().view(
                 -1, 1, 1).expand(det_bboxes.size(0), det_bboxes.size(1), 1)
-        mask_rois = torch.cat([batch_index, det_bboxes], dim=-1)
+        mask_rois = paddle.concat([batch_index, det_bboxes], dim=-1)
         mask_rois = mask_rois.view(-1, 5)
         mask_results = self._mask_forward(x, mask_rois)
         mask_pred = mask_results['mask_pred']

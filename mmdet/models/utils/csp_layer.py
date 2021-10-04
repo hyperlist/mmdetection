@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
 from mmcv.runner import BaseModule
 
@@ -146,5 +146,5 @@ class CSPLayer(BaseModule):
         x_main = self.main_conv(x)
         x_main = self.blocks(x_main)
 
-        x_final = torch.cat((x_main, x_short), dim=1)
+        x_final = paddle.concat((x_main, x_short), dim=1)
         return self.final_conv(x_final)

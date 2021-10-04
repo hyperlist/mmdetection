@@ -2,7 +2,7 @@
 import random
 import warnings
 
-import torch
+import paddle
 from mmcv.runner import get_dist_info
 from mmcv.runner.hooks import HOOKS, Hook
 from torch import distributed as dist

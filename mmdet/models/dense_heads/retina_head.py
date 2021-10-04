@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 
 from ..builder import HEADS
@@ -15,7 +15,7 @@ class RetinaHead(AnchorHead):
     the second regresses deltas for the anchors.
 
     Example:
-        >>> import torch
+        >>> import paddle
         >>> self = RetinaHead(11, 7)
         >>> x = torch.rand(1, 7, 32, 32)
         >>> cls_score, bbox_pred = self.forward_single(x)
@@ -61,8 +61,8 @@ class RetinaHead(AnchorHead):
     def _init_layers(self):
         """Initialize layers of the head."""
         self.relu = nn.ReLU(inplace=True)
-        self.cls_convs = nn.ModuleList()
-        self.reg_convs = nn.ModuleList()
+        self.cls_convs = nn.LayerList()
+        self.reg_convs = nn.LayerList()
         for i in range(self.stacked_convs):
             chn = self.in_channels if i == 0 else self.feat_channels
             self.cls_convs.append(

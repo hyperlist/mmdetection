@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 from mmcv import ConfigDict
 
 from mmdet.models.dense_heads import DETRHead

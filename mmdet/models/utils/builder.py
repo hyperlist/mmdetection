@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.utils import Registry, build_from_cfg
 
 TRANSFORMER = Registry('Transformer')
@@ -25,7 +25,7 @@ def build_linear_layer(cfg, *args, **kwargs):
         kwargs (keyword arguments): Keyword arguments passed to the `__init__`
             method of the corresponding linear layer.
     Returns:
-        nn.Module: Created linear layer.
+        nn.Layer: Created linear layer.
     """
     if cfg is None:
         cfg_ = dict(type='Linear')

@@ -1,14 +1,14 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import PLUGIN_LAYERS
 
 eps = 1e-6
 
 
 @PLUGIN_LAYERS.register_module()
-class DropBlock(nn.Module):
+class DropBlock(nn.Layer):
     """Randomly drop some regions of feature maps.
 
      Please refer to the method proposed in `DropBlock

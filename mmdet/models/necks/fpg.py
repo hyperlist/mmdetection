@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 
@@ -225,14 +225,14 @@ class FPG(BaseModule):
         self.add_extra_convs = add_extra_convs
 
         # build lateral 1x1 convs to reduce channels
-        self.lateral_convs = nn.ModuleList()
+        self.lateral_convs = nn.LayerList()
         for i in range(self.start_level, self.backbone_end_level):
             l_conv = nn.Conv2d(self.in_channels[i],
                                self.inter_channels[i - self.start_level], 1)
             self.lateral_convs.append(l_conv)
 
         extra_levels = num_outs - self.backbone_end_level + self.start_level
-        self.extra_downsamples = nn.ModuleList()
+        self.extra_downsamples = nn.LayerList()
         for i in range(extra_levels):
             if self.add_extra_convs:
                 fpn_idx = self.backbone_end_level - self.start_level + i
@@ -244,11 +244,11 @@ class FPG(BaseModule):
                     padding=1)
                 self.extra_downsamples.append(extra_conv)
             else:
-                self.extra_downsamples.append(nn.MaxPool2d(1, stride=2))
+                self.extra_downsamples.append(nn.MaxPool2D(1, stride=2))
 
-        self.fpn_transitions = nn.ModuleList()  # stack times
+        self.fpn_transitions = nn.LayerList()  # stack times
         for s in range(self.stack_times):
-            stage_trans = nn.ModuleList()  # num of feature levels
+            stage_trans = nn.LayerList()  # num of feature levels
             for i in range(self.num_outs):
                 # same, across_lateral, across_down, across_up
                 trans = nn.ModuleDict()
@@ -303,7 +303,7 @@ class FPG(BaseModule):
                 stage_trans.append(trans)
             self.fpn_transitions.append(stage_trans)
 
-        self.output_transition = nn.ModuleList()  # output levels
+        self.output_transition = nn.LayerList()  # output levels
         for i in range(self.num_outs):
             trans = self.build_trans(
                 self.output_trans,

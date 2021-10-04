@@ -5,7 +5,7 @@ from os.path import dirname, exists, join
 
 import numpy as np
 import pytest
-import torch
+import paddle
 
 
 def _get_config_directory():
@@ -378,11 +378,11 @@ def test_two_stage_forward(cfg_file):
         detector.simple_test(
             imgs[0][None, :].repeat(2, 1, 1, 1), [img_metas[0]] * 2,
             proposals=[torch.empty((0, 4)),
-                       torch.cat([x1y1, x2y2], dim=-1)])
+                       paddle.concat([x1y1, x2y2], dim=-1)])
 
         # test no proposal of aug
         detector.roi_head.aug_test(
-            features, [torch.cat([x1y1, x2y2], dim=-1),
+            features, [paddle.concat([x1y1, x2y2], dim=-1),
                        torch.empty((0, 4))], [[img_metas[0]]] * 2)
 
         # test rcnn_test_cfg is None
@@ -392,7 +392,7 @@ def test_two_stage_forward(cfg_file):
             bboxes, scores = detector.roi_head.simple_test_bboxes(
                 feature, [img_metas[0]] * 2,
                 [torch.empty((0, 4)),
-                 torch.cat([x1y1, x2y2], dim=-1)], None)
+                 paddle.concat([x1y1, x2y2], dim=-1)], None)
             assert bboxes[0].shape == torch.Size((0, 4))
             assert scores[0].shape == torch.Size(
                 (0, detector.roi_head.bbox_head.fc_cls.out_features))

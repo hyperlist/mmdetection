@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.ops import DeformConv2d, MaskedConv2d
 from mmcv.runner import BaseModule, force_fp32
 
@@ -571,9 +571,9 @@ class GuidedAnchorHead(AnchorHead):
         square_flat_list = []
         for i in range(num_imgs):
             assert len(square_list[i]) == len(inside_flag_list[i])
-            inside_flag_flat_list.append(torch.cat(inside_flag_list[i]))
-            approx_flat_list.append(torch.cat(approx_list[i]))
-            square_flat_list.append(torch.cat(square_list[i]))
+            inside_flag_flat_list.append(paddle.concat(inside_flag_list[i]))
+            approx_flat_list.append(paddle.concat(approx_list[i]))
+            square_flat_list.append(paddle.concat(square_list[i]))
 
         # compute targets for each image
         if gt_bboxes_ignore_list is None:
@@ -699,7 +699,7 @@ class GuidedAnchorHead(AnchorHead):
         # concat all level anchors to a single tensor
         concat_anchor_list = []
         for i in range(len(guided_anchors_list)):
-            concat_anchor_list.append(torch.cat(guided_anchors_list[i]))
+            concat_anchor_list.append(paddle.concat(guided_anchors_list[i]))
         all_anchor_list = images_to_levels(concat_anchor_list,
                                            num_level_anchors)
 
@@ -842,16 +842,16 @@ class GuidedAnchorHead(AnchorHead):
                 anchors, bbox_pred, max_shape=img_shape)
             mlvl_bboxes.append(bboxes)
             mlvl_scores.append(scores)
-        mlvl_bboxes = torch.cat(mlvl_bboxes)
+        mlvl_bboxes = paddle.concat(mlvl_bboxes)
         if rescale:
             mlvl_bboxes /= mlvl_bboxes.new_tensor(scale_factor)
-        mlvl_scores = torch.cat(mlvl_scores)
+        mlvl_scores = paddle.concat(mlvl_scores)
         if self.use_sigmoid_cls:
             # Add a dummy background class to the backend when using sigmoid
             # remind that we set FG labels to [0, num_class-1] since mmdet v2.0
             # BG cat_id: num_class
             padding = mlvl_scores.new_zeros(mlvl_scores.shape[0], 1)
-            mlvl_scores = torch.cat([mlvl_scores, padding], dim=1)
+            mlvl_scores = paddle.concat([mlvl_scores, padding], dim=1)
         # multi class NMS
         det_bboxes, det_labels = multiclass_nms(mlvl_bboxes, mlvl_scores,
                                                 cfg.score_thr, cfg.nms,

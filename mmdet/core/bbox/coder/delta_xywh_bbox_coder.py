@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
 import numpy as np
-import torch
+import paddle
 
 from ..builder import BBOX_CODERS
 from .base_bbox_coder import BaseBBoxCoder
@@ -263,7 +263,7 @@ def delta2bbox(rois,
             assert max_shape.size(0) == bboxes.size(0)
 
         min_xy = x1.new_tensor(0)
-        max_xy = torch.cat(
+        max_xy = paddle.concat(
             [max_shape] * (deltas.size(-1) // 2),
             dim=-1).flip(-1).unsqueeze(-2)
         bboxes = torch.where(bboxes < min_xy, min_xy, bboxes)

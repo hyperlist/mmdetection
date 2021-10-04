@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle.nn as nn
+
 
 from ..builder import LOSSES
 from .utils import weighted_loss
@@ -13,7 +13,7 @@ def mse_loss(pred, target):
 
 
 @LOSSES.register_module()
-class MSELoss(nn.Module):
+class MSELoss(nn.Layer):
     """MSELoss.
 
     Args:

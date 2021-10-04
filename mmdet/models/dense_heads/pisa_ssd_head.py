@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.core import multi_apply
 from ..builder import HEADS
@@ -61,26 +61,26 @@ class PISASSDHead(SSDHead):
          num_total_pos, num_total_neg, sampling_results_list) = cls_reg_targets
 
         num_images = len(img_metas)
-        all_cls_scores = torch.cat([
+        all_cls_scores = paddle.concat([
             s.permute(0, 2, 3, 1).reshape(
                 num_images, -1, self.cls_out_channels) for s in cls_scores
         ], 1)
-        all_labels = torch.cat(labels_list, -1).view(num_images, -1)
-        all_label_weights = torch.cat(label_weights_list,
+        all_labels = paddle.concat(labels_list, -1).view(num_images, -1)
+        all_label_weights = paddle.concat(label_weights_list,
                                       -1).view(num_images, -1)
-        all_bbox_preds = torch.cat([
+        all_bbox_preds = paddle.concat([
             b.permute(0, 2, 3, 1).reshape(num_images, -1, 4)
             for b in bbox_preds
         ], -2)
-        all_bbox_targets = torch.cat(bbox_targets_list,
+        all_bbox_targets = paddle.concat(bbox_targets_list,
                                      -2).view(num_images, -1, 4)
-        all_bbox_weights = torch.cat(bbox_weights_list,
+        all_bbox_weights = paddle.concat(bbox_weights_list,
                                      -2).view(num_images, -1, 4)
 
         # concat all level anchors to a single tensor
         all_anchors = []
         for i in range(num_images):
-            all_anchors.append(torch.cat(anchor_list[i]))
+            all_anchors.append(paddle.concat(anchor_list[i]))
 
         isr_cfg = self.train_cfg.get('isr', None)
         all_targets = (all_labels.view(-1), all_label_weights.view(-1),
@@ -92,7 +92,7 @@ class PISASSDHead(SSDHead):
                 all_cls_scores.view(-1, all_cls_scores.size(-1)),
                 all_bbox_preds.view(-1, 4),
                 all_targets,
-                torch.cat(all_anchors),
+                paddle.concat(all_anchors),
                 sampling_results_list,
                 loss_cls=CrossEntropyLoss(),
                 bbox_coder=self.bbox_coder,

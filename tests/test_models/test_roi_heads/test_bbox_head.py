@@ -2,7 +2,7 @@
 import mmcv
 import numpy as np
 import pytest
-import torch
+import paddle
 
 from mmdet.core import bbox2roi
 from mmdet.models.roi_heads.bbox_heads import BBoxHead
@@ -232,7 +232,7 @@ def _demodata_refine_boxes(n_roi, n_img, rng=0):
     else:
         img_ids = rng.randint(0, n_img, (n_roi, ))
         img_ids = torch.from_numpy(img_ids)
-    rois = torch.cat([img_ids[:, None].float(), roi_boxes], dim=1)
+    rois = paddle.concat([img_ids[:, None].float(), roi_boxes], dim=1)
     # Create other args
     labels = rng.randint(0, 2, (n_roi, ))
     labels = torch.from_numpy(labels).long()

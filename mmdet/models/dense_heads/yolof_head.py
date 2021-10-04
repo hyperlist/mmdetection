@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import (ConvModule, bias_init_with_prob, constant_init, is_norm,
                       normal_init)
 from mmcv.runner import force_fp32
@@ -36,7 +36,7 @@ def levels_to_images(mlvl_tensor):
         t = t.view(batch_size, -1, channels).contiguous()
         for img in range(batch_size):
             batch_list[img].append(t[img])
-    return [torch.cat(item, 0) for item in batch_list]
+    return [paddle.concat(item, 0) for item in batch_list]
 
 
 @HEADS.register_module()
@@ -304,7 +304,7 @@ class YOLOFHead(AnchorHead):
 
         res = (batch_labels, batch_label_weights, num_total_pos, num_total_neg)
         for i, rests in enumerate(rest_results):  # user-added return values
-            rest_results[i] = torch.cat(rests, 0)
+            rest_results[i] = paddle.concat(rests, 0)
 
         return res + tuple(rest_results)
 

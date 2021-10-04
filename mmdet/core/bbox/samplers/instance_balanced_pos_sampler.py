@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 
 from ..builder import BBOX_SAMPLERS
 from .random_sampler import RandomSampler
@@ -41,7 +41,7 @@ class InstanceBalancedPosSampler(RandomSampler):
                 if len(inds) > num_per_gt:
                     inds = self.random_choice(inds, num_per_gt)
                 sampled_inds.append(inds)
-            sampled_inds = torch.cat(sampled_inds)
+            sampled_inds = paddle.concat(sampled_inds)
             if len(sampled_inds) < num_expected:
                 num_extra = num_expected - len(sampled_inds)
                 extra_inds = np.array(
@@ -50,7 +50,7 @@ class InstanceBalancedPosSampler(RandomSampler):
                     extra_inds = self.random_choice(extra_inds, num_extra)
                 extra_inds = torch.from_numpy(extra_inds).to(
                     assign_result.gt_inds.device).long()
-                sampled_inds = torch.cat([sampled_inds, extra_inds])
+                sampled_inds = paddle.concat([sampled_inds, extra_inds])
             elif len(sampled_inds) > num_expected:
                 sampled_inds = self.random_choice(sampled_inds, num_expected)
             return sampled_inds

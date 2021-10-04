@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import Scale
 from mmcv.runner import force_fp32
 
@@ -106,7 +106,7 @@ class FCOSHead(AnchorFreeHead):
         """Initialize layers of the head."""
         super()._init_layers()
         self.conv_centerness = nn.Conv2d(self.feat_channels, 1, 3, padding=1)
-        self.scales = nn.ModuleList([Scale(1.0) for _ in self.strides])
+        self.scales = nn.LayerList([Scale(1.0) for _ in self.strides])
 
     def forward(self, feats):
         """Forward features from the upstream network.
@@ -212,13 +212,13 @@ class FCOSHead(AnchorFreeHead):
             centerness.permute(0, 2, 3, 1).reshape(-1)
             for centerness in centernesses
         ]
-        flatten_cls_scores = torch.cat(flatten_cls_scores)
-        flatten_bbox_preds = torch.cat(flatten_bbox_preds)
-        flatten_centerness = torch.cat(flatten_centerness)
-        flatten_labels = torch.cat(labels)
-        flatten_bbox_targets = torch.cat(bbox_targets)
+        flatten_cls_scores = paddle.concat(flatten_cls_scores)
+        flatten_bbox_preds = paddle.concat(flatten_bbox_preds)
+        flatten_centerness = paddle.concat(flatten_centerness)
+        flatten_labels = paddle.concat(labels)
+        flatten_bbox_targets = paddle.concat(bbox_targets)
         # repeat points to align with bbox_preds
-        flatten_points = torch.cat(
+        flatten_points = paddle.concat(
             [points.repeat(num_imgs, 1) for points in all_level_points])
 
         # FG cat_id: [0, num_classes -1], BG cat_id: num_classes
@@ -422,12 +422,12 @@ class FCOSHead(AnchorFreeHead):
             mlvl_scores.append(scores)
             mlvl_centerness.append(centerness)
 
-        batch_mlvl_bboxes = torch.cat(mlvl_bboxes, dim=1)
+        batch_mlvl_bboxes = paddle.concat(mlvl_bboxes, dim=1)
         if rescale:
             batch_mlvl_bboxes /= batch_mlvl_bboxes.new_tensor(
                 scale_factors).unsqueeze(1)
-        batch_mlvl_scores = torch.cat(mlvl_scores, dim=1)
-        batch_mlvl_centerness = torch.cat(mlvl_centerness, dim=1)
+        batch_mlvl_scores = paddle.concat(mlvl_scores, dim=1)
+        batch_mlvl_centerness = paddle.concat(mlvl_centerness, dim=1)
 
         # Replace multiclass_nms with ONNX::NonMaxSuppression in deployment
         if torch.onnx.is_in_onnx_export() and with_nms:
@@ -447,7 +447,7 @@ class FCOSHead(AnchorFreeHead):
         # BG cat_id: num_class
         padding = batch_mlvl_scores.new_zeros(batch_size,
                                               batch_mlvl_scores.shape[1], 1)
-        batch_mlvl_scores = torch.cat([batch_mlvl_scores, padding], dim=-1)
+        batch_mlvl_scores = paddle.concat([batch_mlvl_scores, padding], dim=-1)
 
         if with_nms:
             det_results = []
@@ -508,8 +508,8 @@ class FCOSHead(AnchorFreeHead):
                 points[i]) for i in range(num_levels)
         ]
         # concat all levels points and regress ranges
-        concat_regress_ranges = torch.cat(expanded_regress_ranges, dim=0)
-        concat_points = torch.cat(points, dim=0)
+        concat_regress_ranges = paddle.concat(expanded_regress_ranges, dim=0)
+        concat_points = paddle.concat(points, dim=0)
 
         # the number of points per img, per lvl
         num_points = [center.size(0) for center in points]
@@ -535,8 +535,8 @@ class FCOSHead(AnchorFreeHead):
         concat_lvl_bbox_targets = []
         for i in range(num_levels):
             concat_lvl_labels.append(
-                torch.cat([labels[i] for labels in labels_list]))
-            bbox_targets = torch.cat(
+                paddle.concat([labels[i] for labels in labels_list]))
+            bbox_targets = paddle.concat(
                 [bbox_targets[i] for bbox_targets in bbox_targets_list])
             if self.norm_on_bbox:
                 bbox_targets = bbox_targets / self.strides[i]

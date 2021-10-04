@@ -3,7 +3,7 @@ import os.path as osp
 
 import mmcv
 import pytest
-import torch
+import paddle
 
 from mmdet import digit_version
 from mmdet.models.necks import FPN, YOLOV3Neck

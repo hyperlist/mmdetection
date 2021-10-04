@@ -2,7 +2,7 @@
 import argparse
 
 import numpy as np
-import torch
+import paddle
 from mmcv import Config, DictAction
 
 from mmdet.models import build_detector

@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import pytest
-import torch
+import paddle
 
 from mmdet.models.roi_heads.roi_extractors import GenericRoIExtractor
 

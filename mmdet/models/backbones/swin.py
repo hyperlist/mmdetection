@@ -2,10 +2,10 @@ import warnings
 from collections import OrderedDict
 from copy import deepcopy
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.utils.checkpoint as cp
+import paddle
+import paddle.nn as nn
+
+import paddle.utils.checkpoint as cp
 from mmcv.cnn import build_norm_layer, constant_init, trunc_normal_init
 from mmcv.cnn.bricks.transformer import FFN, build_dropout
 from mmcv.runner import BaseModule, ModuleList, _load_checkpoint
@@ -636,7 +636,7 @@ class SwinTransformer(BaseModule):
         for i in out_indices:
             layer = build_norm_layer(norm_cfg, self.num_features[i])[1]
             layer_name = f'norm{i}'
-            self.add_module(layer_name, layer)
+            self.add_sublayer(layer_name, layer)
 
     def train(self, mode=True):
         """Convert the model into training mode while keep layers freezed."""

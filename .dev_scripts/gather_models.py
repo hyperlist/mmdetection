@@ -8,7 +8,7 @@ import subprocess
 from collections import OrderedDict
 
 import mmcv
-import torch
+import paddle
 import yaml
 
 

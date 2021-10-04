@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
 
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule, Scale
 
 from mmdet.models.dense_heads.fcos_head import FCOSHead
@@ -50,8 +50,8 @@ class NASFCOSHead(FCOSHead):
         self.arch_config = [
             dconv3x3_config, conv3x3_config, dconv3x3_config, conv1x1_config
         ]
-        self.cls_convs = nn.ModuleList()
-        self.reg_convs = nn.ModuleList()
+        self.cls_convs = nn.LayerList()
+        self.reg_convs = nn.LayerList()
         for i, op_ in enumerate(self.arch_config):
             op = copy.deepcopy(op_)
             chn = self.in_channels if i == 0 else self.feat_channels
@@ -77,4 +77,4 @@ class NASFCOSHead(FCOSHead):
         self.conv_reg = nn.Conv2d(self.feat_channels, 4, 3, padding=1)
         self.conv_centerness = nn.Conv2d(self.feat_channels, 1, 3, padding=1)
 
-        self.scales = nn.ModuleList([Scale(1.0) for _ in self.strides])
+        self.scales = nn.LayerList([Scale(1.0) for _ in self.strides])

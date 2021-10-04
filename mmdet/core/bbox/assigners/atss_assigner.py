@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from ..builder import BBOX_ASSIGNERS
 from ..iou_calculators import build_iou_calculator
@@ -125,7 +125,7 @@ class ATSSAssigner(BaseAssigner):
                 selectable_k, dim=0, largest=False)
             candidate_idxs.append(topk_idxs_per_level + start_idx)
             start_idx = end_idx
-        candidate_idxs = torch.cat(candidate_idxs, dim=0)
+        candidate_idxs = paddle.concat(candidate_idxs, dim=0)
 
         # get corresponding iou for the these candidates, and compute the
         # mean and std, set mean + std as the iou threshold

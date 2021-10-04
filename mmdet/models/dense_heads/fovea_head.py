@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.ops import DeformConv2d
 from mmcv.runner import BaseModule
@@ -86,7 +86,7 @@ class FoveaHead(AnchorFreeHead):
             self.conv_cls = nn.Conv2d(
                 self.feat_channels, self.cls_out_channels, 3, padding=1)
         else:
-            self.cls_convs = nn.ModuleList()
+            self.cls_convs = nn.LayerList()
             self.cls_convs.append(
                 ConvModule(
                     self.feat_channels, (self.feat_channels * 4),
@@ -153,8 +153,8 @@ class FoveaHead(AnchorFreeHead):
             bbox_pred.permute(0, 2, 3, 1).reshape(-1, 4)
             for bbox_pred in bbox_preds
         ]
-        flatten_cls_scores = torch.cat(flatten_cls_scores)
-        flatten_bbox_preds = torch.cat(flatten_bbox_preds)
+        flatten_cls_scores = paddle.concat(flatten_cls_scores)
+        flatten_bbox_preds = paddle.concat(flatten_bbox_preds)
         flatten_labels, flatten_bbox_targets = self.get_targets(
             gt_bbox_list, gt_label_list, featmap_sizes, points)
 
@@ -190,18 +190,18 @@ class FoveaHead(AnchorFreeHead):
             featmap_size_list=featmap_sizes,
             point_list=points)
         flatten_labels = [
-            torch.cat([
+            paddle.concat([
                 labels_level_img.flatten() for labels_level_img in labels_level
             ]) for labels_level in zip(*label_list)
         ]
         flatten_bbox_targets = [
-            torch.cat([
+            paddle.concat([
                 bbox_targets_level_img.reshape(-1, 4)
                 for bbox_targets_level_img in bbox_targets_level
             ]) for bbox_targets_level in zip(*bbox_target_list)
         ]
-        flatten_labels = torch.cat(flatten_labels)
-        flatten_bbox_targets = torch.cat(flatten_bbox_targets)
+        flatten_labels = paddle.concat(flatten_labels)
+        flatten_bbox_targets = paddle.concat(flatten_bbox_targets)
         return flatten_labels, flatten_bbox_targets
 
     def _get_target_single(self,
@@ -335,14 +335,14 @@ class FoveaHead(AnchorFreeHead):
             bboxes = torch.stack([x1, y1, x2, y2], -1)
             det_bboxes.append(bboxes)
             det_scores.append(scores)
-        det_bboxes = torch.cat(det_bboxes)
+        det_bboxes = paddle.concat(det_bboxes)
         if rescale:
             det_bboxes /= det_bboxes.new_tensor(scale_factor)
-        det_scores = torch.cat(det_scores)
+        det_scores = paddle.concat(det_scores)
         padding = det_scores.new_zeros(det_scores.shape[0], 1)
         # remind that we set FG labels to [0, num_class-1] since mmdet v2.0
         # BG cat_id: num_class
-        det_scores = torch.cat([det_scores, padding], dim=1)
+        det_scores = paddle.concat([det_scores, padding], dim=1)
         det_bboxes, det_labels = multiclass_nms(det_bboxes, det_scores,
                                                 cfg.score_thr, cfg.nms,
                                                 cfg.max_per_img)

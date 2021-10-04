@@ -6,7 +6,7 @@ CommandLine:
 
 """
 import pytest
-import torch
+import paddle
 
 
 def test_standard_points_generator():

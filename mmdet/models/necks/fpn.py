@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule, auto_fp16
 
@@ -44,7 +44,7 @@ class FPN(BaseModule):
         init_cfg (dict or list[dict], optional): Initialization config dict.
 
     Example:
-        >>> import torch
+        >>> import paddle
         >>> in_channels = [2, 3, 5, 7]
         >>> scales = [340, 170, 84, 43]
         >>> inputs = [torch.rand(1, c, s, s)
@@ -103,8 +103,8 @@ class FPN(BaseModule):
         elif add_extra_convs:  # True
             self.add_extra_convs = 'on_input'
 
-        self.lateral_convs = nn.ModuleList()
-        self.fpn_convs = nn.ModuleList()
+        self.lateral_convs = nn.LayerList()
+        self.fpn_convs = nn.LayerList()
 
         for i in range(self.start_level, self.backbone_end_level):
             l_conv = ConvModule(

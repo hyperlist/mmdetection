@@ -2,8 +2,8 @@
 from logging import warning
 from math import ceil, log
 
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule, bias_init_with_prob
 from mmcv.ops import CornerPool, batched_nms
 from mmcv.runner import BaseModule
@@ -167,9 +167,9 @@ class CornerHead(BaseDenseHead, BBoxTestMixin):
         Including corner heatmap branch and corner offset branch. Each branch
         has two parts: prefix `tl_` for top-left and `br_` for bottom-right.
         """
-        self.tl_pool, self.br_pool = nn.ModuleList(), nn.ModuleList()
-        self.tl_heat, self.br_heat = nn.ModuleList(), nn.ModuleList()
-        self.tl_off, self.br_off = nn.ModuleList(), nn.ModuleList()
+        self.tl_pool, self.br_pool = nn.LayerList(), nn.LayerList()
+        self.tl_heat, self.br_heat = nn.LayerList(), nn.LayerList()
+        self.tl_off, self.br_off = nn.LayerList(), nn.LayerList()
 
         for _ in range(self.num_feat_levels):
             self.tl_pool.append(
@@ -205,7 +205,7 @@ class CornerHead(BaseDenseHead, BBoxTestMixin):
         Only include corner embedding branch with two parts: prefix `tl_` for
         top-left and `br_` for bottom-right.
         """
-        self.tl_emb, self.br_emb = nn.ModuleList(), nn.ModuleList()
+        self.tl_emb, self.br_emb = nn.LayerList(), nn.LayerList()
 
         for _ in range(self.num_feat_levels):
             self.tl_emb.append(
@@ -776,7 +776,7 @@ class CornerHead(BaseDenseHead, BBoxTestMixin):
         scores = scores.view(-1)
         clses = clses[idx].view(-1)
 
-        detections = torch.cat([bboxes, scores.unsqueeze(-1)], -1)
+        detections = paddle.concat([bboxes, scores.unsqueeze(-1)], -1)
         keepinds = (detections[:, -1] > -0.1)
         detections = detections[keepinds]
         labels = clses[keepinds]

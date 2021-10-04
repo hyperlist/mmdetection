@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.core import bbox2result, bbox_mapping_back
 from ..builder import DETECTORS
@@ -45,11 +45,11 @@ class CornerNet(SingleStageDetector):
             bboxes, labels = bboxes_labels
             bboxes, scores = bboxes[:, :4], bboxes[:, -1:]
             bboxes = bbox_mapping_back(bboxes, img_shape, scale_factor, flip)
-            recovered_bboxes.append(torch.cat([bboxes, scores], dim=-1))
+            recovered_bboxes.append(paddle.concat([bboxes, scores], dim=-1))
             aug_labels.append(labels)
 
-        bboxes = torch.cat(recovered_bboxes, dim=0)
-        labels = torch.cat(aug_labels)
+        bboxes = paddle.concat(recovered_bboxes, dim=0)
+        labels = paddle.concat(aug_labels)
 
         if bboxes.shape[0] > 0:
             out_bboxes, out_labels = self.bbox_head._bboxes_nms(
@@ -83,7 +83,7 @@ class CornerNet(SingleStageDetector):
             'aug test must have flipped image pair')
         aug_results = []
         for ind, flip_ind in zip(img_inds[0::2], img_inds[1::2]):
-            img_pair = torch.cat([imgs[ind], imgs[flip_ind]])
+            img_pair = paddle.concat([imgs[ind], imgs[flip_ind]])
             x = self.extract_feat(img_pair)
             outs = self.bbox_head(x)
             bbox_list = self.bbox_head.get_bboxes(

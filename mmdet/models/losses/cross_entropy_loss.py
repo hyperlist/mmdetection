@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 
 from ..builder import LOSSES
 from .utils import weight_reduce_loss
@@ -165,7 +165,7 @@ def mask_cross_entropy(pred,
 
 
 @LOSSES.register_module()
-class CrossEntropyLoss(nn.Module):
+class CrossEntropyLoss(nn.Layer):
 
     def __init__(self,
                  use_sigmoid=False,

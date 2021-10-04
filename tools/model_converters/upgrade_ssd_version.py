@@ -3,7 +3,7 @@ import argparse
 import tempfile
 from collections import OrderedDict
 
-import torch
+import paddle
 from mmcv import Config
 
 

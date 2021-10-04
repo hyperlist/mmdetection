@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch
+import paddle
 
 from ..builder import BBOX_CODERS
 from .base_bbox_coder import BaseBBoxCoder
@@ -109,7 +109,7 @@ def bboxes2tblr(priors, gts, normalizer=4.0, normalize_by_wh=True):
     bottom = ymax - prior_centers[:, 1].unsqueeze(1)
     left = prior_centers[:, 0].unsqueeze(1) - xmin
     right = xmax - prior_centers[:, 0].unsqueeze(1)
-    loc = torch.cat((top, bottom, left, right), dim=1)
+    loc = paddle.concat((top, bottom, left, right), dim=1)
     if normalize_by_wh:
         # Normalize tblr by anchor width and height
         wh = priors[:, 2:4] - priors[:, 0:2]
@@ -172,7 +172,7 @@ def tblr2bboxes(priors,
         # Inplace operation with slice would failed for exporting to ONNX
         th = h * loc_decode[..., :2]  # tb
         tw = w * loc_decode[..., 2:]  # lr
-        loc_decode = torch.cat([th, tw], dim=-1)
+        loc_decode = paddle.concat([th, tw], dim=-1)
     # Cannot be exported using onnx when loc_decode.split(1, dim=-1)
     top, bottom, left, right = loc_decode.split((1, 1, 1, 1), dim=-1)
     xmin = prior_centers[..., 0].unsqueeze(-1) - left
@@ -180,7 +180,7 @@ def tblr2bboxes(priors,
     ymin = prior_centers[..., 1].unsqueeze(-1) - top
     ymax = prior_centers[..., 1].unsqueeze(-1) + bottom
 
-    bboxes = torch.cat((xmin, ymin, xmax, ymax), dim=-1)
+    bboxes = paddle.concat((xmin, ymin, xmax, ymax), dim=-1)
 
     if clip_border and max_shape is not None:
         # clip bboxes with dynamic `min` and `max` for onnx
@@ -188,7 +188,7 @@ def tblr2bboxes(priors,
             from mmdet.core.export import dynamic_clip_for_onnx
             xmin, ymin, xmax, ymax = dynamic_clip_for_onnx(
                 xmin, ymin, xmax, ymax, max_shape)
-            bboxes = torch.cat([xmin, ymin, xmax, ymax], dim=-1)
+            bboxes = paddle.concat([xmin, ymin, xmax, ymax], dim=-1)
             return bboxes
         if not isinstance(max_shape, torch.Tensor):
             max_shape = priors.new_tensor(max_shape)
@@ -198,7 +198,7 @@ def tblr2bboxes(priors,
             assert max_shape.size(0) == bboxes.size(0)
 
         min_xy = priors.new_tensor(0)
-        max_xy = torch.cat([max_shape, max_shape],
+        max_xy = paddle.concat([max_shape, max_shape],
                            dim=-1).flip(-1).unsqueeze(-2)
         bboxes = torch.where(bboxes < min_xy, min_xy, bboxes)
         bboxes = torch.where(bboxes > max_xy, max_xy, bboxes)

@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 
 from ..builder import LOSSES
 
@@ -44,9 +44,9 @@ def ae_loss_per_image(tl_preds, br_preds, match):
             br_list.append(br_e)
             me_list.append((tl_e + br_e) / 2.0)
 
-        tl_list = torch.cat(tl_list)
-        br_list = torch.cat(br_list)
-        me_list = torch.cat(me_list)
+        tl_list = paddle.concat(tl_list)
+        br_list = paddle.concat(br_list)
+        me_list = paddle.concat(me_list)
 
         assert tl_list.size() == br_list.size()
 
@@ -72,7 +72,7 @@ def ae_loss_per_image(tl_preds, br_preds, match):
 
 
 @LOSSES.register_module()
-class AssociativeEmbeddingLoss(nn.Module):
+class AssociativeEmbeddingLoss(nn.Layer):
     """Associative Embedding Loss.
 
     More details can be found in

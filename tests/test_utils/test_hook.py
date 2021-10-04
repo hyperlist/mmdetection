@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, call
 
 import numpy as np
 import pytest
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.runner import (CheckpointHook, IterTimerHook, PaviLoggerHook,
                          build_runner)
 from torch.nn.init import constant_
@@ -24,7 +24,7 @@ def _build_demo_runner_without_hook(runner_type='EpochBasedRunner',
                                     max_iters=None,
                                     multi_optimziers=False):
 
-    class Model(nn.Module):
+    class Model(nn.Layer):
 
         def __init__(self):
             super().__init__()
@@ -158,7 +158,7 @@ def test_yolox_lrupdater_hook(multi_optimziers):
 def test_ema_hook():
     """xdoctest -m tests/test_hooks.py test_ema_hook."""
 
-    class DemoModel(nn.Module):
+    class DemoModel(nn.Layer):
 
         def __init__(self):
             super().__init__()
@@ -288,7 +288,7 @@ def test_sync_random_size_hook():
 def test_check_invalid_loss_hook(set_loss):
     # Check whether loss is valid during training.
 
-    class DemoModel(nn.Module):
+    class DemoModel(nn.Layer):
 
         def __init__(self, set_loss_nan=False, set_loss_inf=False):
             super().__init__()

@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 
 
 def bbox_flip(bboxes, img_shape, direction='horizontal'):
@@ -70,11 +70,11 @@ def bbox2roi(bbox_list):
     for img_id, bboxes in enumerate(bbox_list):
         if bboxes.size(0) > 0:
             img_inds = bboxes.new_full((bboxes.size(0), 1), img_id)
-            rois = torch.cat([img_inds, bboxes[:, :4]], dim=-1)
+            rois = paddle.concat([img_inds, bboxes[:, :4]], dim=-1)
         else:
             rois = bboxes.new_zeros((0, 5))
         rois_list.append(rois)
-    rois = torch.cat(rois_list, 0)
+    rois = paddle.concat(rois_list, 0)
     return rois
 
 
@@ -155,7 +155,7 @@ def distance2bbox(points, distance, max_shape=None):
             assert max_shape.size(0) == bboxes.size(0)
 
         min_xy = x1.new_tensor(0)
-        max_xy = torch.cat([max_shape, max_shape],
+        max_xy = paddle.concat([max_shape, max_shape],
                            dim=-1).flip(-1).unsqueeze(-2)
         bboxes = torch.where(bboxes < min_xy, min_xy, bboxes)
         bboxes = torch.where(bboxes > max_xy, max_xy, bboxes)
@@ -230,7 +230,7 @@ def bbox_cxcywh_to_xyxy(bbox):
     """
     cx, cy, w, h = bbox.split((1, 1, 1, 1), dim=-1)
     bbox_new = [(cx - 0.5 * w), (cy - 0.5 * h), (cx + 0.5 * w), (cy + 0.5 * h)]
-    return torch.cat(bbox_new, dim=-1)
+    return paddle.concat(bbox_new, dim=-1)
 
 
 def bbox_xyxy_to_cxcywh(bbox):
@@ -244,4 +244,4 @@ def bbox_xyxy_to_cxcywh(bbox):
     """
     x1, y1, x2, y2 = bbox.split((1, 1, 1, 1), dim=-1)
     bbox_new = [(x1 + x2) / 2, (y1 + y2) / 2, (x2 - x1), (y2 - y1)]
-    return torch.cat(bbox_new, dim=-1)
+    return paddle.concat(bbox_new, dim=-1)

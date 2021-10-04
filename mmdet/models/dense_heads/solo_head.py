@@ -1,9 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 
 from mmdet.core import InstanceData, mask_matrix_nms, multi_apply
@@ -100,8 +100,8 @@ class SOLOHead(BaseMaskHead):
         self._init_layers()
 
     def _init_layers(self):
-        self.mask_convs = nn.ModuleList()
-        self.cls_convs = nn.ModuleList()
+        self.mask_convs = nn.LayerList()
+        self.cls_convs = nn.LayerList()
         for i in range(self.stacked_convs):
             chn = self.in_channels + 2 if i == 0 else self.feat_channels
             self.mask_convs.append(
@@ -121,7 +121,7 @@ class SOLOHead(BaseMaskHead):
                     stride=1,
                     padding=1,
                     norm_cfg=self.norm_cfg))
-        self.conv_mask_list = nn.ModuleList()
+        self.conv_mask_list = nn.LayerList()
         for num_grid in self.num_grids:
             self.conv_mask_list.append(
                 nn.Conv2d(self.feat_channels, num_grid**2, 1))
@@ -158,7 +158,7 @@ class SOLOHead(BaseMaskHead):
             # generate and concat the coordinate
             coord_feat = generate_coordinate(mask_feat.size(),
                                              mask_feat.device)
-            mask_feat = torch.cat([mask_feat, coord_feat], 1)
+            mask_feat = paddle.concat([mask_feat, coord_feat], 1)
 
             for mask_layer in (self.mask_convs):
                 mask_feat = mask_layer(mask_feat)
@@ -253,12 +253,12 @@ class SOLOHead(BaseMaskHead):
         # cat multiple image
         temp_mlvl_cls_preds = []
         for lvl in range(num_levels):
-            mlvl_pos_mask_targets[lvl] = torch.cat(
+            mlvl_pos_mask_targets[lvl] = paddle.concat(
                 mlvl_pos_mask_targets[lvl], dim=0)
-            mlvl_pos_mask_preds[lvl] = torch.cat(
+            mlvl_pos_mask_preds[lvl] = paddle.concat(
                 mlvl_pos_mask_preds[lvl], dim=0)
-            mlvl_pos_masks[lvl] = torch.cat(mlvl_pos_masks[lvl], dim=0)
-            mlvl_labels[lvl] = torch.cat(mlvl_labels[lvl], dim=0)
+            mlvl_pos_masks[lvl] = paddle.concat(mlvl_pos_masks[lvl], dim=0)
+            mlvl_labels[lvl] = paddle.concat(mlvl_labels[lvl], dim=0)
             temp_mlvl_cls_preds.append(mlvl_cls_preds[lvl].permute(
                 0, 2, 3, 1).reshape(-1, self.cls_out_channels))
 
@@ -272,12 +272,12 @@ class SOLOHead(BaseMaskHead):
             loss_mask.append(
                 self.loss_mask(pred, target, reduction_override='none'))
         if num_pos > 0:
-            loss_mask = torch.cat(loss_mask).sum() / num_pos
+            loss_mask = paddle.concat(loss_mask).sum() / num_pos
         else:
-            loss_mask = torch.cat(loss_mask).mean()
+            loss_mask = paddle.concat(loss_mask).mean()
 
-        flatten_labels = torch.cat(mlvl_labels)
-        flatten_cls_preds = torch.cat(temp_mlvl_cls_preds)
+        flatten_labels = paddle.concat(mlvl_labels)
+        flatten_cls_preds = paddle.concat(temp_mlvl_cls_preds)
         loss_cls = self.loss_cls(
             flatten_cls_preds, flatten_labels, avg_factor=num_pos + 1)
         return dict(loss_mask=loss_mask, loss_cls=loss_cls)
@@ -456,8 +456,8 @@ class SOLOHead(BaseMaskHead):
                 mlvl_mask_preds[lvl][img_id] for lvl in range(num_levels)
             ]
 
-            cls_pred_list = torch.cat(cls_pred_list, dim=0)
-            mask_pred_list = torch.cat(mask_pred_list, dim=0)
+            cls_pred_list = paddle.concat(cls_pred_list, dim=0)
+            mask_pred_list = paddle.concat(mask_pred_list, dim=0)
 
             results = self._get_results_single(
                 cls_pred_list, mask_pred_list, img_meta=img_metas[img_id])
@@ -601,9 +601,9 @@ class DecoupledSOLOHead(SOLOHead):
             *args, init_cfg=init_cfg, **kwargs)
 
     def _init_layers(self):
-        self.mask_convs_x = nn.ModuleList()
-        self.mask_convs_y = nn.ModuleList()
-        self.cls_convs = nn.ModuleList()
+        self.mask_convs_x = nn.LayerList()
+        self.mask_convs_y = nn.LayerList()
+        self.cls_convs = nn.LayerList()
 
         for i in range(self.stacked_convs):
             chn = self.in_channels + 1 if i == 0 else self.feat_channels
@@ -634,8 +634,8 @@ class DecoupledSOLOHead(SOLOHead):
                     padding=1,
                     norm_cfg=self.norm_cfg))
 
-        self.conv_mask_list_x = nn.ModuleList()
-        self.conv_mask_list_y = nn.ModuleList()
+        self.conv_mask_list_x = nn.LayerList()
+        self.conv_mask_list_y = nn.LayerList()
         for num_grid in self.num_grids:
             self.conv_mask_list_x.append(
                 nn.Conv2d(self.feat_channels, num_grid, 3, padding=1))
@@ -657,8 +657,8 @@ class DecoupledSOLOHead(SOLOHead):
             # generate and concat the coordinate
             coord_feat = generate_coordinate(mask_feat.size(),
                                              mask_feat.device)
-            mask_feat_x = torch.cat([mask_feat, coord_feat[:, 0:1, ...]], 1)
-            mask_feat_y = torch.cat([mask_feat, coord_feat[:, 1:2, ...]], 1)
+            mask_feat_x = paddle.concat([mask_feat, coord_feat[:, 0:1, ...]], 1)
+            mask_feat_y = paddle.concat([mask_feat, coord_feat[:, 1:2, ...]], 1)
 
             for mask_layer_x, mask_layer_y in \
                     zip(self.mask_convs_x, self.mask_convs_y):
@@ -770,13 +770,13 @@ class DecoupledSOLOHead(SOLOHead):
         # cat multiple image
         temp_mlvl_cls_preds = []
         for lvl in range(num_levels):
-            mlvl_pos_mask_targets[lvl] = torch.cat(
+            mlvl_pos_mask_targets[lvl] = paddle.concat(
                 mlvl_pos_mask_targets[lvl], dim=0)
-            mlvl_pos_mask_preds_x[lvl] = torch.cat(
+            mlvl_pos_mask_preds_x[lvl] = paddle.concat(
                 mlvl_pos_mask_preds_x[lvl], dim=0)
-            mlvl_pos_mask_preds_y[lvl] = torch.cat(
+            mlvl_pos_mask_preds_y[lvl] = paddle.concat(
                 mlvl_pos_mask_preds_y[lvl], dim=0)
-            mlvl_labels[lvl] = torch.cat(mlvl_labels[lvl], dim=0)
+            mlvl_labels[lvl] = paddle.concat(mlvl_labels[lvl], dim=0)
             temp_mlvl_cls_preds.append(mlvl_cls_preds[lvl].permute(
                 0, 2, 3, 1).reshape(-1, self.cls_out_channels))
 
@@ -796,13 +796,13 @@ class DecoupledSOLOHead(SOLOHead):
             loss_mask.append(
                 self.loss_mask(pred_mask, target, reduction_override='none'))
         if num_pos > 0:
-            loss_mask = torch.cat(loss_mask).sum() / num_pos
+            loss_mask = paddle.concat(loss_mask).sum() / num_pos
         else:
-            loss_mask = torch.cat(loss_mask).mean()
+            loss_mask = paddle.concat(loss_mask).mean()
 
         # cate
-        flatten_labels = torch.cat(mlvl_labels)
-        flatten_cls_preds = torch.cat(temp_mlvl_cls_preds)
+        flatten_labels = paddle.concat(mlvl_labels)
+        flatten_cls_preds = paddle.concat(temp_mlvl_cls_preds)
 
         loss_cls = self.loss_cls(
             flatten_cls_preds, flatten_labels, avg_factor=num_pos + 1)
@@ -903,9 +903,9 @@ class DecoupledSOLOHead(SOLOHead):
                 mlvl_mask_preds_y[i][img_id] for i in range(num_levels)
             ]
 
-            cls_pred_list = torch.cat(cls_pred_list, dim=0)
-            mask_pred_list_x = torch.cat(mask_pred_list_x, dim=0)
-            mask_pred_list_y = torch.cat(mask_pred_list_y, dim=0)
+            cls_pred_list = paddle.concat(cls_pred_list, dim=0)
+            mask_pred_list_x = paddle.concat(mask_pred_list_x, dim=0)
+            mask_pred_list_y = paddle.concat(mask_pred_list_y, dim=0)
 
             results = self._get_results_single(
                 cls_pred_list,
@@ -1078,8 +1078,8 @@ class DecoupledSOLOLightHead(DecoupledSOLOHead):
             *args, init_cfg=init_cfg, **kwargs)
 
     def _init_layers(self):
-        self.mask_convs = nn.ModuleList()
-        self.cls_convs = nn.ModuleList()
+        self.mask_convs = nn.LayerList()
+        self.cls_convs = nn.LayerList()
 
         for i in range(self.stacked_convs):
             if self.dcn_cfg is not None\
@@ -1110,8 +1110,8 @@ class DecoupledSOLOLightHead(DecoupledSOLOHead):
                     conv_cfg=conv_cfg,
                     norm_cfg=self.norm_cfg))
 
-        self.conv_mask_list_x = nn.ModuleList()
-        self.conv_mask_list_y = nn.ModuleList()
+        self.conv_mask_list_x = nn.LayerList()
+        self.conv_mask_list_y = nn.LayerList()
         for num_grid in self.num_grids:
             self.conv_mask_list_x.append(
                 nn.Conv2d(self.feat_channels, num_grid, 3, padding=1))
@@ -1133,7 +1133,7 @@ class DecoupledSOLOLightHead(DecoupledSOLOHead):
             # generate and concat the coordinate
             coord_feat = generate_coordinate(mask_feat.size(),
                                              mask_feat.device)
-            mask_feat = torch.cat([mask_feat, coord_feat], 1)
+            mask_feat = paddle.concat([mask_feat, coord_feat], 1)
 
             for mask_layer in self.mask_convs:
                 mask_feat = mask_layer(mask_feat)

@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule, auto_fp16, force_fp32
 
@@ -59,7 +59,7 @@ class GlobalContextHead(BaseModule):
                 norm_cfg=self.norm_cfg)
             self.num_convs = num_res_blocks
         else:
-            self.convs = nn.ModuleList()
+            self.convs = nn.LayerList()
             for i in range(self.num_convs):
                 in_channels = self.in_channels if i == 0 else conv_out_channels
                 self.convs.append(
@@ -71,7 +71,7 @@ class GlobalContextHead(BaseModule):
                         conv_cfg=self.conv_cfg,
                         norm_cfg=self.norm_cfg))
 
-        self.pool = nn.AdaptiveAvgPool2d(1)
+        self.pool = nn.AdaptiveAvgPool2D(1)
         self.fc = nn.Linear(conv_out_channels, num_classes)
 
         self.criterion = nn.BCEWithLogitsLoss()

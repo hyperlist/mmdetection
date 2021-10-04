@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from abc import ABCMeta, abstractmethod
 
-import torch.nn.functional as F
+
 from mmcv.runner import BaseModule, force_fp32
 
 from ..builder import build_loss

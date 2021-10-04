@@ -3,7 +3,7 @@ from collections.abc import Sequence
 
 import mmcv
 import numpy as np
-import torch
+import paddle
 from mmcv.parallel import DataContainer as DC
 
 from ..builder import PIPELINES

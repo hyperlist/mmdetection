@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import pytest
-import torch
+import paddle
 
 from mmdet.core.bbox.coder import (DeltaXYWHBBoxCoder, TBLRBBoxCoder,
                                    YOLOBBoxCoder)

@@ -3,7 +3,7 @@
 
 import warnings
 
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 from torch.nn.modules.batchnorm import _BatchNorm
@@ -79,7 +79,7 @@ class Darknet(BaseModule):
 
     Example:
         >>> from mmdet.models import Darknet
-        >>> import torch
+        >>> import paddle
         >>> self = Darknet(depth=53)
         >>> self.eval()
         >>> inputs = torch.rand(1, 3, 416, 416)
@@ -125,7 +125,7 @@ class Darknet(BaseModule):
         for i, n_layers in enumerate(self.layers):
             layer_name = f'conv_res_block{i + 1}'
             in_c, out_c = self.channels[i]
-            self.add_module(
+            self.add_sublayer(
                 layer_name,
                 self.make_conv_res_block(in_c, out_c, n_layers, **cfg))
             self.cr_blocks.append(layer_name)
@@ -203,11 +203,11 @@ class Darknet(BaseModule):
         cfg = dict(conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg)
 
         model = nn.Sequential()
-        model.add_module(
+        model.add_sublayer(
             'conv',
             ConvModule(
                 in_channels, out_channels, 3, stride=2, padding=1, **cfg))
         for idx in range(res_repeat):
-            model.add_module('res{}'.format(idx),
+            model.add_sublayer('res{}'.format(idx),
                              ResBlock(out_channels, **cfg))
         return model

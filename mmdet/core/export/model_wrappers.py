@@ -3,7 +3,7 @@ import os.path as osp
 import warnings
 
 import numpy as np
-import torch
+import paddle
 
 from mmdet.core import bbox2result
 from mmdet.models import BaseDetector

@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 
-import torch.nn as nn
-import torch.utils.checkpoint as cp
+import paddle.nn as nn
+import paddle.utils.checkpoint as cp
 from mmcv.cnn import build_conv_layer, build_norm_layer, build_plugin_layer
 from mmcv.runner import BaseModule
 from torch.nn.modules.batchnorm import _BatchNorm
@@ -43,10 +43,10 @@ class BasicBlock(BaseModule):
             padding=dilation,
             dilation=dilation,
             bias=False)
-        self.add_module(self.norm1_name, norm1)
+        self.add_sublayer(self.norm1_name, norm1)
         self.conv2 = build_conv_layer(
             conv_cfg, planes, planes, 3, padding=1, bias=False)
-        self.add_module(self.norm2_name, norm2)
+        self.add_sublayer(self.norm2_name, norm2)
 
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
@@ -56,12 +56,12 @@ class BasicBlock(BaseModule):
 
     @property
     def norm1(self):
-        """nn.Module: normalization layer after the first convolution layer"""
+        """nn.Layer: normalization layer after the first convolution layer"""
         return getattr(self, self.norm1_name)
 
     @property
     def norm2(self):
-        """nn.Module: normalization layer after the second convolution layer"""
+        """nn.Layer: normalization layer after the second convolution layer"""
         return getattr(self, self.norm2_name)
 
     def forward(self, x):
@@ -170,7 +170,7 @@ class Bottleneck(BaseModule):
             kernel_size=1,
             stride=self.conv1_stride,
             bias=False)
-        self.add_module(self.norm1_name, norm1)
+        self.add_sublayer(self.norm1_name, norm1)
         fallback_on_stride = False
         if self.with_dcn:
             fallback_on_stride = dcn.pop('fallback_on_stride', False)
@@ -196,14 +196,14 @@ class Bottleneck(BaseModule):
                 dilation=dilation,
                 bias=False)
 
-        self.add_module(self.norm2_name, norm2)
+        self.add_sublayer(self.norm2_name, norm2)
         self.conv3 = build_conv_layer(
             conv_cfg,
             planes,
             planes * self.expansion,
             kernel_size=1,
             bias=False)
-        self.add_module(self.norm3_name, norm3)
+        self.add_sublayer(self.norm3_name, norm3)
 
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
@@ -235,7 +235,7 @@ class Bottleneck(BaseModule):
                 in_channels=in_channels,
                 postfix=plugin.pop('postfix', ''))
             assert not hasattr(self, name), f'duplicate plugin {name}'
-            self.add_module(name, layer)
+            self.add_sublayer(name, layer)
             plugin_names.append(name)
         return plugin_names
 
@@ -247,17 +247,17 @@ class Bottleneck(BaseModule):
 
     @property
     def norm1(self):
-        """nn.Module: normalization layer after the first convolution layer"""
+        """nn.Layer: normalization layer after the first convolution layer"""
         return getattr(self, self.norm1_name)
 
     @property
     def norm2(self):
-        """nn.Module: normalization layer after the second convolution layer"""
+        """nn.Layer: normalization layer after the second convolution layer"""
         return getattr(self, self.norm2_name)
 
     @property
     def norm3(self):
-        """nn.Module: normalization layer after the third convolution layer"""
+        """nn.Layer: normalization layer after the third convolution layer"""
         return getattr(self, self.norm3_name)
 
     def forward(self, x):
@@ -345,7 +345,7 @@ class ResNet(BaseModule):
 
     Example:
         >>> from mmdet.models import ResNet
-        >>> import torch
+        >>> import paddle
         >>> self = ResNet(depth=18)
         >>> self.eval()
         >>> inputs = torch.rand(1, 3, 32, 32)
@@ -483,7 +483,7 @@ class ResNet(BaseModule):
                 init_cfg=block_init_cfg)
             self.inplanes = planes * self.block.expansion
             layer_name = f'layer{i + 1}'
-            self.add_module(layer_name, res_layer)
+            self.add_sublayer(layer_name, res_layer)
             self.res_layers.append(layer_name)
 
         self._freeze_stages()
@@ -559,7 +559,7 @@ class ResNet(BaseModule):
 
     @property
     def norm1(self):
-        """nn.Module: the normalization layer named "norm1" """
+        """nn.Layer: the normalization layer named "norm1" """
         return getattr(self, self.norm1_name)
 
     def _make_stem_layer(self, in_channels, stem_channels):
@@ -606,9 +606,9 @@ class ResNet(BaseModule):
                 bias=False)
             self.norm1_name, norm1 = build_norm_layer(
                 self.norm_cfg, stem_channels, postfix=1)
-            self.add_module(self.norm1_name, norm1)
+            self.add_sublayer(self.norm1_name, norm1)
             self.relu = nn.ReLU(inplace=True)
-        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.maxpool = nn.MaxPool2D(kernel_size=3, stride=2, padding=1)
 
     def _freeze_stages(self):
         if self.frozen_stages >= 0:

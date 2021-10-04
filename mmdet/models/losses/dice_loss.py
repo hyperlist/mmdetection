@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 
 from ..builder import LOSSES
 from .utils import weight_reduce_loss
@@ -46,7 +46,7 @@ def dice_loss(pred,
 
 
 @LOSSES.register_module()
-class DiceLoss(nn.Module):
+class DiceLoss(nn.Layer):
 
     def __init__(self,
                  use_sigmoid=True,

@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import (ConvModule, caffe2_xavier_init, constant_init, is_norm,
                       normal_init)
 from torch.nn import BatchNorm2d
@@ -7,7 +7,7 @@ from torch.nn import BatchNorm2d
 from ..builder import NECKS
 
 
-class Bottleneck(nn.Module):
+class Bottleneck(nn.Layer):
     """Bottleneck block for DilatedEncoder used in `YOLOF.
 
     <https://arxiv.org/abs/2103.09460>`.
@@ -49,7 +49,7 @@ class Bottleneck(nn.Module):
 
 
 @NECKS.register_module()
-class DilatedEncoder(nn.Module):
+class DilatedEncoder(nn.Layer):
     """Dilated Encoder for YOLOF <https://arxiv.org/abs/2103.09460>`.
 
     This module contains two types of components:

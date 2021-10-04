@@ -1,5 +1,5 @@
 import pytest
-import torch
+import paddle
 
 from mmdet.models.backbones.swin import SwinBlock, SwinTransformer
 

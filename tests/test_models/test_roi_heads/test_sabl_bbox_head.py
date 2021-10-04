@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch
+import paddle
 
 from mmdet.core import bbox2roi
 from mmdet.models.roi_heads.bbox_heads import SABLHead

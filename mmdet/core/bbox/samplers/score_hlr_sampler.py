@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 from mmcv.ops import nms_match
 
 from ..builder import BBOX_SAMPLERS
@@ -171,7 +171,7 @@ class ScoreHLRSampler(BaseSampler):
                                                      valid_argmax_score]
                 pred_bboxes = self.bbox_head.bbox_coder.decode(
                     valid_rois[:, 1:], selected_bbox_pred)
-                pred_bboxes_with_score = torch.cat(
+                pred_bboxes_with_score = paddle.concat(
                     [pred_bboxes, valid_max_score[:, None]], -1)
                 group = nms_match(pred_bboxes_with_score, self.iou_thr)
 
@@ -188,7 +188,7 @@ class ScoreHLRSampler(BaseSampler):
 
                 if num_rand > 0:
                     rand_inds = torch.randperm(num_invalid)[:num_rand]
-                    select_inds = torch.cat(
+                    select_inds = paddle.concat(
                         [valid_inds[hlr_inds], invalid_inds[rand_inds]])
                 else:
                     select_inds = valid_inds[hlr_inds]
@@ -239,10 +239,10 @@ class ScoreHLRSampler(BaseSampler):
 
         gt_flags = bboxes.new_zeros((bboxes.shape[0], ), dtype=torch.uint8)
         if self.add_gt_as_proposals:
-            bboxes = torch.cat([gt_bboxes, bboxes], dim=0)
+            bboxes = paddle.concat([gt_bboxes, bboxes], dim=0)
             assign_result.add_gt_(gt_labels)
             gt_ones = bboxes.new_ones(gt_bboxes.shape[0], dtype=torch.uint8)
-            gt_flags = torch.cat([gt_ones, gt_flags])
+            gt_flags = paddle.concat([gt_ones, gt_flags])
 
         num_expected_pos = int(self.num * self.pos_fraction)
         pos_inds = self.pos_sampler._sample_pos(

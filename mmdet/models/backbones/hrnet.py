@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import build_conv_layer, build_norm_layer
 from mmcv.runner import BaseModule, ModuleList, Sequential
 from torch.nn.modules.batchnorm import _BatchNorm
@@ -176,9 +176,9 @@ class HRModule(BaseModule):
                                                      in_channels[j])[1],
                                     nn.ReLU(inplace=False)))
                     fuse_layer.append(nn.Sequential(*conv_downsamples))
-            fuse_layers.append(nn.ModuleList(fuse_layer))
+            fuse_layers.append(nn.LayerList(fuse_layer))
 
-        return nn.ModuleList(fuse_layers)
+        return nn.LayerList(fuse_layers)
 
     def forward(self, x):
         """Forward function."""
@@ -238,7 +238,7 @@ class HRNet(BaseModule):
 
     Example:
         >>> from mmdet.models import HRNet
-        >>> import torch
+        >>> import paddle
         >>> extra = dict(
         >>>     stage1=dict(
         >>>         num_modules=1,
@@ -340,7 +340,7 @@ class HRNet(BaseModule):
             padding=1,
             bias=False)
 
-        self.add_module(self.norm1_name, norm1)
+        self.add_sublayer(self.norm1_name, norm1)
         self.conv2 = build_conv_layer(
             self.conv_cfg,
             64,
@@ -350,7 +350,7 @@ class HRNet(BaseModule):
             padding=1,
             bias=False)
 
-        self.add_module(self.norm2_name, norm2)
+        self.add_sublayer(self.norm2_name, norm2)
         self.relu = nn.ReLU(inplace=True)
 
         # stage 1
@@ -401,12 +401,12 @@ class HRNet(BaseModule):
 
     @property
     def norm1(self):
-        """nn.Module: the normalization layer named "norm1" """
+        """nn.Layer: the normalization layer named "norm1" """
         return getattr(self, self.norm1_name)
 
     @property
     def norm2(self):
-        """nn.Module: the normalization layer named "norm2" """
+        """nn.Layer: the normalization layer named "norm2" """
         return getattr(self, self.norm2_name)
 
     def _make_transition_layer(self, num_channels_pre_layer,
@@ -453,7 +453,7 @@ class HRNet(BaseModule):
                             nn.ReLU(inplace=True)))
                 transition_layers.append(nn.Sequential(*conv_downsamples))
 
-        return nn.ModuleList(transition_layers)
+        return nn.LayerList(transition_layers)
 
     def _make_layer(self, block, inplanes, planes, blocks, stride=1):
         downsample = None

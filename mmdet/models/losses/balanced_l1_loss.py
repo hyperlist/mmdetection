@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
 import numpy as np
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 
 from ..builder import LOSSES
 from .utils import weighted_loss
@@ -54,7 +54,7 @@ def balanced_l1_loss(pred,
 
 
 @LOSSES.register_module()
-class BalancedL1Loss(nn.Module):
+class BalancedL1Loss(nn.Layer):
     """Balanced L1 Loss.
 
     arXiv: https://arxiv.org/pdf/1904.02701.pdf (CVPR 2019)

@@ -6,7 +6,7 @@ import tempfile
 import mmcv
 import numpy as np
 import pytest
-import torch
+import paddle
 
 from mmdet.core import visualization as vis
 

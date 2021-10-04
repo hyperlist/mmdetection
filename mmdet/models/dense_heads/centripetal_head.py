@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule, normal_init
 from mmcv.ops import DeformConv2d
 
@@ -77,14 +77,14 @@ class CentripetalHead(CornerHead):
         centripetal shift ( centripetal_shift). Each branch has two parts:
         prefix `tl_` for top-left and `br_` for bottom-right.
         """
-        self.tl_feat_adaption = nn.ModuleList()
-        self.br_feat_adaption = nn.ModuleList()
-        self.tl_dcn_offset = nn.ModuleList()
-        self.br_dcn_offset = nn.ModuleList()
-        self.tl_guiding_shift = nn.ModuleList()
-        self.br_guiding_shift = nn.ModuleList()
-        self.tl_centripetal_shift = nn.ModuleList()
-        self.br_centripetal_shift = nn.ModuleList()
+        self.tl_feat_adaption = nn.LayerList()
+        self.br_feat_adaption = nn.LayerList()
+        self.tl_dcn_offset = nn.LayerList()
+        self.br_dcn_offset = nn.LayerList()
+        self.tl_guiding_shift = nn.LayerList()
+        self.br_guiding_shift = nn.LayerList()
+        self.tl_centripetal_shift = nn.LayerList()
+        self.br_centripetal_shift = nn.LayerList()
 
         for _ in range(self.num_feat_levels):
             self.tl_feat_adaption.append(

@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 # Copyright (c) 2019 Western Digital Corporation or its affiliates.
-import torch
+import paddle
 
 from ..builder import DETECTORS
 from .single_stage import SingleStageDetector

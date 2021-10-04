@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.utils import util_mixins
 
@@ -52,7 +52,7 @@ class SamplingResult(util_mixins.NiceRepr):
     @property
     def bboxes(self):
         """torch.Tensor: concatenated positive and negative boxes"""
-        return torch.cat([self.pos_bboxes, self.neg_bboxes])
+        return paddle.concat([self.pos_bboxes, self.neg_bboxes])
 
     def to(self, device):
         """Change the device of the data inplace.

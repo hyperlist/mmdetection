@@ -3,7 +3,7 @@ import sys
 import warnings
 
 import numpy as np
-import torch
+import paddle
 
 from mmdet.core import (bbox2roi, bbox_mapping, merge_aug_bboxes,
                         merge_aug_masks, multiclass_nms)

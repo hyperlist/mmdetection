@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule, Scale
 from mmcv.ops import DeformConv2d
 from mmcv.runner import force_fp32
@@ -171,7 +171,7 @@ class VFNetHead(ATSSHead, FCOSHead):
             norm_cfg=self.norm_cfg,
             bias=self.conv_bias)
         self.vfnet_reg = nn.Conv2d(self.feat_channels, 4, 3, padding=1)
-        self.scales = nn.ModuleList([Scale(1.0) for _ in self.strides])
+        self.scales = nn.LayerList([Scale(1.0) for _ in self.strides])
 
         self.vfnet_reg_refine_dconv = DeformConv2d(
             self.feat_channels,
@@ -180,7 +180,7 @@ class VFNetHead(ATSSHead, FCOSHead):
             1,
             padding=self.dcn_pad)
         self.vfnet_reg_refine = nn.Conv2d(self.feat_channels, 4, 3, padding=1)
-        self.scales_refine = nn.ModuleList([Scale(1.0) for _ in self.strides])
+        self.scales_refine = nn.LayerList([Scale(1.0) for _ in self.strides])
 
         self.vfnet_cls_dconv = DeformConv2d(
             self.feat_channels,
@@ -369,13 +369,13 @@ class VFNetHead(ATSSHead, FCOSHead):
             bbox_pred_refine.permute(0, 2, 3, 1).reshape(-1, 4).contiguous()
             for bbox_pred_refine in bbox_preds_refine
         ]
-        flatten_cls_scores = torch.cat(flatten_cls_scores)
-        flatten_bbox_preds = torch.cat(flatten_bbox_preds)
-        flatten_bbox_preds_refine = torch.cat(flatten_bbox_preds_refine)
-        flatten_labels = torch.cat(labels)
-        flatten_bbox_targets = torch.cat(bbox_targets)
+        flatten_cls_scores = paddle.concat(flatten_cls_scores)
+        flatten_bbox_preds = paddle.concat(flatten_bbox_preds)
+        flatten_bbox_preds_refine = paddle.concat(flatten_bbox_preds_refine)
+        flatten_labels = paddle.concat(labels)
+        flatten_bbox_targets = paddle.concat(bbox_targets)
         # repeat points to align with bbox_preds
-        flatten_points = torch.cat(
+        flatten_points = paddle.concat(
             [points.repeat(num_imgs, 1) for points in all_level_points])
 
         # FG cat_id: [0, num_classes - 1], BG cat_id: num_classes
@@ -578,14 +578,14 @@ class VFNetHead(ATSSHead, FCOSHead):
             bboxes = distance2bbox(points, bbox_pred, max_shape=img_shape)
             mlvl_bboxes.append(bboxes)
             mlvl_scores.append(scores)
-        mlvl_bboxes = torch.cat(mlvl_bboxes)
+        mlvl_bboxes = paddle.concat(mlvl_bboxes)
         if rescale:
             mlvl_bboxes /= mlvl_bboxes.new_tensor(scale_factor)
-        mlvl_scores = torch.cat(mlvl_scores)
+        mlvl_scores = paddle.concat(mlvl_scores)
         padding = mlvl_scores.new_zeros(mlvl_scores.shape[0], 1)
         # remind that we set FG labels to [0, num_class-1] since mmdet v2.0
         # BG cat_id: num_class
-        mlvl_scores = torch.cat([mlvl_scores, padding], dim=1)
+        mlvl_scores = paddle.concat([mlvl_scores, padding], dim=1)
         if with_nms:
             det_bboxes, det_labels = multiclass_nms(mlvl_bboxes, mlvl_scores,
                                                     cfg.score_thr, cfg.nms,
@@ -756,8 +756,8 @@ class VFNetHead(ATSSHead, FCOSHead):
         bbox_weights_list = [
             bbox_weights.reshape(-1) for bbox_weights in bbox_weights_list
         ]
-        label_weights = torch.cat(label_weights_list)
-        bbox_weights = torch.cat(bbox_weights_list)
+        label_weights = paddle.concat(label_weights_list)
+        bbox_weights = paddle.concat(bbox_weights_list)
         return labels_list, label_weights, bbox_targets_list, bbox_weights
 
     def transform_bbox_targets(self, decoded_bboxes, mlvl_points, num_imgs):

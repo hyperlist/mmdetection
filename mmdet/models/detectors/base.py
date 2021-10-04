@@ -4,8 +4,8 @@ from collections import OrderedDict
 
 import mmcv
 import numpy as np
-import torch
-import torch.distributed as dist
+import paddle
+import paddle.distributed as dist
 from mmcv.runner import BaseModule, auto_fp16
 
 from mmdet.core.visualization import imshow_det_bboxes

@@ -2,7 +2,7 @@
 import copy
 
 import numpy as np
-import torch
+import paddle
 
 from mmdet.utils.util_mixins import NiceRepr
 

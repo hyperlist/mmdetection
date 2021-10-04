@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 import pytest
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.runner import auto_fp16, force_fp32
 from mmcv.runner.fp16_utils import cast_tensor_type
 
@@ -52,7 +52,7 @@ def test_cast_tensor_type():
 def test_auto_fp16():
 
     with pytest.raises(TypeError):
-        # ExampleObject is not a subclass of nn.Module
+        # ExampleObject is not a subclass of nn.Layer
 
         class ExampleObject:
 
@@ -65,7 +65,7 @@ def test_auto_fp16():
         model(input_x)
 
     # apply to all input args
-    class ExampleModule(nn.Module):
+    class ExampleModule(nn.Layer):
 
         @auto_fp16()
         def forward(self, x, y):
@@ -90,7 +90,7 @@ def test_auto_fp16():
         assert output_y.dtype == torch.half
 
     # apply to specified input args
-    class ExampleModule(nn.Module):
+    class ExampleModule(nn.Layer):
 
         @auto_fp16(apply_to=('x', ))
         def forward(self, x, y):
@@ -115,7 +115,7 @@ def test_auto_fp16():
         assert output_y.dtype == torch.float32
 
     # apply to optional input args
-    class ExampleModule(nn.Module):
+    class ExampleModule(nn.Layer):
 
         @auto_fp16(apply_to=('x', 'y'))
         def forward(self, x, y=None, z=None):
@@ -145,7 +145,7 @@ def test_auto_fp16():
         assert output_z.dtype == torch.float32
 
     # out_fp32=True
-    class ExampleModule(nn.Module):
+    class ExampleModule(nn.Layer):
 
         @auto_fp16(apply_to=('x', 'y'), out_fp32=True)
         def forward(self, x, y=None, z=None):
@@ -178,7 +178,7 @@ def test_auto_fp16():
 def test_force_fp32():
 
     with pytest.raises(TypeError):
-        # ExampleObject is not a subclass of nn.Module
+        # ExampleObject is not a subclass of nn.Layer
 
         class ExampleObject:
 
@@ -191,7 +191,7 @@ def test_force_fp32():
         model(input_x)
 
     # apply to all input args
-    class ExampleModule(nn.Module):
+    class ExampleModule(nn.Layer):
 
         @force_fp32()
         def forward(self, x, y):
@@ -216,7 +216,7 @@ def test_force_fp32():
         assert output_y.dtype == torch.float32
 
     # apply to specified input args
-    class ExampleModule(nn.Module):
+    class ExampleModule(nn.Layer):
 
         @force_fp32(apply_to=('x', ))
         def forward(self, x, y):
@@ -241,7 +241,7 @@ def test_force_fp32():
         assert output_y.dtype == torch.half
 
     # apply to optional input args
-    class ExampleModule(nn.Module):
+    class ExampleModule(nn.Layer):
 
         @force_fp32(apply_to=('x', 'y'))
         def forward(self, x, y=None, z=None):
@@ -271,7 +271,7 @@ def test_force_fp32():
         assert output_z.dtype == torch.half
 
     # out_fp16=True
-    class ExampleModule(nn.Module):
+    class ExampleModule(nn.Layer):
 
         @force_fp32(apply_to=('x', 'y'), out_fp16=True)
         def forward(self, x, y=None, z=None):

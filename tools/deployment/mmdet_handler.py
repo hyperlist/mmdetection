@@ -3,7 +3,7 @@ import base64
 import os
 
 import mmcv
-import torch
+import paddle
 from ts.torch_handler.base_handler import BaseHandler
 
 from mmdet.apis import inference_detector, init_detector

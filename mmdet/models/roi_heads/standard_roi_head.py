@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.core import bbox2result, bbox2roi, build_assigner, build_sampler
 from ..builder import HEADS, build_head, build_roi_extractor
@@ -163,14 +163,14 @@ class StandardRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
                         res.neg_bboxes.shape[0],
                         device=device,
                         dtype=torch.uint8))
-            pos_inds = torch.cat(pos_inds)
+            pos_inds = paddle.concat(pos_inds)
 
             mask_results = self._mask_forward(
                 x, pos_inds=pos_inds, bbox_feats=bbox_feats)
 
         mask_targets = self.mask_head.get_targets(sampling_results, gt_masks,
                                                   self.train_cfg)
-        pos_labels = torch.cat([res.pos_gt_labels for res in sampling_results])
+        pos_labels = paddle.concat([res.pos_gt_labels for res in sampling_results])
         loss_mask = self.mask_head.loss(mask_results['mask_pred'],
                                         mask_targets, pos_labels)
 
@@ -331,7 +331,7 @@ class StandardRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
         batch_index = torch.arange(
             det_bboxes.size(0), device=det_bboxes.device).float().view(
                 -1, 1, 1).expand(det_bboxes.size(0), det_bboxes.size(1), 1)
-        mask_rois = torch.cat([batch_index, det_bboxes], dim=-1)
+        mask_rois = paddle.concat([batch_index, det_bboxes], dim=-1)
         mask_rois = mask_rois.view(-1, 5)
         mask_results = self._mask_forward(x, mask_rois)
         mask_pred = mask_results['mask_pred']
@@ -373,7 +373,7 @@ class StandardRoIHead(BaseRoIHead, BBoxTestMixin, MaskTestMixin):
             rois.size(0), device=rois.device).float().view(-1, 1, 1).expand(
                 rois.size(0), rois.size(1), 1)
 
-        rois = torch.cat([batch_index, rois[..., :4]], dim=-1)
+        rois = paddle.concat([batch_index, rois[..., :4]], dim=-1)
         batch_size = rois.shape[0]
         num_proposals_per_img = rois.shape[1]
 

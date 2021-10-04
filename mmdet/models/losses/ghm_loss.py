@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 
 from ..builder import LOSSES
 from .utils import weight_reduce_loss
@@ -20,7 +20,7 @@ def _expand_onehot_labels(labels, label_weights, label_channels):
 
 # TODO: code refactoring to make it consistent with other losses
 @LOSSES.register_module()
-class GHMC(nn.Module):
+class GHMC(nn.Layer):
     """GHM Classification Loss.
 
     Details of the theorem can be viewed in the paper
@@ -119,7 +119,7 @@ class GHMC(nn.Module):
 
 # TODO: code refactoring to make it consistent with other losses
 @LOSSES.register_module()
-class GHMR(nn.Module):
+class GHMR(nn.Layer):
     """GHM Regression Loss.
 
     Details of the theorem can be viewed in the paper

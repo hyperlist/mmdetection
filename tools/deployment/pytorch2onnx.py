@@ -6,7 +6,7 @@ from functools import partial
 
 import numpy as np
 import onnx
-import torch
+import paddle
 from mmcv import Config, DictAction
 
 from mmdet.core.export import build_model_from_cfg, preprocess_example_input

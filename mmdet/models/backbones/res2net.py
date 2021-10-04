@@ -1,9 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import math
 
-import torch
-import torch.nn as nn
-import torch.utils.checkpoint as cp
+import paddle
+import paddle.nn as nn
+import paddle.utils.checkpoint as cp
 from mmcv.cnn import build_conv_layer, build_norm_layer
 from mmcv.runner import Sequential
 
@@ -44,7 +44,7 @@ class Bottle2neck(_Bottleneck):
             kernel_size=1,
             stride=self.conv1_stride,
             bias=False)
-        self.add_module(self.norm1_name, norm1)
+        self.add_sublayer(self.norm1_name, norm1)
 
         if stage_type == 'stage' and self.conv2_stride != 1:
             self.pool = nn.AvgPool2d(
@@ -69,8 +69,8 @@ class Bottle2neck(_Bottleneck):
                         bias=False))
                 bns.append(
                     build_norm_layer(self.norm_cfg, width, postfix=i + 1)[1])
-            self.convs = nn.ModuleList(convs)
-            self.bns = nn.ModuleList(bns)
+            self.convs = nn.LayerList(convs)
+            self.bns = nn.LayerList(bns)
         else:
             assert self.conv_cfg is None, 'conv_cfg must be None for DCN'
             for i in range(scales - 1):
@@ -86,8 +86,8 @@ class Bottle2neck(_Bottleneck):
                         bias=False))
                 bns.append(
                     build_norm_layer(self.norm_cfg, width, postfix=i + 1)[1])
-            self.convs = nn.ModuleList(convs)
-            self.bns = nn.ModuleList(bns)
+            self.convs = nn.LayerList(convs)
+            self.bns = nn.LayerList(bns)
 
         self.conv3 = build_conv_layer(
             self.conv_cfg,
@@ -95,7 +95,7 @@ class Bottle2neck(_Bottleneck):
             self.planes * self.expansion,
             kernel_size=1,
             bias=False)
-        self.add_module(self.norm3_name, norm3)
+        self.add_sublayer(self.norm3_name, norm3)
 
         self.stage_type = stage_type
         self.scales = scales
@@ -127,12 +127,12 @@ class Bottle2neck(_Bottleneck):
                     sp = sp + spx[i]
                 sp = self.convs[i](sp.contiguous())
                 sp = self.relu(self.bns[i](sp))
-                out = torch.cat((out, sp), 1)
+                out = paddle.concat((out, sp), 1)
 
             if self.stage_type == 'normal' or self.conv2_stride == 1:
-                out = torch.cat((out, spx[self.scales - 1]), 1)
+                out = paddle.concat((out, spx[self.scales - 1]), 1)
             elif self.stage_type == 'stage':
-                out = torch.cat((out, self.pool(spx[self.scales - 1])), 1)
+                out = paddle.concat((out, self.pool(spx[self.scales - 1])), 1)
 
             if self.with_plugins:
                 out = self.forward_plugin(out, self.after_conv2_plugin_names)
@@ -164,7 +164,7 @@ class Res2Layer(Sequential):
     """Res2Layer to build Res2Net style backbone.
 
     Args:
-        block (nn.Module): block used to build ResLayer.
+        block (nn.Layer): block used to build ResLayer.
         inplanes (int): inplanes of block.
         planes (int): planes of block.
         num_blocks (int): number of blocks.
@@ -281,7 +281,7 @@ class Res2Net(ResNet):
 
     Example:
         >>> from mmdet.models import Res2Net
-        >>> import torch
+        >>> import paddle
         >>> self = Res2Net(depth=50, scales=4, base_width=26)
         >>> self.eval()
         >>> inputs = torch.rand(1, 3, 32, 32)

@@ -3,7 +3,7 @@ import contextlib
 import sys
 import time
 
-import torch
+import paddle
 
 if sys.version_info >= (3, 7):
 

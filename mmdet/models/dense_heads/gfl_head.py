@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule, Scale
 from mmcv.runner import force_fp32
 
@@ -13,7 +13,7 @@ from ..builder import HEADS, build_loss
 from .anchor_head import AnchorHead
 
 
-class Integral(nn.Module):
+class Integral(nn.Layer):
     """A fixed layer for calculating integral result from distribution.
 
     This layer calculates the target location by :math: `sum{P(y_i) * y_i}`,
@@ -121,8 +121,8 @@ class GFLHead(AnchorHead):
     def _init_layers(self):
         """Initialize layers of the head."""
         self.relu = nn.ReLU(inplace=True)
-        self.cls_convs = nn.ModuleList()
-        self.reg_convs = nn.ModuleList()
+        self.cls_convs = nn.LayerList()
+        self.reg_convs = nn.LayerList()
         for i in range(self.stacked_convs):
             chn = self.in_channels if i == 0 else self.feat_channels
             self.cls_convs.append(
@@ -148,7 +148,7 @@ class GFLHead(AnchorHead):
             self.feat_channels, self.cls_out_channels, 3, padding=1)
         self.gfl_reg = nn.Conv2d(
             self.feat_channels, 4 * (self.reg_max + 1), 3, padding=1)
-        self.scales = nn.ModuleList(
+        self.scales = nn.LayerList(
             [Scale(1.0) for _ in self.anchor_generator.strides])
 
     def forward(self, feats):
@@ -443,18 +443,18 @@ class GFLHead(AnchorHead):
             mlvl_bboxes.append(bboxes)
             mlvl_scores.append(scores)
 
-        batch_mlvl_bboxes = torch.cat(mlvl_bboxes, dim=1)
+        batch_mlvl_bboxes = paddle.concat(mlvl_bboxes, dim=1)
         if rescale:
             batch_mlvl_bboxes /= batch_mlvl_bboxes.new_tensor(
                 scale_factors).unsqueeze(1)
 
-        batch_mlvl_scores = torch.cat(mlvl_scores, dim=1)
+        batch_mlvl_scores = paddle.concat(mlvl_scores, dim=1)
         # Add a dummy background class to the backend when using sigmoid
         # remind that we set FG labels to [0, num_class-1] since mmdet v2.0
         # BG cat_id: num_class
         padding = batch_mlvl_scores.new_zeros(batch_size,
                                               batch_mlvl_scores.shape[1], 1)
-        batch_mlvl_scores = torch.cat([batch_mlvl_scores, padding], dim=-1)
+        batch_mlvl_scores = paddle.concat([batch_mlvl_scores, padding], dim=-1)
 
         if with_nms:
             det_results = []
@@ -496,8 +496,8 @@ class GFLHead(AnchorHead):
         # concat all level anchors and flags to a single tensor
         for i in range(num_imgs):
             assert len(anchor_list[i]) == len(valid_flag_list[i])
-            anchor_list[i] = torch.cat(anchor_list[i])
-            valid_flag_list[i] = torch.cat(valid_flag_list[i])
+            anchor_list[i] = paddle.concat(anchor_list[i])
+            valid_flag_list[i] = paddle.concat(valid_flag_list[i])
 
         # compute targets for each image
         if gt_bboxes_ignore_list is None:

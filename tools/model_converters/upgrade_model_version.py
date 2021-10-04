@@ -4,7 +4,7 @@ import re
 import tempfile
 from collections import OrderedDict
 
-import torch
+import paddle
 from mmcv import Config
 
 
@@ -46,18 +46,18 @@ def parse_config(config_strings):
 def reorder_cls_channel(val, num_classes=81):
     # bias
     if val.dim() == 1:
-        new_val = torch.cat((val[1:], val[:1]), dim=0)
+        new_val = paddle.concat((val[1:], val[:1]), dim=0)
     # weight
     else:
         out_channels, in_channels = val.shape[:2]
         # conv_cls for softmax output
         if out_channels != num_classes and out_channels % num_classes == 0:
             new_val = val.reshape(-1, num_classes, in_channels, *val.shape[2:])
-            new_val = torch.cat((new_val[:, 1:], new_val[:, :1]), dim=1)
+            new_val = paddle.concat((new_val[:, 1:], new_val[:, :1]), dim=1)
             new_val = new_val.reshape(val.size())
         # fc_cls
         elif out_channels == num_classes:
-            new_val = torch.cat((val[1:], val[:1]), dim=0)
+            new_val = paddle.concat((val[1:], val[:1]), dim=0)
         # agnostic | retina_cls | rpn_cls
         else:
             new_val = val

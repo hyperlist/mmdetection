@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import bias_init_with_prob, normal_init
 from mmcv.ops import batched_nms
 from mmcv.runner import force_fp32
@@ -218,7 +218,7 @@ class CenterNetHead(BaseDenseHead, BBoxTestMixin):
             gt_label = gt_labels[batch_id]
             center_x = (gt_bbox[:, [0]] + gt_bbox[:, [2]]) * width_ratio / 2
             center_y = (gt_bbox[:, [1]] + gt_bbox[:, [3]]) * height_ratio / 2
-            gt_centers = torch.cat((center_x, center_y), dim=1)
+            gt_centers = paddle.concat((center_x, center_y), dim=1)
 
             for j, ct in enumerate(gt_centers):
                 ctx_int, cty_int = ct.int()
@@ -360,7 +360,7 @@ class CenterNetHead(BaseDenseHead, BBoxTestMixin):
         br_y = (topk_ys + wh[..., 1] / 2) * (inp_h / height)
 
         batch_bboxes = torch.stack([tl_x, tl_y, br_x, br_y], dim=2)
-        batch_bboxes = torch.cat((batch_bboxes, batch_scores[..., None]),
+        batch_bboxes = paddle.concat((batch_bboxes, batch_scores[..., None]),
                                  dim=-1)
         return batch_bboxes, batch_topk_labels
 

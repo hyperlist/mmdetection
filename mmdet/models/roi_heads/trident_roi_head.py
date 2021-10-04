@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 from mmcv.ops import batched_nms
 
 from mmdet.core import (bbox2result, bbox2roi, bbox_mapping, merge_aug_bboxes,
@@ -66,9 +66,9 @@ class TridentRoIHead(StandardRoIHead):
         det_bboxes, det_labels = [], []
         for i in range(len(img_metas) // num_branch):
             det_result = self.merge_trident_bboxes(
-                torch.cat(det_bboxes_list[i * num_branch:(i + 1) *
+                paddle.concat(det_bboxes_list[i * num_branch:(i + 1) *
                                           num_branch]),
-                torch.cat(det_labels_list[i * num_branch:(i + 1) *
+                paddle.concat(det_labels_list[i * num_branch:(i + 1) *
                                           num_branch]))
             det_bboxes.append(det_result[0])
             det_labels.append(det_result[1])
@@ -108,8 +108,8 @@ class TridentRoIHead(StandardRoIHead):
                 trident_bboxes.append(bboxes)
                 trident_scores.append(scores)
 
-            aug_bboxes.append(torch.cat(trident_bboxes, 0))
-            aug_scores.append(torch.cat(trident_scores, 0))
+            aug_bboxes.append(paddle.concat(trident_bboxes, 0))
+            aug_scores.append(paddle.concat(trident_scores, 0))
         # after merging, bboxes will be rescaled to the original image size
         merged_bboxes, merged_scores = merge_aug_bboxes(
             aug_bboxes, aug_scores, img_metas, rcnn_test_cfg)

@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import (bias_init_with_prob, build_activation_layer,
                       build_norm_layer)
 from mmcv.cnn.bricks.transformer import FFN, MultiheadAttention
@@ -91,7 +91,7 @@ class DIIHead(BBoxHead):
             dropout=dropout)
         self.ffn_norm = build_norm_layer(dict(type='LN'), in_channels)[1]
 
-        self.cls_fcs = nn.ModuleList()
+        self.cls_fcs = nn.LayerList()
         for _ in range(num_cls_fcs):
             self.cls_fcs.append(
                 nn.Linear(in_channels, in_channels, bias=False))
@@ -106,7 +106,7 @@ class DIIHead(BBoxHead):
         else:
             self.fc_cls = nn.Linear(in_channels, self.num_classes + 1)
 
-        self.reg_fcs = nn.ModuleList()
+        self.reg_fcs = nn.LayerList()
         for _ in range(num_reg_fcs):
             self.reg_fcs.append(
                 nn.Linear(in_channels, in_channels, bias=False))
@@ -415,8 +415,8 @@ class DIIHead(BBoxHead):
             pos_gt_labels_list,
             cfg=rcnn_train_cfg)
         if concat:
-            labels = torch.cat(labels, 0)
-            label_weights = torch.cat(label_weights, 0)
-            bbox_targets = torch.cat(bbox_targets, 0)
-            bbox_weights = torch.cat(bbox_weights, 0)
+            labels = paddle.concat(labels, 0)
+            label_weights = paddle.concat(label_weights, 0)
+            bbox_targets = paddle.concat(bbox_targets, 0)
+            bbox_weights = paddle.concat(bbox_weights, 0)
         return labels, label_weights, bbox_targets, bbox_weights

@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
 import numpy as np
-import torch
+import paddle
 
 from ..builder import BBOX_CODERS
 from .base_bbox_coder import BaseBBoxCoder

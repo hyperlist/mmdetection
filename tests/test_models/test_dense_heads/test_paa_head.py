@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
 import numpy as np
-import torch
+import paddle
 
 from mmdet.models.dense_heads import PAAHead, paa_head
 from mmdet.models.dense_heads.paa_head import levels_to_images

@@ -1,8 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 
-import torch
-import torch.nn.functional as F
+import paddle
 
 from ..builder import BBOX_ASSIGNERS
 from ..iou_calculators import bbox_overlaps

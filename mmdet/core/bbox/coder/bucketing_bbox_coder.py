@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
 import numpy as np
-import torch
-import torch.nn.functional as F
+import paddle
+
 
 from ..builder import BBOX_CODERS
 from ..transforms import bbox_rescale
@@ -233,8 +233,8 @@ def bbox2bucket(proposals,
             offset_t_weights[inds, t_label[:, k]] = 1.0
             offset_d_weights[inds, d_label[:, k]] = 1.0
 
-    offsets = torch.cat([l_offsets, r_offsets, t_offsets, d_offsets], dim=-1)
-    offsets_weights = torch.cat([
+    offsets = paddle.concat([l_offsets, r_offsets, t_offsets, d_offsets], dim=-1)
+    offsets_weights = paddle.concat([
         offset_l_weights, offset_r_weights, offset_t_weights, offset_d_weights
     ],
                                 dim=-1)
@@ -251,7 +251,7 @@ def bbox2bucket(proposals,
     bucket_cls_r_weights = (r_offsets.abs() < 1).float()
     bucket_cls_t_weights = (t_offsets.abs() < 1).float()
     bucket_cls_d_weights = (d_offsets.abs() < 1).float()
-    bucket_cls_weights = torch.cat([
+    bucket_cls_weights = paddle.concat([
         bucket_cls_l_weights, bucket_cls_r_weights, bucket_cls_t_weights,
         bucket_cls_d_weights
     ],
@@ -339,7 +339,7 @@ def bucket2bbox(proposals,
         y1 = y1.clamp(min=0, max=max_shape[0] - 1)
         x2 = x2.clamp(min=0, max=max_shape[1] - 1)
         y2 = y2.clamp(min=0, max=max_shape[0] - 1)
-    bboxes = torch.cat([x1[:, None], y1[:, None], x2[:, None], y2[:, None]],
+    bboxes = paddle.concat([x1[:, None], y1[:, None], x2[:, None], y2[:, None]],
                        dim=-1)
 
     # bucketing guided rescoring

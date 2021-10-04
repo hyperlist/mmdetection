@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
-import torch.nn.functional as F
+import paddle
+
 
 from mmdet.core import (bbox2result, bbox2roi, bbox_mapping, merge_aug_bboxes,
                         merge_aug_masks, multiclass_nms)
@@ -196,7 +196,7 @@ class SCNetRoIHead(CascadeRoIHead):
 
         mask_targets = self.mask_head.get_targets(sampling_results, gt_masks,
                                                   rcnn_train_cfg)
-        pos_labels = torch.cat([res.pos_gt_labels for res in sampling_results])
+        pos_labels = paddle.concat([res.pos_gt_labels for res in sampling_results])
         loss_mask = self.mask_head.loss(mask_results['mask_pred'],
                                         mask_targets, pos_labels)
 
@@ -397,7 +397,7 @@ class SCNetRoIHead(CascadeRoIHead):
                         refine_rois = bbox_head.regress_by_class(
                             rois[j], bbox_label, bbox_pred[j], img_metas[j])
                         refine_rois_list.append(refine_rois)
-                rois = torch.cat(refine_rois_list)
+                rois = paddle.concat(refine_rois_list)
 
         # average scores of each image by stages
         cls_score = [

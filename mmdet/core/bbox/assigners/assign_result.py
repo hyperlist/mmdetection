@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.utils import util_mixins
 
@@ -196,10 +196,10 @@ class AssignResult(util_mixins.NiceRepr):
         """
         self_inds = torch.arange(
             1, len(gt_labels) + 1, dtype=torch.long, device=gt_labels.device)
-        self.gt_inds = torch.cat([self_inds, self.gt_inds])
+        self.gt_inds = paddle.concat([self_inds, self.gt_inds])
 
-        self.max_overlaps = torch.cat(
+        self.max_overlaps = paddle.concat(
             [self.max_overlaps.new_ones(len(gt_labels)), self.max_overlaps])
 
         if self.labels is not None:
-            self.labels = torch.cat([gt_labels, self.labels])
+            self.labels = paddle.concat([gt_labels, self.labels])

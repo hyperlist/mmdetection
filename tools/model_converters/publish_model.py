@@ -2,7 +2,7 @@
 import argparse
 import subprocess
 
-import torch
+import paddle
 
 
 def parse_args():

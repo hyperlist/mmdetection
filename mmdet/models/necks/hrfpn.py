@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 from torch.utils.checkpoint import checkpoint
@@ -57,7 +57,7 @@ class HRFPN(BaseModule):
             conv_cfg=self.conv_cfg,
             act_cfg=None)
 
-        self.fpn_convs = nn.ModuleList()
+        self.fpn_convs = nn.LayerList()
         for i in range(self.num_outs):
             self.fpn_convs.append(
                 ConvModule(
@@ -81,7 +81,7 @@ class HRFPN(BaseModule):
         for i in range(1, self.num_ins):
             outs.append(
                 F.interpolate(inputs[i], scale_factor=2**i, mode='bilinear'))
-        out = torch.cat(outs, dim=1)
+        out = paddle.concat(outs, dim=1)
         if out.requires_grad and self.with_cp:
             out = checkpoint(self.reduction_conv, out)
         else:

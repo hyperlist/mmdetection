@@ -3,8 +3,8 @@ import math
 import warnings
 
 import mmcv
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 
 from mmdet.core import bbox_overlaps
 from ..builder import LOSSES
@@ -238,7 +238,7 @@ def ciou_loss(pred, target, eps=1e-7):
 
 
 @LOSSES.register_module()
-class IoULoss(nn.Module):
+class IoULoss(nn.Layer):
     """IoULoss.
 
     Computing the IoU loss between a set of predicted bboxes and target bboxes.
@@ -319,7 +319,7 @@ class IoULoss(nn.Module):
 
 
 @LOSSES.register_module()
-class BoundedIoULoss(nn.Module):
+class BoundedIoULoss(nn.Layer):
 
     def __init__(self, beta=0.2, eps=1e-3, reduction='mean', loss_weight=1.0):
         super(BoundedIoULoss, self).__init__()
@@ -355,7 +355,7 @@ class BoundedIoULoss(nn.Module):
 
 
 @LOSSES.register_module()
-class GIoULoss(nn.Module):
+class GIoULoss(nn.Layer):
 
     def __init__(self, eps=1e-6, reduction='mean', loss_weight=1.0):
         super(GIoULoss, self).__init__()
@@ -395,7 +395,7 @@ class GIoULoss(nn.Module):
 
 
 @LOSSES.register_module()
-class DIoULoss(nn.Module):
+class DIoULoss(nn.Layer):
 
     def __init__(self, eps=1e-6, reduction='mean', loss_weight=1.0):
         super(DIoULoss, self).__init__()
@@ -435,7 +435,7 @@ class DIoULoss(nn.Module):
 
 
 @LOSSES.register_module()
-class CIoULoss(nn.Module):
+class CIoULoss(nn.Layer):
 
     def __init__(self, eps=1e-6, reduction='mean', loss_weight=1.0):
         super(CIoULoss, self).__init__()

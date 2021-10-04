@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 
 from ..builder import LOSSES
 from .accuracy import accuracy
@@ -77,7 +77,7 @@ def seesaw_ce_loss(cls_score,
 
 
 @LOSSES.register_module()
-class SeesawLoss(nn.Module):
+class SeesawLoss(nn.Layer):
     """
     Seesaw Loss for Long-Tailed Instance Segmentation (CVPR 2021)
     arXiv: https://arxiv.org/abs/2008.10032
@@ -171,7 +171,7 @@ class SeesawLoss(nn.Module):
         score_pos = score_objectness[..., [0]]
         score_neg = score_objectness[..., [1]]
         score_classes = score_classes * score_pos
-        scores = torch.cat([score_classes, score_neg], dim=-1)
+        scores = paddle.concat([score_classes, score_neg], dim=-1)
         return scores
 
     def get_accuracy(self, cls_score, labels):

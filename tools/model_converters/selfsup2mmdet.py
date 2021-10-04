@@ -2,7 +2,7 @@
 import argparse
 from collections import OrderedDict
 
-import torch
+import paddle
 
 
 def moco_convert(src, dst):

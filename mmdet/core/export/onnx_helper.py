@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import os
 
-import torch
+import paddle
 
 
 def dynamic_clip_for_onnx(x1, y1, x2, y2, max_shape):
@@ -148,7 +148,7 @@ def add_dummy_nms_for_onnx(boxes,
     batch_inds = torch.randint(batch_size, (num_fake_det, 1))
     cls_inds = torch.randint(num_class, (num_fake_det, 1))
     box_inds = torch.randint(num_box, (num_fake_det, 1))
-    indices = torch.cat([batch_inds, cls_inds, box_inds], dim=1)
+    indices = paddle.concat([batch_inds, cls_inds, box_inds], dim=1)
     output = indices
     setattr(DummyONNXNMSop, 'output', output)
 
@@ -194,7 +194,7 @@ def add_dummy_nms_for_onnx(boxes,
             batch_size, -1)
 
     scores = scores.unsqueeze(2)
-    dets = torch.cat([boxes, scores], dim=2)
+    dets = paddle.concat([boxes, scores], dim=2)
     return dets, labels
 
 

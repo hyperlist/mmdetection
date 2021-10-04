@@ -3,7 +3,7 @@ import warnings
 
 import mmcv
 import numpy as np
-import torch
+import paddle
 from torch.nn.modules.utils import _pair
 
 from .builder import PRIOR_GENERATORS

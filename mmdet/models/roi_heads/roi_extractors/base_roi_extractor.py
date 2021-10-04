@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from abc import ABCMeta, abstractmethod
 
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv import ops
 from mmcv.runner import BaseModule
 
@@ -55,7 +55,7 @@ class BaseRoIExtractor(BaseModule, metaclass=ABCMeta):
         layer_type = cfg.pop('type')
         assert hasattr(ops, layer_type)
         layer_cls = getattr(ops, layer_type)
-        roi_layers = nn.ModuleList(
+        roi_layers = nn.LayerList(
             [layer_cls(spatial_scale=1 / s, **cfg) for s in featmap_strides])
         return roi_layers
 

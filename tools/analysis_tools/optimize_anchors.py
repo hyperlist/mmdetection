@@ -23,7 +23,7 @@ import os.path as osp
 
 import mmcv
 import numpy as np
-import torch
+import paddle
 from mmcv import Config
 from scipy.optimize import differential_evolution
 
@@ -131,7 +131,7 @@ class BaseAnchorOptimizer:
         whs = torch.from_numpy(self.bbox_whs).to(
             self.device, dtype=torch.float32)
         bboxes = bbox_cxcywh_to_xyxy(
-            torch.cat([torch.zeros_like(whs), whs], dim=1))
+            paddle.concat([torch.zeros_like(whs), whs], dim=1))
         return bboxes
 
     def optimize(self):
@@ -312,7 +312,7 @@ class YOLODEAnchorOptimizer(BaseAnchorOptimizer):
              for w, h in zip(anchor_params[::2], anchor_params[1::2])]).to(
                  bboxes.device, dtype=bboxes.dtype)
         anchor_boxes = bbox_cxcywh_to_xyxy(
-            torch.cat([torch.zeros_like(anchor_whs), anchor_whs], dim=1))
+            paddle.concat([torch.zeros_like(anchor_whs), anchor_whs], dim=1))
         ious = bbox_overlaps(bboxes, anchor_boxes)
         max_ious, _ = ious.max(1)
         cost = 1 - max_ious.mean().item()

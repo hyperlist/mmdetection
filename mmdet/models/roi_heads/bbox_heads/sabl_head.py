@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule, force_fp32
 
@@ -134,7 +134,7 @@ class SABLHead(BaseModule):
                 self.reg_feat_up_ratio,
                 stride=self.reg_feat_up_ratio)
 
-        self.reg_pre_convs = nn.ModuleList()
+        self.reg_pre_convs = nn.LayerList()
         for i in range(self.reg_pre_num):
             reg_pre_conv = ConvModule(
                 reg_in_channels,
@@ -145,7 +145,7 @@ class SABLHead(BaseModule):
                 act_cfg=dict(type='ReLU'))
             self.reg_pre_convs.append(reg_pre_conv)
 
-        self.reg_post_conv_xs = nn.ModuleList()
+        self.reg_post_conv_xs = nn.LayerList()
         for i in range(self.reg_post_num):
             reg_post_conv_x = ConvModule(
                 reg_in_channels,
@@ -155,7 +155,7 @@ class SABLHead(BaseModule):
                 norm_cfg=norm_cfg,
                 act_cfg=dict(type='ReLU'))
             self.reg_post_conv_xs.append(reg_post_conv_x)
-        self.reg_post_conv_ys = nn.ModuleList()
+        self.reg_post_conv_ys = nn.LayerList()
         for i in range(self.reg_post_num):
             reg_post_conv_y = ConvModule(
                 reg_in_channels,
@@ -209,7 +209,7 @@ class SABLHead(BaseModule):
     def _add_fc_branch(self, num_branch_fcs, in_channels, roi_feat_size,
                        fc_out_channels):
         in_channels = in_channels * roi_feat_size * roi_feat_size
-        branch_fcs = nn.ModuleList()
+        branch_fcs = nn.LayerList()
         for i in range(num_branch_fcs):
             fc_in_channels = (in_channels if i == 0 else fc_out_channels)
             branch_fcs.append(nn.Linear(fc_in_channels, fc_out_channels))
@@ -283,7 +283,7 @@ class SABLHead(BaseModule):
         feat_fr = feat[:, r_start:].flip(dims=(1, ))
         feat_fl = feat_fl.contiguous()
         feat_fr = feat_fr.contiguous()
-        feat = torch.cat([feat_fl, feat_fr], dim=-1)
+        feat = paddle.concat([feat_fl, feat_fr], dim=-1)
         return feat
 
     def bbox_pred_split(self, bbox_pred, num_proposals_per_img):
@@ -309,8 +309,8 @@ class SABLHead(BaseModule):
         offset_pred_y = self.side_aware_split(offset_pred_y)
         cls_pred_x = self.side_aware_split(cls_pred_x)
         cls_pred_y = self.side_aware_split(cls_pred_y)
-        edge_offset_preds = torch.cat([offset_pred_x, offset_pred_y], dim=-1)
-        edge_cls_preds = torch.cat([cls_pred_x, cls_pred_y], dim=-1)
+        edge_offset_preds = paddle.concat([offset_pred_x, offset_pred_y], dim=-1)
+        edge_cls_preds = paddle.concat([cls_pred_x, cls_pred_y], dim=-1)
 
         return (edge_cls_preds, edge_offset_preds)
 
@@ -353,12 +353,12 @@ class SABLHead(BaseModule):
              cfg=rcnn_train_cfg)
 
         if concat:
-            labels = torch.cat(labels, 0)
-            label_weights = torch.cat(label_weights, 0)
-            bucket_cls_targets = torch.cat(bucket_cls_targets, 0)
-            bucket_cls_weights = torch.cat(bucket_cls_weights, 0)
-            bucket_offset_targets = torch.cat(bucket_offset_targets, 0)
-            bucket_offset_weights = torch.cat(bucket_offset_weights, 0)
+            labels = paddle.concat(labels, 0)
+            label_weights = paddle.concat(label_weights, 0)
+            bucket_cls_targets = paddle.concat(bucket_cls_targets, 0)
+            bucket_cls_weights = paddle.concat(bucket_cls_weights, 0)
+            bucket_offset_targets = paddle.concat(bucket_offset_targets, 0)
+            bucket_offset_weights = paddle.concat(bucket_offset_weights, 0)
         return (labels, label_weights, bucket_cls_targets, bucket_cls_weights,
                 bucket_offset_targets, bucket_offset_weights)
 
@@ -579,6 +579,6 @@ class SABLHead(BaseModule):
         else:
             bboxes, _ = self.bbox_coder.decode(rois[:, 1:], bbox_pred,
                                                img_meta['img_shape'])
-            new_rois = torch.cat((rois[:, [0]], bboxes), dim=1)
+            new_rois = paddle.concat((rois[:, [0]], bboxes), dim=1)
 
         return new_rois

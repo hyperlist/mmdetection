@@ -5,7 +5,7 @@ CommandLine:
     pytest tests/test_utils/test_assigner.py
     xdoctest tests/test_utils/test_assigner.py zero
 """
-import torch
+import paddle
 
 from mmdet.core.bbox.assigners import (ApproxMaxIoUAssigner,
                                        CenterRegionAssigner, HungarianAssigner,

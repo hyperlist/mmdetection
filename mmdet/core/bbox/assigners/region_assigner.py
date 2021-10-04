@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 
 from mmdet.core import anchor_inside_flags
 from ..builder import BBOX_ASSIGNERS
@@ -199,9 +199,9 @@ class RegionAssigner(BaseAssigner):
             mlvl_assigned_gt_inds[lvl][ignore_flags] = -1
 
         # 5. Assign -1 to anchor outside of image
-        flat_assigned_gt_inds = torch.cat(mlvl_assigned_gt_inds)
-        flat_anchors = torch.cat(mlvl_anchors)
-        flat_valid_flags = torch.cat(mlvl_valid_flags)
+        flat_assigned_gt_inds = paddle.concat(mlvl_assigned_gt_inds)
+        flat_anchors = paddle.concat(mlvl_anchors)
+        flat_valid_flags = paddle.concat(mlvl_valid_flags)
         assert (flat_assigned_gt_inds.shape[0] == flat_anchors.shape[0] ==
                 flat_valid_flags.shape[0])
         inside_flags = anchor_inside_flags(flat_anchors, flat_valid_flags,

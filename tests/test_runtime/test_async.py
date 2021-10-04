@@ -7,7 +7,7 @@ import sys
 
 import asynctest
 import mmcv
-import torch
+import paddle
 
 from mmdet.apis import async_inference_detector, init_detector
 

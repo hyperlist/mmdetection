@@ -2,7 +2,7 @@
 import warnings
 
 import numpy as np
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import build_conv_layer, build_norm_layer
 
 from ..builder import BACKBONES
@@ -49,7 +49,7 @@ class RegNet(ResNet):
 
     Example:
         >>> from mmdet.models import RegNet
-        >>> import torch
+        >>> import paddle
         >>> self = RegNet(
                 arch=dict(
                     w0=88,
@@ -227,7 +227,7 @@ class RegNet(ResNet):
                 init_cfg=block_init_cfg)
             self.inplanes = self.stage_widths[i]
             layer_name = f'layer{i + 1}'
-            self.add_module(layer_name, res_layer)
+            self.add_sublayer(layer_name, res_layer)
             self.res_layers.append(layer_name)
 
         self._freeze_stages()
@@ -246,7 +246,7 @@ class RegNet(ResNet):
             bias=False)
         self.norm1_name, norm1 = build_norm_layer(
             self.norm_cfg, base_channels, postfix=1)
-        self.add_module(self.norm1_name, norm1)
+        self.add_sublayer(self.norm1_name, norm1)
         self.relu = nn.ReLU(inplace=True)
 
     def generate_regnet(self,

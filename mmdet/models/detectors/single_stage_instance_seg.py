@@ -4,7 +4,7 @@ import warnings
 
 import mmcv
 import numpy as np
-import torch
+import paddle
 
 from mmdet.core.visualization.image import imshow_det_bboxes
 from ..builder import DETECTORS, build_backbone, build_head, build_neck
@@ -233,7 +233,7 @@ class SingleStageInstanceSegmentor(BaseDetector):
             # creat dummy bbox results to store the scores
             results.bboxes = results.scores.new_zeros(len(results), 4)
 
-        det_bboxes = torch.cat([results.bboxes, results.scores[:, None]],
+        det_bboxes = paddle.concat([results.bboxes, results.scores[:, None]],
                                dim=-1)
         det_bboxes = det_bboxes.detach().cpu().numpy()
         bbox_results = [

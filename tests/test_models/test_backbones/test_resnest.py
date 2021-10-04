@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import pytest
-import torch
+import paddle
 
 from mmdet.models.backbones import ResNeSt
 from mmdet.models.backbones.resnest import Bottleneck as BottleneckS

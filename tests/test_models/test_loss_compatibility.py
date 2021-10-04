@@ -5,7 +5,7 @@ from os.path import dirname, exists, join
 
 import numpy as np
 import pytest
-import torch
+import paddle
 
 
 def _get_config_directory():

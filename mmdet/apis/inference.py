@@ -3,7 +3,7 @@ import warnings
 
 import mmcv
 import numpy as np
-import torch
+import paddle
 from mmcv.ops import RoIPool
 from mmcv.parallel import collate, scatter
 from mmcv.runner import load_checkpoint
@@ -26,7 +26,7 @@ def init_detector(config, checkpoint=None, device='cuda:0', cfg_options=None):
             config.
 
     Returns:
-        nn.Module: The constructed detector.
+        nn.Layer: The constructed detector.
     """
     if isinstance(config, str):
         config = mmcv.Config.fromfile(config)
@@ -91,7 +91,7 @@ def inference_detector(model, imgs):
     """Inference image(s) with the detector.
 
     Args:
-        model (nn.Module): The loaded detector.
+        model (nn.Layer): The loaded detector.
         imgs (str/ndarray or list[str/ndarray] or tuple[str/ndarray]):
            Either image files or loaded images.
 
@@ -157,7 +157,7 @@ async def async_inference_detector(model, imgs):
     """Async inference image(s) with the detector.
 
     Args:
-        model (nn.Module): The loaded detector.
+        model (nn.Layer): The loaded detector.
         img (str | ndarray): Either image files or loaded images.
 
     Returns:
@@ -219,7 +219,7 @@ def show_result_pyplot(model,
     """Visualize the detection results on the image.
 
     Args:
-        model (nn.Module): The loaded detector.
+        model (nn.Layer): The loaded detector.
         img (str or np.ndarray): Image filename or loaded image.
         result (tuple[list] or list): The detection result, can be either
             (bbox, segm) or just bbox.

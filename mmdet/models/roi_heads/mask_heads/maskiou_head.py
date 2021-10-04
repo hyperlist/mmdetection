@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
-import torch.nn as nn
-from mmcv.cnn import Conv2d, Linear, MaxPool2d
+import paddle
+import paddle.nn as nn
+from mmcv.cnn import Conv2d, Linear, MaxPool2D
 from mmcv.runner import BaseModule, force_fp32
 from torch.nn.modules.utils import _pair
 
@@ -40,7 +40,7 @@ class MaskIoUHead(BaseModule):
         self.num_classes = num_classes
         self.fp16_enabled = False
 
-        self.convs = nn.ModuleList()
+        self.convs = nn.LayerList()
         for i in range(num_convs):
             if i == 0:
                 # concatenation of mask feature and mask prediction
@@ -58,7 +58,7 @@ class MaskIoUHead(BaseModule):
 
         roi_feat_size = _pair(roi_feat_size)
         pooled_area = (roi_feat_size[0] // 2) * (roi_feat_size[1] // 2)
-        self.fcs = nn.ModuleList()
+        self.fcs = nn.LayerList()
         for i in range(num_fcs):
             in_channels = (
                 self.conv_out_channels *
@@ -67,14 +67,14 @@ class MaskIoUHead(BaseModule):
 
         self.fc_mask_iou = Linear(self.fc_out_channels, self.num_classes)
         self.relu = nn.ReLU()
-        self.max_pool = MaxPool2d(2, 2)
+        self.max_pool = MaxPool2D(2, 2)
         self.loss_iou = build_loss(loss_iou)
 
     def forward(self, mask_feat, mask_pred):
         mask_pred = mask_pred.sigmoid()
         mask_pred_pooled = self.max_pool(mask_pred.unsqueeze(1))
 
-        x = torch.cat((mask_feat, mask_pred_pooled), 1)
+        x = paddle.concat((mask_feat, mask_pred_pooled), 1)
 
         for conv in self.convs:
             x = self.relu(conv(x))
@@ -128,7 +128,7 @@ class MaskIoUHead(BaseModule):
         # the whole instance
         area_ratios = map(self._get_area_ratio, pos_proposals,
                           pos_assigned_gt_inds, gt_masks)
-        area_ratios = torch.cat(list(area_ratios))
+        area_ratios = paddle.concat(list(area_ratios))
         assert mask_targets.size(0) == area_ratios.size(0)
 
         mask_pred = (mask_pred > rcnn_train_cfg.mask_thr_binary).float()

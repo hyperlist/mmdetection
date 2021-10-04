@@ -2,7 +2,7 @@
 import os.path as osp
 
 import mmcv
-import torch
+import paddle
 from mmcv.parallel import collate
 from mmcv.utils import build_from_cfg
 

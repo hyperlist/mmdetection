@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 
 from mmdet.core import bbox2result, bbox2roi, bbox_xyxy_to_cxcywh
 from mmdet.core.bbox.samplers import PseudoSampler
@@ -130,7 +130,7 @@ class SparseRoIHead(CascadeRoIHead):
             img_metas)
         bbox_results = dict(
             cls_score=cls_score,
-            decode_bbox_pred=torch.cat(proposal_list),
+            decode_bbox_pred=paddle.concat(proposal_list),
             object_feats=object_feats,
             # detach then use it in label assign
             detach_cls_score_list=[
@@ -299,7 +299,7 @@ class SparseRoIHead(CascadeRoIHead):
                 scale_factor = img_metas[img_id]['scale_factor']
                 bbox_pred_per_img /= bbox_pred_per_img.new_tensor(scale_factor)
             det_bboxes.append(
-                torch.cat([bbox_pred_per_img, scores_per_img[:, None]], dim=1))
+                paddle.concat([bbox_pred_per_img, scores_per_img[:, None]], dim=1))
             det_labels.append(labels_per_img)
 
         bbox_results = [

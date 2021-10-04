@@ -8,7 +8,7 @@ class ResLayer(Sequential):
     """ResLayer to build ResNet style backbone.
 
     Args:
-        block (nn.Module): block used to build ResLayer.
+        block (nn.Layer): block used to build ResLayer.
         inplanes (int): inplanes of block.
         planes (int): planes of block.
         num_blocks (int): number of blocks.
@@ -144,13 +144,13 @@ class SimplifiedBasicBlock(BaseModule):
         if self.with_norm:
             self.norm1_name, norm1 = build_norm_layer(
                 norm_cfg, planes, postfix=1)
-            self.add_module(self.norm1_name, norm1)
+            self.add_sublayer(self.norm1_name, norm1)
         self.conv2 = build_conv_layer(
             conv_cfg, planes, planes, 3, padding=1, bias=with_bias)
         if self.with_norm:
             self.norm2_name, norm2 = build_norm_layer(
                 norm_cfg, planes, postfix=2)
-            self.add_module(self.norm2_name, norm2)
+            self.add_sublayer(self.norm2_name, norm2)
 
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
@@ -160,12 +160,12 @@ class SimplifiedBasicBlock(BaseModule):
 
     @property
     def norm1(self):
-        """nn.Module: normalization layer after the first convolution layer"""
+        """nn.Layer: normalization layer after the first convolution layer"""
         return getattr(self, self.norm1_name) if self.with_norm else None
 
     @property
     def norm2(self):
-        """nn.Module: normalization layer after the second convolution layer"""
+        """nn.Layer: normalization layer after the second convolution layer"""
         return getattr(self, self.norm2_name) if self.with_norm else None
 
     def forward(self, x):

@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule, ModuleList, force_fp32
 
@@ -193,26 +193,26 @@ class YOLACTHead(AnchorHead):
 
         if self.use_ohem:
             num_images = len(img_metas)
-            all_cls_scores = torch.cat([
+            all_cls_scores = paddle.concat([
                 s.permute(0, 2, 3, 1).reshape(
                     num_images, -1, self.cls_out_channels) for s in cls_scores
             ], 1)
-            all_labels = torch.cat(labels_list, -1).view(num_images, -1)
-            all_label_weights = torch.cat(label_weights_list,
+            all_labels = paddle.concat(labels_list, -1).view(num_images, -1)
+            all_label_weights = paddle.concat(label_weights_list,
                                           -1).view(num_images, -1)
-            all_bbox_preds = torch.cat([
+            all_bbox_preds = paddle.concat([
                 b.permute(0, 2, 3, 1).reshape(num_images, -1, 4)
                 for b in bbox_preds
             ], -2)
-            all_bbox_targets = torch.cat(bbox_targets_list,
+            all_bbox_targets = paddle.concat(bbox_targets_list,
                                          -2).view(num_images, -1, 4)
-            all_bbox_weights = torch.cat(bbox_weights_list,
+            all_bbox_weights = paddle.concat(bbox_weights_list,
                                          -2).view(num_images, -1, 4)
 
             # concat all level anchors to a single tensor
             all_anchors = []
             for i in range(num_images):
-                all_anchors.append(torch.cat(anchor_list[i]))
+                all_anchors.append(paddle.concat(anchor_list[i]))
 
             # check NaN and Inf
             assert torch.isfinite(all_cls_scores).all().item(), \
@@ -240,7 +240,7 @@ class YOLACTHead(AnchorHead):
             # concat all level anchors and flags to a single tensor
             concat_anchor_list = []
             for i in range(len(anchor_list)):
-                concat_anchor_list.append(torch.cat(anchor_list[i]))
+                concat_anchor_list.append(paddle.concat(anchor_list[i]))
             all_anchor_list = images_to_levels(concat_anchor_list,
                                                num_level_anchors)
             losses_cls, losses_bbox = multi_apply(
@@ -438,17 +438,17 @@ class YOLACTHead(AnchorHead):
             mlvl_bboxes.append(bboxes)
             mlvl_scores.append(scores)
             mlvl_coeffs.append(coeff_pred)
-        mlvl_bboxes = torch.cat(mlvl_bboxes)
+        mlvl_bboxes = paddle.concat(mlvl_bboxes)
         if rescale:
             mlvl_bboxes /= mlvl_bboxes.new_tensor(scale_factor)
-        mlvl_scores = torch.cat(mlvl_scores)
-        mlvl_coeffs = torch.cat(mlvl_coeffs)
+        mlvl_scores = paddle.concat(mlvl_scores)
+        mlvl_coeffs = paddle.concat(mlvl_coeffs)
         if self.use_sigmoid_cls:
             # Add a dummy background class to the backend when using sigmoid
             # remind that we set FG labels to [0, num_class-1] since mmdet v2.0
             # BG cat_id: num_class
             padding = mlvl_scores.new_zeros(mlvl_scores.shape[0], 1)
-            mlvl_scores = torch.cat([mlvl_scores, padding], dim=1)
+            mlvl_scores = paddle.concat([mlvl_scores, padding], dim=1)
         det_bboxes, det_labels, det_coeffs = fast_nms(mlvl_bboxes, mlvl_scores,
                                                       mlvl_coeffs,
                                                       cfg.score_thr,
@@ -704,7 +704,7 @@ class YOLACTProtonet(BaseModule):
                     coeff_pred_per_level.permute(
                         0, 2, 3, 1).reshape(num_imgs, -1, self.num_protos)
                 coeff_pred_list.append(coeff_pred_per_level)
-            coeff_pred = torch.cat(coeff_pred_list, dim=1)
+            coeff_pred = paddle.concat(coeff_pred_list, dim=1)
 
         mask_pred_list = []
         for idx in range(num_imgs):

@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import pytest
-import torch
+import paddle
 from mmcv.utils import ConfigDict
 
 from mmdet.models.utils.transformer import (AdaptivePadding,

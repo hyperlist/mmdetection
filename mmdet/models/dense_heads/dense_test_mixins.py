@@ -2,7 +2,7 @@
 import sys
 from inspect import signature
 
-import torch
+import paddle
 
 from mmdet.core import bbox_mapping_back, merge_aug_proposals, multiclass_nms
 
@@ -88,7 +88,7 @@ class BBoxTestMixin(object):
         # after merging, bboxes will be rescaled to the original image size
         merged_bboxes, merged_scores = self.merge_aug_bboxes(
             aug_bboxes, aug_scores, img_metas)
-        merged_factors = torch.cat(aug_factors, dim=0) if aug_factors else None
+        merged_factors = paddle.concat(aug_factors, dim=0) if aug_factors else None
         det_bboxes, det_labels = multiclass_nms(
             merged_bboxes,
             merged_scores,
@@ -193,9 +193,9 @@ class BBoxTestMixin(object):
             bboxes = bbox_mapping_back(bboxes, img_shape, scale_factor, flip,
                                        flip_direction)
             recovered_bboxes.append(bboxes)
-        bboxes = torch.cat(recovered_bboxes, dim=0)
+        bboxes = paddle.concat(recovered_bboxes, dim=0)
         if aug_scores is None:
             return bboxes
         else:
-            scores = torch.cat(aug_scores, dim=0)
+            scores = paddle.concat(aug_scores, dim=0)
             return bboxes, scores

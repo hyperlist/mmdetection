@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from abc import abstractmethod
 
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.runner import force_fp32
 
@@ -95,7 +95,7 @@ class AnchorFreeHead(BaseDenseHead, BBoxTestMixin):
 
     def _init_cls_convs(self):
         """Initialize classification conv layers of the head."""
-        self.cls_convs = nn.ModuleList()
+        self.cls_convs = nn.LayerList()
         for i in range(self.stacked_convs):
             chn = self.in_channels if i == 0 else self.feat_channels
             if self.dcn_on_last_conv and i == self.stacked_convs - 1:
@@ -115,7 +115,7 @@ class AnchorFreeHead(BaseDenseHead, BBoxTestMixin):
 
     def _init_reg_convs(self):
         """Initialize bbox regression conv layers of the head."""
-        self.reg_convs = nn.ModuleList()
+        self.reg_convs = nn.LayerList()
         for i in range(self.stacked_convs):
             chn = self.in_channels if i == 0 else self.feat_channels
             if self.dcn_on_last_conv and i == self.stacked_convs - 1:

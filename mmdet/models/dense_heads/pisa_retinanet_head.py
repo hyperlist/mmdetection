@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 from mmcv.runner import force_fp32
 
 from mmdet.core import images_to_levels
@@ -76,7 +76,7 @@ class PISARetinaHead(RetinaHead):
         # concat all level anchors and flags to a single tensor
         concat_anchor_list = []
         for i in range(len(anchor_list)):
-            concat_anchor_list.append(torch.cat(anchor_list[i]))
+            concat_anchor_list.append(paddle.concat(anchor_list[i]))
         all_anchor_list = images_to_levels(concat_anchor_list,
                                            num_level_anchors)
 
@@ -85,22 +85,22 @@ class PISARetinaHead(RetinaHead):
             cls_score.permute(0, 2, 3, 1).reshape(num_imgs, -1, label_channels)
             for cls_score in cls_scores
         ]
-        flatten_cls_scores = torch.cat(
+        flatten_cls_scores = paddle.concat(
             flatten_cls_scores, dim=1).reshape(-1,
                                                flatten_cls_scores[0].size(-1))
         flatten_bbox_preds = [
             bbox_pred.permute(0, 2, 3, 1).reshape(num_imgs, -1, 4)
             for bbox_pred in bbox_preds
         ]
-        flatten_bbox_preds = torch.cat(
+        flatten_bbox_preds = paddle.concat(
             flatten_bbox_preds, dim=1).view(-1, flatten_bbox_preds[0].size(-1))
-        flatten_labels = torch.cat(labels_list, dim=1).reshape(-1)
-        flatten_label_weights = torch.cat(
+        flatten_labels = paddle.concat(labels_list, dim=1).reshape(-1)
+        flatten_label_weights = paddle.concat(
             label_weights_list, dim=1).reshape(-1)
-        flatten_anchors = torch.cat(all_anchor_list, dim=1).reshape(-1, 4)
-        flatten_bbox_targets = torch.cat(
+        flatten_anchors = paddle.concat(all_anchor_list, dim=1).reshape(-1, 4)
+        flatten_bbox_targets = paddle.concat(
             bbox_targets_list, dim=1).reshape(-1, 4)
-        flatten_bbox_weights = torch.cat(
+        flatten_bbox_weights = paddle.concat(
             bbox_weights_list, dim=1).reshape(-1, 4)
 
         # Apply ISR-P

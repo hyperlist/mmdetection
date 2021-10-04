@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
-import torch.utils.checkpoint as cp
+import paddle.nn as nn
+import paddle.utils.checkpoint as cp
 from mmcv.cnn import (build_conv_layer, build_norm_layer, constant_init,
                       kaiming_init)
 from mmcv.runner import Sequential, load_checkpoint
@@ -124,7 +124,7 @@ class ResLayer(Sequential):
     ``rfp_inplanes`` to the first block.
 
     Args:
-        block (nn.Module): block used to build ResLayer.
+        block (nn.Layer): block used to build ResLayer.
         inplanes (int): inplanes of block.
         planes (int): planes of block.
         num_blocks (int): number of blocks.
@@ -287,7 +287,7 @@ class DetectoRS_ResNet(ResNet):
                 plugins=stage_plugins)
             self.inplanes = planes * self.block.expansion
             layer_name = f'layer{i + 1}'
-            self.add_module(layer_name, res_layer)
+            self.add_sublayer(layer_name, res_layer)
             self.res_layers.append(layer_name)
 
         self._freeze_stages()

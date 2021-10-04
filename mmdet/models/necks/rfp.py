@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import constant_init, xavier_init
 from mmcv.runner import BaseModule, ModuleList
 
@@ -30,7 +30,7 @@ class ASPP(BaseModule):
                  init_cfg=dict(type='Kaiming', layer='Conv2d')):
         super().__init__(init_cfg)
         assert dilations[-1] == 1
-        self.aspp = nn.ModuleList()
+        self.aspp = nn.LayerList()
         for dilation in dilations:
             kernel_size = 3 if dilation > 1 else 1
             padding = dilation if dilation > 1 else 0
@@ -43,7 +43,7 @@ class ASPP(BaseModule):
                 padding=padding,
                 bias=True)
             self.aspp.append(conv)
-        self.gap = nn.AdaptiveAvgPool2d(1)
+        self.gap = nn.AdaptiveAvgPool2D(1)
 
     def forward(self, x):
         avg_x = self.gap(x)
@@ -52,7 +52,7 @@ class ASPP(BaseModule):
             inp = avg_x if (aspp_idx == len(self.aspp) - 1) else x
             out.append(F.relu_(self.aspp[aspp_idx](inp)))
         out[-1] = out[-1].expand_as(out[-2])
-        out = torch.cat(out, dim=1)
+        out = paddle.concat(out, dim=1)
         return out
 
 

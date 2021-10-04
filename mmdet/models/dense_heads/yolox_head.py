@@ -1,9 +1,9 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import math
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import (ConvModule, DepthwiseSeparableConvModule,
                       bias_init_with_prob)
 from mmcv.ops.nms import batched_nms
@@ -127,11 +127,11 @@ class YOLOXHead(BaseDenseHead, BBoxTestMixin):
         self._init_layers()
 
     def _init_layers(self):
-        self.multi_level_cls_convs = nn.ModuleList()
-        self.multi_level_reg_convs = nn.ModuleList()
-        self.multi_level_conv_cls = nn.ModuleList()
-        self.multi_level_conv_reg = nn.ModuleList()
-        self.multi_level_conv_obj = nn.ModuleList()
+        self.multi_level_cls_convs = nn.LayerList()
+        self.multi_level_reg_convs = nn.LayerList()
+        self.multi_level_conv_cls = nn.LayerList()
+        self.multi_level_conv_reg = nn.LayerList()
+        self.multi_level_conv_obj = nn.LayerList()
         for _ in self.strides:
             self.multi_level_cls_convs.append(self._build_stacked_convs())
             self.multi_level_reg_convs.append(self._build_stacked_convs())
@@ -269,10 +269,10 @@ class YOLOXHead(BaseDenseHead, BBoxTestMixin):
             for objectness in objectnesses
         ]
 
-        flatten_cls_scores = torch.cat(flatten_cls_scores, dim=1).sigmoid()
-        flatten_bbox_preds = torch.cat(flatten_bbox_preds, dim=1)
-        flatten_objectness = torch.cat(flatten_objectness, dim=1).sigmoid()
-        flatten_priors = torch.cat(mlvl_priors)
+        flatten_cls_scores = paddle.concat(flatten_cls_scores, dim=1).sigmoid()
+        flatten_bbox_preds = paddle.concat(flatten_bbox_preds, dim=1)
+        flatten_objectness = paddle.concat(flatten_objectness, dim=1).sigmoid()
+        flatten_priors = paddle.concat(mlvl_priors)
 
         flatten_bboxes = self._bbox_decode(flatten_priors, flatten_bbox_preds)
 
@@ -364,10 +364,10 @@ class YOLOXHead(BaseDenseHead, BBoxTestMixin):
             for objectness in objectnesses
         ]
 
-        flatten_cls_preds = torch.cat(flatten_cls_preds, dim=1)
-        flatten_bbox_preds = torch.cat(flatten_bbox_preds, dim=1)
-        flatten_objectness = torch.cat(flatten_objectness, dim=1)
-        flatten_priors = torch.cat(mlvl_priors)
+        flatten_cls_preds = paddle.concat(flatten_cls_preds, dim=1)
+        flatten_bbox_preds = paddle.concat(flatten_bbox_preds, dim=1)
+        flatten_objectness = paddle.concat(flatten_objectness, dim=1)
+        flatten_priors = paddle.concat(mlvl_priors)
         flatten_bboxes = self._bbox_decode(flatten_priors, flatten_bbox_preds)
 
         (pos_masks, cls_targets, obj_targets, bbox_targets, l1_targets,
@@ -378,12 +378,12 @@ class YOLOXHead(BaseDenseHead, BBoxTestMixin):
              flatten_bboxes.detach(), gt_bboxes, gt_labels)
 
         num_total_samples = max(sum(num_fg_imgs), 1)
-        pos_masks = torch.cat(pos_masks, 0)
-        cls_targets = torch.cat(cls_targets, 0)
-        obj_targets = torch.cat(obj_targets, 0)
-        bbox_targets = torch.cat(bbox_targets, 0)
+        pos_masks = paddle.concat(pos_masks, 0)
+        cls_targets = paddle.concat(cls_targets, 0)
+        obj_targets = paddle.concat(obj_targets, 0)
+        bbox_targets = paddle.concat(bbox_targets, 0)
         if self.use_l1:
-            l1_targets = torch.cat(l1_targets, 0)
+            l1_targets = paddle.concat(l1_targets, 0)
 
         loss_bbox = self.loss_bbox(
             flatten_bboxes.view(-1, 4)[pos_masks],
@@ -441,7 +441,7 @@ class YOLOXHead(BaseDenseHead, BBoxTestMixin):
 
         # YOLOX uses center priors with 0.5 offset to assign targets,
         # but use center priors without offset to regress bboxes.
-        offset_priors = torch.cat(
+        offset_priors = paddle.concat(
             [priors[:, :2] + priors[:, 2:] * 0.5, priors[:, 2:]], dim=-1)
 
         assign_result = self.assigner.assign(

@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import math
 
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
 from mmcv.runner import BaseModule
 
@@ -56,8 +56,8 @@ class YOLOXPAFPN(BaseModule):
 
         # build top-down blocks
         self.upsample = nn.Upsample(**upsample_cfg)
-        self.reduce_layers = nn.ModuleList()
-        self.top_down_blocks = nn.ModuleList()
+        self.reduce_layers = nn.LayerList()
+        self.top_down_blocks = nn.LayerList()
         for idx in range(len(in_channels) - 1, 0, -1):
             self.reduce_layers.append(
                 ConvModule(
@@ -79,8 +79,8 @@ class YOLOXPAFPN(BaseModule):
                     act_cfg=act_cfg))
 
         # build bottom-up blocks
-        self.downsamples = nn.ModuleList()
-        self.bottom_up_blocks = nn.ModuleList()
+        self.downsamples = nn.LayerList()
+        self.bottom_up_blocks = nn.LayerList()
         for idx in range(len(in_channels) - 1):
             self.downsamples.append(
                 conv(
@@ -103,7 +103,7 @@ class YOLOXPAFPN(BaseModule):
                     norm_cfg=norm_cfg,
                     act_cfg=act_cfg))
 
-        self.out_convs = nn.ModuleList()
+        self.out_convs = nn.LayerList()
         for i in range(len(in_channels)):
             self.out_convs.append(
                 ConvModule(
@@ -136,7 +136,7 @@ class YOLOXPAFPN(BaseModule):
             upsample_feat = self.upsample(feat_heigh)
 
             inner_out = self.top_down_blocks[len(self.in_channels) - 1 - idx](
-                torch.cat([upsample_feat, feat_low], 1))
+                paddle.concat([upsample_feat, feat_low], 1))
             inner_outs.insert(0, inner_out)
 
         # bottom-up path
@@ -146,7 +146,7 @@ class YOLOXPAFPN(BaseModule):
             feat_height = inner_outs[idx + 1]
             downsample_feat = self.downsamples[idx](feat_low)
             out = self.bottom_up_blocks[idx](
-                torch.cat([downsample_feat, feat_height], 1))
+                paddle.concat([downsample_feat, feat_height], 1))
             outs.append(out)
 
         # out convs

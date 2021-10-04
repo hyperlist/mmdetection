@@ -1,5 +1,5 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
+import paddle
 from mmcv.ops.nms import batched_nms
 
 from mmdet.core.bbox.iou_calculators import bbox_overlaps
@@ -69,15 +69,15 @@ def multiclass_nms(multi_bboxes,
     else:
         # TensorRT NMS plugin has invalid output filled with -1
         # add dummy data to make detection output correct.
-        bboxes = torch.cat([bboxes, bboxes.new_zeros(1, 4)], dim=0)
-        scores = torch.cat([scores, scores.new_zeros(1)], dim=0)
-        labels = torch.cat([labels, labels.new_zeros(1)], dim=0)
+        bboxes = paddle.concat([bboxes, bboxes.new_zeros(1, 4)], dim=0)
+        scores = paddle.concat([scores, scores.new_zeros(1)], dim=0)
+        labels = paddle.concat([labels, labels.new_zeros(1)], dim=0)
 
     if bboxes.numel() == 0:
         if torch.onnx.is_in_onnx_export():
             raise RuntimeError('[ONNX Error] Can not record NMS '
                                'as it has not been executed this time')
-        dets = torch.cat([bboxes, scores[:, None]], -1)
+        dets = paddle.concat([bboxes, scores[:, None]], -1)
         if return_inds:
             return dets, labels, inds
         else:
@@ -167,5 +167,5 @@ def fast_nms(multi_bboxes,
     boxes = boxes[idx]
     coeffs = coeffs[idx]
 
-    cls_dets = torch.cat([boxes, scores[:, None]], dim=1)
+    cls_dets = paddle.concat([boxes, scores[:, None]], dim=1)
     return cls_dets, classes, coeffs

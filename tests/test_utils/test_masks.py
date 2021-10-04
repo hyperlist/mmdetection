@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 import pytest
-import torch
+import paddle
 
 from mmdet.core import BitmapMasks, PolygonMasks
 

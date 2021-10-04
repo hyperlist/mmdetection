@@ -1,6 +1,6 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn.bricks.wrappers import NewEmptyTensorOp, obsolete_torch_version
 
 if torch.__version__ == 'parrots':
@@ -28,8 +28,8 @@ def adaptive_avg_pool2d(input, output_size):
         return F.adaptive_avg_pool2d(input, output_size)
 
 
-class AdaptiveAvgPool2d(nn.AdaptiveAvgPool2d):
-    """Handle empty batch dimension to AdaptiveAvgPool2d."""
+class AdaptiveAvgPool2D(nn.AdaptiveAvgPool2D):
+    """Handle empty batch dimension to AdaptiveAvgPool2D."""
 
     def forward(self, x):
         # PyTorch 1.9 does not support empty tensor inference yet

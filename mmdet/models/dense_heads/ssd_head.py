@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule, DepthwiseSeparableConvModule
 from mmcv.runner import force_fp32
 
@@ -108,8 +108,8 @@ class SSDHead(AnchorHead):
 
     def _init_layers(self):
         """Initialize layers of the head."""
-        self.cls_convs = nn.ModuleList()
-        self.reg_convs = nn.ModuleList()
+        self.cls_convs = nn.LayerList()
+        self.reg_convs = nn.LayerList()
         # TODO: Use registry to choose ConvModule type
         conv = DepthwiseSeparableConvModule \
             if self.use_depthwise else ConvModule
@@ -306,26 +306,26 @@ class SSDHead(AnchorHead):
          num_total_pos, num_total_neg) = cls_reg_targets
 
         num_images = len(img_metas)
-        all_cls_scores = torch.cat([
+        all_cls_scores = paddle.concat([
             s.permute(0, 2, 3, 1).reshape(
                 num_images, -1, self.cls_out_channels) for s in cls_scores
         ], 1)
-        all_labels = torch.cat(labels_list, -1).view(num_images, -1)
-        all_label_weights = torch.cat(label_weights_list,
+        all_labels = paddle.concat(labels_list, -1).view(num_images, -1)
+        all_label_weights = paddle.concat(label_weights_list,
                                       -1).view(num_images, -1)
-        all_bbox_preds = torch.cat([
+        all_bbox_preds = paddle.concat([
             b.permute(0, 2, 3, 1).reshape(num_images, -1, 4)
             for b in bbox_preds
         ], -2)
-        all_bbox_targets = torch.cat(bbox_targets_list,
+        all_bbox_targets = paddle.concat(bbox_targets_list,
                                      -2).view(num_images, -1, 4)
-        all_bbox_weights = torch.cat(bbox_weights_list,
+        all_bbox_weights = paddle.concat(bbox_weights_list,
                                      -2).view(num_images, -1, 4)
 
         # concat all level anchors to a single tensor
         all_anchors = []
         for i in range(num_images):
-            all_anchors.append(torch.cat(anchor_list[i]))
+            all_anchors.append(paddle.concat(anchor_list[i]))
 
         losses_cls, losses_bbox = multi_apply(
             self.loss_single,

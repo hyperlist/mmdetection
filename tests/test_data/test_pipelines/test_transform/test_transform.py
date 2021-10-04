@@ -5,7 +5,7 @@ import os.path as osp
 import mmcv
 import numpy as np
 import pytest
-import torch
+import paddle
 from mmcv.utils import build_from_cfg
 
 from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps

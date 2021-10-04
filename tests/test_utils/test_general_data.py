@@ -2,7 +2,7 @@ import copy
 
 import numpy as np
 import pytest
-import torch
+import paddle
 
 from mmdet.core import GeneralData, InstanceData
 

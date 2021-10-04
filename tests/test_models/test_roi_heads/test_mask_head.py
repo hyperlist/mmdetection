@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch
+import paddle
 
 from mmdet.models.roi_heads.mask_heads import FCNMaskHead, MaskIoUHead
 from .utils import _dummy_bbox_sampling
@@ -42,7 +42,7 @@ def test_mask_head_loss():
 
     mask_pred = self.forward(dummy_feats)
     mask_targets = self.get_targets(sampling_results, gt_masks, train_cfg)
-    pos_labels = torch.cat([res.pos_gt_labels for res in sampling_results])
+    pos_labels = paddle.concat([res.pos_gt_labels for res in sampling_results])
     loss_mask = self.loss(mask_pred, mask_targets, pos_labels)
 
     onegt_mask_loss = sum(loss_mask['loss_mask'])

@@ -3,9 +3,9 @@ import math
 import warnings
 from typing import Sequence
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.cnn import (build_activation_layer, build_conv_layer,
                       build_norm_layer, xavier_init)
 from mmcv.cnn.bricks.registry import (TRANSFORMER_LAYER,
@@ -59,7 +59,7 @@ def nchw_to_nlc(x):
     return x.flatten(2).transpose(1, 2).contiguous()
 
 
-class AdaptivePadding(nn.Module):
+class AdaptivePadding(nn.Layer):
     """Applies padding to input (if needed) so that input can get fully covered
     by filter you specified. It support two modes "same" and "corner". The
     "same" mode is same with "SAME" padding mode in TensorFlow, pad zero around
@@ -671,7 +671,7 @@ class DeformableDetrTransformerDecoder(TransformerLayerSequence):
         for lid, layer in enumerate(self.layers):
             if reference_points.shape[-1] == 4:
                 reference_points_input = reference_points[:, :, None] * \
-                    torch.cat([valid_ratios, valid_ratios], -1)[:, None]
+                    paddle.concat([valid_ratios, valid_ratios], -1)[:, None]
             else:
                 assert reference_points.shape[-1] == 2
                 reference_points_input = reference_points[:, :, None] * \
@@ -800,16 +800,16 @@ class DeformableDetrTransformer(Transformer):
                     0, H - 1, H, dtype=torch.float32, device=memory.device),
                 torch.linspace(
                     0, W - 1, W, dtype=torch.float32, device=memory.device))
-            grid = torch.cat([grid_x.unsqueeze(-1), grid_y.unsqueeze(-1)], -1)
+            grid = paddle.concat([grid_x.unsqueeze(-1), grid_y.unsqueeze(-1)], -1)
 
-            scale = torch.cat([valid_W.unsqueeze(-1),
+            scale = paddle.concat([valid_W.unsqueeze(-1),
                                valid_H.unsqueeze(-1)], 1).view(N, 1, 1, 2)
             grid = (grid.unsqueeze(0).expand(N, -1, -1, -1) + 0.5) / scale
             wh = torch.ones_like(grid) * 0.05 * (2.0**lvl)
-            proposal = torch.cat((grid, wh), -1).view(N, -1, 4)
+            proposal = paddle.concat((grid, wh), -1).view(N, -1, 4)
             proposals.append(proposal)
             _cur += (H * W)
-        output_proposals = torch.cat(proposals, 1)
+        output_proposals = paddle.concat(proposals, 1)
         output_proposals_valid = ((output_proposals > 0.01) &
                                   (output_proposals < 0.99)).all(
                                       -1, keepdim=True)
@@ -858,7 +858,7 @@ class DeformableDetrTransformer(Transformer):
                 valid_ratios[:, None, lvl, 0] * W)
             ref = torch.stack((ref_x, ref_y), -1)
             reference_points_list.append(ref)
-        reference_points = torch.cat(reference_points_list, 1)
+        reference_points = paddle.concat(reference_points_list, 1)
         reference_points = reference_points[:, :, None] * valid_ratios[:, None]
         return reference_points
 
@@ -964,12 +964,12 @@ class DeformableDetrTransformer(Transformer):
             lvl_pos_embed_flatten.append(lvl_pos_embed)
             feat_flatten.append(feat)
             mask_flatten.append(mask)
-        feat_flatten = torch.cat(feat_flatten, 1)
-        mask_flatten = torch.cat(mask_flatten, 1)
-        lvl_pos_embed_flatten = torch.cat(lvl_pos_embed_flatten, 1)
+        feat_flatten = paddle.concat(feat_flatten, 1)
+        mask_flatten = paddle.concat(mask_flatten, 1)
+        lvl_pos_embed_flatten = paddle.concat(lvl_pos_embed_flatten, 1)
         spatial_shapes = torch.as_tensor(
             spatial_shapes, dtype=torch.long, device=feat_flatten.device)
-        level_start_index = torch.cat((spatial_shapes.new_zeros(
+        level_start_index = paddle.concat((spatial_shapes.new_zeros(
             (1, )), spatial_shapes.prod(1).cumsum(0)[:-1]))
         valid_ratios = torch.stack(
             [self.get_valid_ratio(m) for m in mlvl_masks], 1)

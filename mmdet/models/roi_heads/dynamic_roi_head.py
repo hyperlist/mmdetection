@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 
 from mmdet.core import bbox2roi
 from mmdet.models.losses import SmoothL1Loss

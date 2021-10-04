@@ -2,7 +2,7 @@
 import itertools
 
 import numpy as np
-import torch
+import paddle
 
 from .general_data import GeneralData
 
@@ -169,7 +169,7 @@ class InstanceData(GeneralData):
             values = [results[k] for results in instances_list]
             v0 = values[0]
             if isinstance(v0, torch.Tensor):
-                values = torch.cat(values, dim=0)
+                values = paddle.concat(values, dim=0)
             elif isinstance(v0, np.ndarray):
                 values = np.concatenate(values, axis=0)
             elif isinstance(v0, list):

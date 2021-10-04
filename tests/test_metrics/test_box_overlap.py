@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
 import pytest
-import torch
+import paddle
 
 from mmdet.core import BboxOverlaps2D, bbox_overlaps
 from mmdet.core.evaluation.bbox_overlaps import \
@@ -17,7 +17,7 @@ def test_bbox_overlaps_2d(eps=1e-7):
             num_bbox = np.random.randint(1, 10)
         x1y1 = torch.rand((num_bbox, 2))
         x2y2 = torch.max(torch.rand((num_bbox, 2)), x1y1)
-        bboxes = torch.cat((x1y1, x2y2), -1)
+        bboxes = paddle.concat((x1y1, x2y2), -1)
         bboxes[:, 0::2] *= img_w
         bboxes[:, 1::2] *= img_h
         return bboxes, num_bbox
@@ -26,8 +26,8 @@ def test_bbox_overlaps_2d(eps=1e-7):
     self = BboxOverlaps2D()
     bboxes1, num_bbox = _construct_bbox()
     bboxes2, _ = _construct_bbox(num_bbox)
-    bboxes1 = torch.cat((bboxes1, torch.rand((num_bbox, 1))), 1)
-    bboxes2 = torch.cat((bboxes2, torch.rand((num_bbox, 1))), 1)
+    bboxes1 = paddle.concat((bboxes1, torch.rand((num_bbox, 1))), 1)
+    bboxes2 = paddle.concat((bboxes2, torch.rand((num_bbox, 1))), 1)
     gious = self(bboxes1, bboxes2, 'giou', True)
     assert gious.size() == (num_bbox, ), gious.size()
     assert torch.all(gious >= -1) and torch.all(gious <= 1)
@@ -117,7 +117,7 @@ def test_voc_recall_overlaps():
             num_bbox = np.random.randint(1, 10)
         x1y1 = torch.rand((num_bbox, 2))
         x2y2 = torch.max(torch.rand((num_bbox, 2)), x1y1)
-        bboxes = torch.cat((x1y1, x2y2), -1)
+        bboxes = paddle.concat((x1y1, x2y2), -1)
         bboxes[:, 0::2] *= img_w
         bboxes[:, 1::2] *= img_h
         return bboxes.numpy(), num_bbox

@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import warnings
 
-import torch.nn as nn
+import paddle.nn as nn
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 from torch.nn.modules.batchnorm import _BatchNorm
@@ -115,7 +115,7 @@ class MobileNetV2(BaseModule):
                 stride=stride,
                 expand_ratio=expand_ratio)
             layer_name = f'layer{i + 1}'
-            self.add_module(layer_name, inverted_res_layer)
+            self.add_sublayer(layer_name, inverted_res_layer)
             self.layers.append(layer_name)
 
         if widen_factor > 1.0:
@@ -132,7 +132,7 @@ class MobileNetV2(BaseModule):
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
-        self.add_module('conv2', layer)
+        self.add_sublayer('conv2', layer)
         self.layers.append('conv2')
 
     def make_layer(self, out_channels, num_blocks, stride, expand_ratio):

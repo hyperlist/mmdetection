@@ -1,8 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from math import sqrt
 
-import torch
-import torch.nn.functional as F
+import paddle
+
 
 
 def gaussian2D(radius, sigma=1, dtype=torch.float32, device='cpu'):

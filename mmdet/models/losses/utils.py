@@ -2,7 +2,7 @@
 import functools
 
 import mmcv
-import torch.nn.functional as F
+
 
 
 def reduce_loss(loss, reduction):
@@ -67,7 +67,7 @@ def weighted_loss(loss_func):
 
     :Example:
 
-    >>> import torch
+    >>> import paddle
     >>> @weighted_loss
     >>> def l1_loss(pred, target):
     >>>     return (pred - target).abs()

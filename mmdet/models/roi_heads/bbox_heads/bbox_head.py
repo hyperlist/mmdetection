@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle
+import paddle.nn as nn
+
 from mmcv.runner import BaseModule, auto_fp16, force_fp32
 from torch.nn.modules.utils import _pair
 
@@ -246,10 +246,10 @@ class BBoxHead(BaseModule):
             cfg=rcnn_train_cfg)
 
         if concat:
-            labels = torch.cat(labels, 0)
-            label_weights = torch.cat(label_weights, 0)
-            bbox_targets = torch.cat(bbox_targets, 0)
-            bbox_weights = torch.cat(bbox_weights, 0)
+            labels = paddle.concat(labels, 0)
+            label_weights = paddle.concat(label_weights, 0)
+            bbox_targets = paddle.concat(bbox_targets, 0)
+            bbox_weights = paddle.concat(bbox_weights, 0)
         return labels, label_weights, bbox_targets, bbox_weights
 
     @force_fp32(apply_to=('cls_score', 'bbox_pred'))
@@ -409,7 +409,7 @@ class BBoxHead(BaseModule):
             >>> roi_boxes = random_boxes(n_roi, scale=scale, rng=rng)
             >>> img_ids = torch.randint(0, n_img, (n_roi,))
             >>> img_ids = img_ids.float()
-            >>> rois = torch.cat([img_ids[:, None], roi_boxes], dim=1)
+            >>> rois = paddle.concat([img_ids[:, None], roi_boxes], dim=1)
             >>> # Create other args
             >>> labels = torch.randint(0, 2, (n_roi,)).long()
             >>> bbox_preds = random_boxes(n_roi, scale=scale, rng=rng)
@@ -491,7 +491,7 @@ class BBoxHead(BaseModule):
         else:
             bboxes = self.bbox_coder.decode(
                 rois[:, 1:], bbox_pred, max_shape=max_shape)
-            new_rois = torch.cat((rois[:, [0]], bboxes), dim=1)
+            new_rois = paddle.concat((rois[:, [0]], bboxes), dim=1)
 
         return new_rois
 
@@ -536,7 +536,7 @@ class BBoxHead(BaseModule):
             if img_shape is not None:
                 max_shape = bboxes.new_tensor(img_shape)[..., :2]
                 min_xy = bboxes.new_tensor(0)
-                max_xy = torch.cat(
+                max_xy = paddle.concat(
                     [max_shape] * 2, dim=-1).flip(-1).unsqueeze(-2)
                 bboxes = torch.where(bboxes < min_xy, min_xy, bboxes)
                 bboxes = torch.where(bboxes > max_xy, max_xy, bboxes)
@@ -589,5 +589,5 @@ class BBoxHead(BaseModule):
             # original style: batch_dets[..., :4] -= offsets
             bboxes, scores = batch_dets[..., 0:4], batch_dets[..., 4:5]
             bboxes -= offsets
-            batch_dets = torch.cat([bboxes, scores], dim=2)
+            batch_dets = paddle.concat([bboxes, scores], dim=2)
             return batch_dets, labels

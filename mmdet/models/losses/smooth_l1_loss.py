@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
-import torch
-import torch.nn as nn
+import paddle
+import paddle.nn as nn
 
 from ..builder import LOSSES
 from .utils import weighted_loss
@@ -53,7 +53,7 @@ def l1_loss(pred, target):
 
 
 @LOSSES.register_module()
-class SmoothL1Loss(nn.Module):
+class SmoothL1Loss(nn.Layer):
     """Smooth L1 loss.
 
     Args:
@@ -105,7 +105,7 @@ class SmoothL1Loss(nn.Module):
 
 
 @LOSSES.register_module()
-class L1Loss(nn.Module):
+class L1Loss(nn.Layer):
     """L1 loss.
 
     Args:

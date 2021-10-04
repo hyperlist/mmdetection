@@ -1,5 +1,5 @@
 import pytest
-import torch
+import paddle
 
 from mmdet.models.dense_heads import (DecoupledSOLOHead,
                                       DecoupledSOLOLightHead, SOLOHead)

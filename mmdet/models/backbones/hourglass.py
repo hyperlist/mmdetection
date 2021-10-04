@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-import torch.nn as nn
-import torch.nn.functional as F
+import paddle.nn as nn
+
 from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 
@@ -117,7 +117,7 @@ class HourglassNet(BaseModule):
 
     Example:
         >>> from mmdet.models import HourglassNet
-        >>> import torch
+        >>> import paddle
         >>> self = HourglassNet()
         >>> self.eval()
         >>> inputs = torch.rand(1, 3, 511, 511)
@@ -160,7 +160,7 @@ class HourglassNet(BaseModule):
                 stride=2,
                 norm_cfg=norm_cfg))
 
-        self.hourglass_modules = nn.ModuleList([
+        self.hourglass_modules = nn.LayerList([
             HourglassModule(downsample_times, stage_channels, stage_blocks)
             for _ in range(num_stacks)
         ])
@@ -172,19 +172,19 @@ class HourglassNet(BaseModule):
             num_stacks - 1,
             norm_cfg=norm_cfg)
 
-        self.conv1x1s = nn.ModuleList([
+        self.conv1x1s = nn.LayerList([
             ConvModule(
                 cur_channel, cur_channel, 1, norm_cfg=norm_cfg, act_cfg=None)
             for _ in range(num_stacks - 1)
         ])
 
-        self.out_convs = nn.ModuleList([
+        self.out_convs = nn.LayerList([
             ConvModule(
                 cur_channel, feat_channel, 3, padding=1, norm_cfg=norm_cfg)
             for _ in range(num_stacks)
         ])
 
-        self.remap_convs = nn.ModuleList([
+        self.remap_convs = nn.LayerList([
             ConvModule(
                 feat_channel, cur_channel, 1, norm_cfg=norm_cfg, act_cfg=None)
             for _ in range(num_stacks - 1)

@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import numpy as np
-import torch
+import paddle
 from mmcv import ConfigDict
 
 from mmdet.models.dense_heads import CenterNetHead
